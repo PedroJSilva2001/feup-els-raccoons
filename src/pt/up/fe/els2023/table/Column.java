@@ -1,4 +1,4 @@
-package pt.up.fe.els2023;
+package pt.up.fe.els2023.table;
 
 import java.util.List;
 
