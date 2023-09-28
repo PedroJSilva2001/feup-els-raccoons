@@ -13,10 +13,18 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 public abstract class TableExporter {
-    String table;
-    String filename;
-    String path;
+    private final String table;
+    private final String filename;
+    private final String path;
+    // Line ending
+    protected final String endOfLine;
 
+    public TableExporter(String table, String filename, String path, String endOfLine) {
+        this.table = table;
+        this.filename = filename;
+        this.path = path;
+        this.endOfLine = endOfLine;
+    }
 
     public void export(Map<String, ITable> tables) throws IOException, TableNotFoundException {
         Path fullPath = Paths.get(path, filename);

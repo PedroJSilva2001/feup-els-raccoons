@@ -1,8 +1,6 @@
 package pt.up.fe.els2023;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import pt.up.fe.specs.util.SpecsIo;
 
 
@@ -12,6 +10,6 @@ public class ExampleTest {
     public void exampleTest() {
 		
 		// Reads a resource and tests contents
-		assertEquals("Expected text", SpecsIo.getResource("pt/up/fe/els2023/resource.txt"));
+        Assertions.assertEquals("Expected text", SpecsIo.getResource("pt/up/fe/els2023/resource.txt"));
     }
 }
