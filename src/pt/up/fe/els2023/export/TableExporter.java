@@ -39,5 +39,5 @@ public abstract class TableExporter {
         }
     }
 
-    abstract void export(Writer writer, ITable table);
+    abstract void export(Writer writer, ITable table) throws IOException;
 }

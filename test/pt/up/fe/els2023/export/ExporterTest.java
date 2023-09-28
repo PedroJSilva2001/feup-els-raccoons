@@ -4,14 +4,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import pt.up.fe.els2023.export.CsvExporter;
 import pt.up.fe.els2023.table.Column;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Row;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +21,7 @@ public class ExporterTest {
 
     @BeforeEach
     public void init() {
-        ITable table = Mockito.mock(ITable.class);
+        table = Mockito.mock(ITable.class);
         Mockito.when(table.getName()).thenReturn("table1");
 
         Column column = new Column("data");
@@ -65,21 +66,22 @@ public class ExporterTest {
     }
 
     @Test
-    public void exportCsv() {
+    public void exportCsv() throws IOException {
         CsvExporter exporter = new CsvExporter("table1", "", "", "\n", ",");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
 
         Scanner scanner = new Scanner(writer.toString()).useDelimiter("\n");
-        Assertions.assertDoesNotThrow(() -> scanner.next());
-        Assertions.assertEquals("data,strings,doubles", scanner.next());
+        AtomicReference<String> firstString = new AtomicReference<>("");
+        Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
+        Assertions.assertEquals("data,strings,doubles", firstString.get());
         Assertions.assertEquals("1,stuff,1.03", scanner.next());
         Assertions.assertEquals("2,things,2.3", scanner.next());
         Assertions.assertEquals("3,zau,3.10345", scanner.next());
         Assertions.assertEquals("4,another one,4.0", scanner.next());
         Assertions.assertEquals(",multiple spaces ah,5.123", scanner.next());
-        Assertions.assertEquals("1,  inner  ,1.0", scanner.next());
+        Assertions.assertEquals("1,  inner  ,1", scanner.next());
         Assertions.assertEquals(", extra row,", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }

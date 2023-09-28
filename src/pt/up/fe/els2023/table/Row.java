@@ -1,6 +1,7 @@
 package pt.up.fe.els2023.table;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Row {
@@ -16,5 +17,9 @@ public class Row {
 
     public void addValue(Object value) {
         this.values.add(value);
+    }
+
+    public List<Object> getValues() {
+        return Collections.unmodifiableList(values);
     }
 }
