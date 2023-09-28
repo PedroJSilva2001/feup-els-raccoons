@@ -67,22 +67,22 @@ public class ExporterTest {
 
     @Test
     public void exportCsv() throws IOException {
-        CsvExporter exporter = new CsvExporter("table1", "", "", "\n", ",");
+        CsvExporter exporter = new CsvExporter("table1", "", "", "\r\n", ";");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
 
-        Scanner scanner = new Scanner(writer.toString()).useDelimiter("\n");
+        Scanner scanner = new Scanner(writer.toString()).useDelimiter("\r\n");
         AtomicReference<String> firstString = new AtomicReference<>("");
         Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
-        Assertions.assertEquals("data,strings,doubles", firstString.get());
-        Assertions.assertEquals("1,stuff,1.03", scanner.next());
-        Assertions.assertEquals("2,things,2.3", scanner.next());
-        Assertions.assertEquals("3,zau,3.10345", scanner.next());
-        Assertions.assertEquals("4,another one,4.0", scanner.next());
-        Assertions.assertEquals(",multiple spaces ah,5.123", scanner.next());
-        Assertions.assertEquals("1,  inner  ,1", scanner.next());
-        Assertions.assertEquals(", extra row,", scanner.next());
+        Assertions.assertEquals("data;strings;doubles", firstString.get());
+        Assertions.assertEquals("1;stuff;1.03", scanner.next());
+        Assertions.assertEquals("2;things;2.3", scanner.next());
+        Assertions.assertEquals("3;zau;3.10345", scanner.next());
+        Assertions.assertEquals("4;another one;4.0", scanner.next());
+        Assertions.assertEquals(";multiple spaces ah;5.123", scanner.next());
+        Assertions.assertEquals("1;  inner  ;1", scanner.next());
+        Assertions.assertEquals("; extra row;", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
 }
