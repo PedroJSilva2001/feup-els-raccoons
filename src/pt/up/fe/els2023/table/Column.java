@@ -4,5 +4,5 @@ import java.util.List;
 
 public class Column {
     String name;
-    List<Value> entries;
+    List<Object> entries;
 }
