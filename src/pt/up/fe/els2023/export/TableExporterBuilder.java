@@ -4,7 +4,6 @@ public abstract class TableExporterBuilder<T extends TableExporter> {
     protected final String table;
     protected final String filename;
     protected final String path;
-    // Line ending
     protected String endOfLine;
 
     public TableExporterBuilder(String table, String filename, String path) {

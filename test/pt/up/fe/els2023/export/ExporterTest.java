@@ -86,4 +86,26 @@ public class ExporterTest {
         Assertions.assertEquals("; extra row;", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
+
+    @Test
+    public void exportTsv() throws IOException {
+        TsvExporter exporter = new TsvExporter("table1", "", "", "\r\n");
+        StringWriter writer = new StringWriter();
+
+        exporter.export(writer, table);
+
+        Scanner scanner = new Scanner(writer.toString()).useDelimiter("\r\n");
+        AtomicReference<String> firstString = new AtomicReference<>("");
+        Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
+        Assertions.assertEquals("data\tstrings\tdoubles", firstString.get());
+        Assertions.assertEquals("1\tstuff\t1.03", scanner.next());
+        Assertions.assertEquals("2\tthings\t2.3", scanner.next());
+        Assertions.assertEquals("3\tzau\t3.10345", scanner.next());
+        Assertions.assertEquals("4\tanother one\t4.0", scanner.next());
+        Assertions.assertEquals("\tmultip\"le;spaces ah\t5.123", scanner.next());
+        Assertions.assertEquals("1\t\"  inner", scanner.next());
+        Assertions.assertEquals("  \"\t1", scanner.next());
+        Assertions.assertEquals("\t extra row\t", scanner.next());
+        Assertions.assertFalse(scanner.hasNext());
+    }
 }
