@@ -12,4 +12,11 @@ public class Config {
     Map<String, TableSchema> tableSchemas;
     List<TableOperation> operations;
     List<TableExporter> exporters;
+
+    public Config(Map<String, TableSource> tableSources, Map<String, TableSchema> tableSchemas, List<TableOperation> operations, List<TableExporter> exporters) {
+        this.tableSources = tableSources;
+        this.tableSchemas = tableSchemas;
+        this.operations = operations;
+        this.exporters = exporters;
+    }
 }
