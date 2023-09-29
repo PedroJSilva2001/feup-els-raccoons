@@ -1,5 +1,6 @@
 package pt.up.fe.els2023.export;
 
+import org.apache.commons.text.StringEscapeUtils;
 import pt.up.fe.els2023.table.ITable;
 
 import java.io.IOException;
@@ -43,7 +44,9 @@ public class HtmlExporter extends TableExporter {
                 ""));
 
         for (var column : table.getColumns()) {
-            body.append("       <th>%s</th>".formatted(column.getName()));
+            body.append("       <th>%s</th>".formatted(
+                    StringEscapeUtils.escapeHtml4(column.getName())
+            ));
             body.append(this.endOfLine);
         }
 
@@ -58,7 +61,9 @@ public class HtmlExporter extends TableExporter {
             body.append("   <tr>").append(this.endOfLine);
 
             for (var value : row.getValues()) {
-                body.append("       <td>%s</td>".formatted(value.toString()))
+                body.append("       <td>%s</td>".formatted(
+                            StringEscapeUtils.escapeHtml4(value.toString())
+                        ))
                         .append(this.endOfLine);
             }
 
