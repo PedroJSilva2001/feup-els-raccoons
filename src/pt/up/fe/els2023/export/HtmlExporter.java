@@ -51,7 +51,7 @@ public class HtmlExporter extends TableExporter {
                 "   </thead>",
                 "   <tbody>",
                 ""
-                ));
+        ));
 
         for (var row : table.getRows()) {
             body.append("   <tr>").append(this.endOfLine);

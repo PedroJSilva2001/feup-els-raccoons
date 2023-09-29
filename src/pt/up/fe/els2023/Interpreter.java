@@ -10,6 +10,5 @@ public class Interpreter {
     }
 
     void executeOperations(Config config) {
-        return;
     }
 }

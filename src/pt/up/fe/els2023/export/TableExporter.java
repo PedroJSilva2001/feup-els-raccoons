@@ -1,6 +1,5 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.Config;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.table.ITable;
 
@@ -13,11 +12,10 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 public abstract class TableExporter {
+    protected final String endOfLine;
     private final String table;
     private final String filename;
     private final String path;
-    // Line ending
-    protected final String endOfLine;
 
     public TableExporter(String table, String filename, String path, String endOfLine) {
         this.table = table;
