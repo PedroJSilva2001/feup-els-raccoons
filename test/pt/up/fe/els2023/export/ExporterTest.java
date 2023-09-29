@@ -108,4 +108,83 @@ public class ExporterTest {
         Assertions.assertEquals("\t extra row\t", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
+
+    @Test
+    public void exportHtml() {
+        HtmlExporter exporter = new HtmlExporter("table1", "", "", "\n\r", "Table", """
+                table {
+                   border-collapse: collapse;
+                   width: 100%;
+                }""");
+
+        StringWriter writer = new StringWriter();
+        Assertions.assertDoesNotThrow(() -> exporter.export(writer, table));
+        System.out.println(writer.toString());
+        Scanner scanner = new Scanner(writer.toString()).useDelimiter("\n\r");
+        AtomicReference<String> firstString = new AtomicReference<>("");
+        Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
+
+        Assertions.assertEquals("<!DOCTYPE html>", firstString.get());
+        Assertions.assertEquals("<html>", scanner.next());
+        Assertions.assertEquals("<head>", scanner.next());
+        Assertions.assertEquals("   <meta charset=\"UTF-8\">", scanner.next());
+        Assertions.assertEquals("   <title>Table</title>", scanner.next());
+        Assertions.assertEquals("   <style>", scanner.next());
+        Assertions.assertEquals("table {", scanner.next());
+        Assertions.assertEquals("   border-collapse: collapse;", scanner.next());
+        Assertions.assertEquals("   width: 100%;", scanner.next());
+        Assertions.assertEquals("}", scanner.next());
+        Assertions.assertEquals("   </style>", scanner.next());
+        Assertions.assertEquals("</head>", scanner.next());
+        Assertions.assertEquals("<body>", scanner.next());
+        Assertions.assertEquals("<table>", scanner.next());
+        Assertions.assertEquals("   <thead>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <th>data</th>", scanner.next());
+        Assertions.assertEquals("       <th>strings</th>", scanner.next());
+        Assertions.assertEquals("       <th>doubles</th>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   </thead>", scanner.next());
+        Assertions.assertEquals("   <tbody>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td>1</td>", scanner.next());
+        Assertions.assertEquals("       <td>stuff</td>", scanner.next());
+        Assertions.assertEquals("       <td>1.03</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td>2</td>", scanner.next());
+        Assertions.assertEquals("       <td>things</td>", scanner.next());
+        Assertions.assertEquals("       <td>2.3</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td>3</td>", scanner.next());
+        Assertions.assertEquals("       <td>zau</td>", scanner.next());
+        Assertions.assertEquals("       <td>3.10345</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td>4</td>", scanner.next());
+        Assertions.assertEquals("       <td>another one</td>", scanner.next());
+        Assertions.assertEquals("       <td>4.0</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td></td>", scanner.next());
+        Assertions.assertEquals("       <td>multip\"le;spaces ah</td>", scanner.next());
+        Assertions.assertEquals("       <td>5.123</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td>1</td>", scanner.next());
+        Assertions.assertEquals("       <td>  inner\r\n  </td>", scanner.next());
+        Assertions.assertEquals("       <td>1</td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   <tr>", scanner.next());
+        Assertions.assertEquals("       <td></td>", scanner.next());
+        Assertions.assertEquals("       <td> extra row</td>", scanner.next());
+        Assertions.assertEquals("       <td></td>", scanner.next());
+        Assertions.assertEquals("   </tr>", scanner.next());
+        Assertions.assertEquals("   </tbody>", scanner.next());
+        Assertions.assertEquals("</table>", scanner.next());
+        Assertions.assertEquals("</body>", scanner.next());
+        Assertions.assertEquals("</html>", scanner.next());
+        Assertions.assertFalse(scanner.hasNext());
+    }
 }
