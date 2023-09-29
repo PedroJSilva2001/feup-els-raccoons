@@ -8,11 +8,13 @@ import java.io.Writer;
 public class HtmlExporter extends TableExporter {
     private final String title;
     private final String style;
+    private final boolean exportFullHtml;
 
-    public HtmlExporter(String table, String filename, String path, String endOfLine, String title, String style) {
+    public HtmlExporter(String table, String filename, String path, String endOfLine, String title, String style, boolean exportFullHtml) {
         super(table, filename, path, endOfLine);
         this.title = title;
         this.style = style.replaceAll("\\r\\n|\\n\\r|\\r|\\n", this.endOfLine);
+        this.exportFullHtml = exportFullHtml;
     }
 
     private String buildTemplate(String title, String style, String body) {
@@ -27,9 +29,7 @@ public class HtmlExporter extends TableExporter {
                 "   </style>",
                 "</head>",
                 "<body>",
-                "<table>",
                 "%s",
-                "</table>",
                 "</body>",
                 "</html>").formatted(title, style, body);
     }
@@ -37,6 +37,7 @@ public class HtmlExporter extends TableExporter {
     @Override
     void export(Writer writer, ITable table) throws IOException {
         StringBuilder body = new StringBuilder(String.join(this.endOfLine,
+                "<table>",
                 "   <thead>",
                 "   <tr>",
                 ""));
@@ -64,8 +65,15 @@ public class HtmlExporter extends TableExporter {
             body.append("   </tr>").append(this.endOfLine);
         }
 
-        body.append("   </tbody>");
+        body.append(String.join(this.endOfLine,
+                "   </tbody>",
+                "</table>"
+        ));
 
-        writer.write(buildTemplate(this.title, this.style, body.toString()));
+        if (exportFullHtml) {
+            writer.write(buildTemplate(this.title, this.style, body.toString()));
+        } else {
+            writer.write(body.toString());
+        }
     }
 }
