@@ -62,7 +62,7 @@ public class HtmlExporter extends TableExporter {
 
             for (var value : row.getValues()) {
                 body.append("       <td>%s</td>".formatted(
-                            StringEscapeUtils.escapeHtml4(value.toString())
+                                StringEscapeUtils.escapeHtml4(value.toString())
                         ))
                         .append(this.endOfLine);
             }
