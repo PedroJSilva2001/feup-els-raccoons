@@ -5,10 +5,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class Row {
-    private final List<Object> values;
+    private final List<Value> values;
 
     public Row(List<Object> values) {
-        this.values = values;
+        this.values = new ArrayList<>();
+
+        for (Object value : values) {
+            this.values.add(new Value(value));
+        }
     }
 
     public Row() {
@@ -16,7 +20,7 @@ public class Row {
     }
 
     public void addValue(Object value) {
-        this.values.add(value);
+        this.values.add(new Value(value));
     }
 
     public List<Object> getValues() {

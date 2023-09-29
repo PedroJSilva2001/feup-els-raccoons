@@ -56,8 +56,8 @@ public class ExporterTest {
         Row row2 = new Row(List.of(2,"things",2.3));
         Row row3 = new Row(List.of(3,"zau",3.10345));
         Row row4 = new Row(List.of(4,"another one",4.0));
-        Row row5 = new Row(Stream.of(null, "multiple spaces ah", 5.123).collect(Collectors.toList()));
-        Row row6 = new Row(List.of(1,"  inner  ",1));
+        Row row5 = new Row(Stream.of(null, "multip\"le;spaces ah", 5.123).collect(Collectors.toList()));
+        Row row6 = new Row(List.of(1,"  inner\r\n  ",1));
         Row row7 = new Row(Stream.of(null, " extra row", null).collect(Collectors.toList()));
 
         Mockito.when(table.getRows()).thenReturn(List.of(
@@ -80,8 +80,9 @@ public class ExporterTest {
         Assertions.assertEquals("2;things;2.3", scanner.next());
         Assertions.assertEquals("3;zau;3.10345", scanner.next());
         Assertions.assertEquals("4;another one;4.0", scanner.next());
-        Assertions.assertEquals(";multiple spaces ah;5.123", scanner.next());
-        Assertions.assertEquals("1;  inner  ;1", scanner.next());
+        Assertions.assertEquals(";\"multip\"\"le;spaces ah\";5.123", scanner.next());
+        Assertions.assertEquals("1;\"  inner", scanner.next());
+        Assertions.assertEquals("  \";1", scanner.next());
         Assertions.assertEquals("; extra row;", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }

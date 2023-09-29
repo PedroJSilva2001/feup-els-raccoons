@@ -1,10 +1,8 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.Config;
 import pt.up.fe.els2023.table.Column;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Row;
-import pt.up.fe.els2023.utils.ValueWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,6 +16,18 @@ public class CsvExporter extends TableExporter {
         this.separator = separator;
     }
 
+    private boolean stringContainsNewLine(String value) {
+        return value.contains("\n") || value.contains("\r");
+    }
+
+    private String escapeSeparatorAndNewLine(String value) {
+        if (value.contains(separator) || stringContainsNewLine(value)) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        } else {
+            return value;
+        }
+    }
+
     @Override
     void export(Writer writer, ITable table) throws IOException {
         List<Column> columns = table.getColumns();
@@ -26,11 +36,11 @@ public class CsvExporter extends TableExporter {
             return;
         }
 
-        writer.write(columns.get(0).getName());
+        writer.write(escapeSeparatorAndNewLine(columns.get(0).getName()));
 
         for (int i = 1; i < columns.size(); i++) {
             writer.write(separator);
-            writer.write(columns.get(i).getName());
+            writer.write(escapeSeparatorAndNewLine(columns.get(i).getName()));
         }
 
         writer.write(endOfLine);
@@ -39,12 +49,12 @@ public class CsvExporter extends TableExporter {
             List<Object> values = row.getValues();
 
             if (!values.isEmpty()) {
-                writer.write(ValueWriter.write(values.get(0)));
+                writer.write(escapeSeparatorAndNewLine(values.get(0).toString()));
             }
 
             for (int i = 1; i < values.size(); i++) {
                 writer.write(separator);
-                writer.write(ValueWriter.write(values.get(i)));
+                writer.write(escapeSeparatorAndNewLine(values.get(i).toString()));
             }
 
             writer.write(endOfLine);
