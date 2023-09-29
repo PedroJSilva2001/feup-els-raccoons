@@ -36,10 +36,10 @@ public class ExporterTest {
         column.addEntry("stuff");
         column.addEntry("things");
         column.addEntry("zau");
-        column.addEntry("another one");
-        column.addEntry("multiple spaces ah");
-        column.addEntry("  inner  ");
-        column.addEntry(" extra row");
+        column.addEntry("ano\\ther & one");
+        column.addEntry("multip\"le;spaces ah");
+        column.addEntry("  inner\r\n  ");
+        column.addEntry(" extra<!-- row");
 
         Column column3 = new Column("doubles");
         column.addEntry(1.03);
@@ -55,10 +55,10 @@ public class ExporterTest {
         Row row = new Row(List.of(1, "stuff", 1.03));
         Row row2 = new Row(List.of(2, "things", 2.3));
         Row row3 = new Row(List.of(3, "zau", 3.10345));
-        Row row4 = new Row(List.of(4, "another one", 4.0));
+        Row row4 = new Row(List.of(4, "ano\\ther & one", 4.0));
         Row row5 = new Row(Stream.of(null, "multip\"le;spaces ah", 5.123).collect(Collectors.toList()));
         Row row6 = new Row(List.of(1, "  inner\r\n  ", 1));
-        Row row7 = new Row(Stream.of(null, " extra row", null).collect(Collectors.toList()));
+        Row row7 = new Row(Stream.of(null, " extra<!-- row", null).collect(Collectors.toList()));
 
         Mockito.when(table.getRows()).thenReturn(List.of(
                 row, row2, row3, row4, row5, row6, row7
@@ -79,11 +79,11 @@ public class ExporterTest {
         Assertions.assertEquals("1;stuff;1.03", scanner.next());
         Assertions.assertEquals("2;things;2.3", scanner.next());
         Assertions.assertEquals("3;zau;3.10345", scanner.next());
-        Assertions.assertEquals("4;another one;4.0", scanner.next());
+        Assertions.assertEquals("4;ano\\ther & one;4.0", scanner.next());
         Assertions.assertEquals(";\"multip\"\"le;spaces ah\";5.123", scanner.next());
         Assertions.assertEquals("1;\"  inner", scanner.next());
         Assertions.assertEquals("  \";1", scanner.next());
-        Assertions.assertEquals("; extra row;", scanner.next());
+        Assertions.assertEquals("; extra<!-- row;", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
 
@@ -101,11 +101,11 @@ public class ExporterTest {
         Assertions.assertEquals("1\tstuff\t1.03", scanner.next());
         Assertions.assertEquals("2\tthings\t2.3", scanner.next());
         Assertions.assertEquals("3\tzau\t3.10345", scanner.next());
-        Assertions.assertEquals("4\tanother one\t4.0", scanner.next());
+        Assertions.assertEquals("4\tano\\ther & one\t4.0", scanner.next());
         Assertions.assertEquals("\tmultip\"le;spaces ah\t5.123", scanner.next());
         Assertions.assertEquals("1\t\"  inner", scanner.next());
         Assertions.assertEquals("  \"\t1", scanner.next());
-        Assertions.assertEquals("\t extra row\t", scanner.next());
+        Assertions.assertEquals("\t extra<!-- row\t", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
 
@@ -163,12 +163,12 @@ public class ExporterTest {
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td>4</td>", scanner.next());
-        Assertions.assertEquals("       <td>another one</td>", scanner.next());
+        Assertions.assertEquals("       <td>ano\\ther &amp; one</td>", scanner.next());
         Assertions.assertEquals("       <td>4.0</td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
-        Assertions.assertEquals("       <td>multip\"le;spaces ah</td>", scanner.next());
+        Assertions.assertEquals("       <td>multip&quot;le;spaces ah</td>", scanner.next());
         Assertions.assertEquals("       <td>5.123</td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
@@ -178,7 +178,7 @@ public class ExporterTest {
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
-        Assertions.assertEquals("       <td> extra row</td>", scanner.next());
+        Assertions.assertEquals("       <td> extra&lt;!-- row</td>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   </tbody>", scanner.next());
@@ -226,12 +226,12 @@ public class ExporterTest {
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td>4</td>", scanner.next());
-        Assertions.assertEquals("       <td>another one</td>", scanner.next());
+        Assertions.assertEquals("       <td>ano\\ther &amp; one</td>", scanner.next());
         Assertions.assertEquals("       <td>4.0</td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
-        Assertions.assertEquals("       <td>multip\"le;spaces ah</td>", scanner.next());
+        Assertions.assertEquals("       <td>multip&quot;le;spaces ah</td>", scanner.next());
         Assertions.assertEquals("       <td>5.123</td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
@@ -242,11 +242,48 @@ public class ExporterTest {
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   <tr>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
-        Assertions.assertEquals("       <td> extra row</td>", scanner.next());
+        Assertions.assertEquals("       <td> extra&lt;!-- row</td>", scanner.next());
         Assertions.assertEquals("       <td></td>", scanner.next());
         Assertions.assertEquals("   </tr>", scanner.next());
         Assertions.assertEquals("   </tbody>", scanner.next());
         Assertions.assertEquals("</table>", scanner.next());
+        Assertions.assertFalse(scanner.hasNext());
+    }
+
+    @Test
+    public void exportLatex() {
+        LatexExporter exporter = new LatexExporter("table1", "", "", "\n");
+
+        StringWriter writer = new StringWriter();
+        Assertions.assertDoesNotThrow(() -> exporter.export(writer, table));
+
+        Scanner scanner = new Scanner(writer.toString()).useDelimiter("\n");
+        AtomicReference<String> firstString = new AtomicReference<>("");
+        Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
+
+        Assertions.assertEquals("\\begin{center}", firstString.get());
+        Assertions.assertEquals("\\begin{tabular}{ | c | c | c | }", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("data & strings & doubles \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("1 & stuff & 1.03 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("2 & things & 2.3 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("3 & zau & 3.10345 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("4 & ano\\textbackslash ther \\& one & 4.0 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals(" & multip\"le;spaces ah & 5.123 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("1 &   inner\r", scanner.next());
+        Assertions.assertEquals("   & 1 \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals(" &  extra<!-- row &  \\\\", scanner.next());
+        Assertions.assertEquals("\\hline", scanner.next());
+        Assertions.assertEquals("\\end{tabular}", scanner.next());
+        Assertions.assertEquals("\\end{center}", scanner.next());
         Assertions.assertFalse(scanner.hasNext());
     }
 }
