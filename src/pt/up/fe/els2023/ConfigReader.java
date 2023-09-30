@@ -34,7 +34,7 @@ public class ConfigReader {
         }
 
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
-        Map<String, TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
+        List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
         // TODO: operations
         List<TableExporter> configExporter = parseExporters(yamlData);
 
@@ -66,13 +66,13 @@ public class ConfigReader {
         return configTableSources;
     }
 
-    private Map <String, TableSchema> parseTableSchemas(Map<String, Object> yamlData, Map<String, TableSource> configTableSources) {
+    private List<TableSchema> parseTableSchemas(Map<String, Object> yamlData, Map<String, TableSource> configTableSources) {
         if (!yamlData.containsKey("tables")) {
             System.out.println("No tableSchemas found");
             return null;
         }
 
-        Map<String, TableSchema> configTableSchemas = new HashMap<>();
+        List<TableSchema> configTableSchemas = new ArrayList<>();
         ArrayList<Map<String, Object>> tableSchemas = (ArrayList<Map<String, Object>>) yamlData.get("tables");
 
         for (Map<String, Object> tableSchema : tableSchemas) {
@@ -85,7 +85,7 @@ public class ConfigReader {
                 String columnName = column.get("name") != null ? (String) column.get("name") : columnFrom;
                 configColumns.add(new ColumnSchema(columnName, columnFrom));
             }
-            configTableSchemas.put(name, new TableSchema(name, configColumns, source));
+            configTableSchemas.add(new TableSchema(name, configColumns, source));
         }
 
         return configTableSchemas;

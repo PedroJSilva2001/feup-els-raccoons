@@ -9,7 +9,7 @@ import java.util.Map;
 
 public record Config(
         Map<String, TableSource> tableSources,
-        Map<String, TableSchema> tableSchemas,
+        List<TableSchema> tableSchemas,
         List<TableOperation> operations,
         List<TableExporter> exporters
 ){}
