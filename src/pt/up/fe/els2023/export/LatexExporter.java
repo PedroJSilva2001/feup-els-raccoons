@@ -21,7 +21,7 @@ public class LatexExporter extends TableExporter {
     void export(Writer writer, ITable table) throws IOException {
         StringBuilder sb = new StringBuilder(String.join(endOfLine,
                 "\\begin{center}",
-                "\\begin{tabular}{ |" + " c |".repeat(table.getColumns().size()) + " }",
+                "\\begin{tabular}{ |" + " l |".repeat(table.getColumns().size()) + " }",
                 "\\hline", ""));
 
         boolean first = true;

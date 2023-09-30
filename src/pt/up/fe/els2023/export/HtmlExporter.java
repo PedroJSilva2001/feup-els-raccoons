@@ -18,6 +18,10 @@ public class HtmlExporter extends TableExporter {
         this.exportFullHtml = exportFullHtml;
     }
 
+    private String escapeHtml(String string) {
+        return StringEscapeUtils.escapeHtml4(string).replaceAll(" ", "&nbsp;");
+    }
+
     private String buildTemplate(String title, String style, String body) {
         return String.join(this.endOfLine,
                 "<!DOCTYPE html>",
@@ -38,14 +42,14 @@ public class HtmlExporter extends TableExporter {
     @Override
     void export(Writer writer, ITable table) throws IOException {
         StringBuilder body = new StringBuilder(String.join(this.endOfLine,
-                "<table>",
+                "<table style=\"white-space: pre-line;\">",
                 "   <thead>",
                 "   <tr>",
                 ""));
 
         for (var column : table.getColumns()) {
             body.append("       <th>%s</th>".formatted(
-                    StringEscapeUtils.escapeHtml4(column.getName())
+                    escapeHtml(column.getName())
             ));
             body.append(this.endOfLine);
         }
@@ -62,7 +66,7 @@ public class HtmlExporter extends TableExporter {
 
             for (var value : row.getValues()) {
                 body.append("       <td>%s</td>".formatted(
-                                StringEscapeUtils.escapeHtml4(value.toString())
+                                escapeHtml(value.toString())
                         ))
                         .append(this.endOfLine);
             }
