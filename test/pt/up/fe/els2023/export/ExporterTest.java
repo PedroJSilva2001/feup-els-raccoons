@@ -294,7 +294,7 @@ public class ExporterTest {
 
         StringWriter writer = new StringWriter();
         Assertions.assertDoesNotThrow(() -> markdownExporter.export(writer, table));
-        System.out.println(writer.toString());
+
         Scanner scanner = new Scanner(writer.toString()).useDelimiter("\n");
         AtomicReference<String> firstString = new AtomicReference<>("");
         Assertions.assertDoesNotThrow(() -> firstString.set(scanner.next()));
