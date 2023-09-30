@@ -9,7 +9,6 @@ public class Interpreter {
         return null;
     }
 
-    Void executeOperations(Config config) {
-        return null;
+    void executeOperations(Config config) {
     }
 }
