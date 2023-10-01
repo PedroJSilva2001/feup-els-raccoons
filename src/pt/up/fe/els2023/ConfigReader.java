@@ -41,7 +41,7 @@ public class ConfigReader {
         return new Config(configTableSources, configTableSchemas, null, configExporter);
     }
 
-    private Map <String, TableSource> parseTableSources(Map<String, Object> yamlData) {
+    private Map<String, TableSource> parseTableSources(Map<String, Object> yamlData) {
         if (!yamlData.containsKey("sources")) {
             System.out.println("No tableSources found");
             return null;
@@ -52,10 +52,11 @@ public class ConfigReader {
 
         for (Map<String, Object> tableSource : tableSources) {
             Object files = tableSource.get("path");
+            String sourceName = (String) tableSource.get("name");
             ArrayList<String> filesList = files instanceof String ? new ArrayList<>(List.of((String) files)) : (ArrayList<String>) files;
             switch ((String) tableSource.get("type")) {
                 // TODO
-                case "json" -> configTableSources.put((String) tableSource.get("name"), new JsonSource());
+                case "json" -> configTableSources.put(sourceName, new JsonSource(sourceName, filesList));
                 case "yaml" -> System.out.println("TODO: yamlSource");
                 case "xml" -> System.out.println("TODO: xmlSource");
                 case "csv" -> System.out.println("TODO: csvSource");
@@ -91,7 +92,7 @@ public class ConfigReader {
         return configTableSchemas;
     }
 
-    private List <TableExporter> parseExporters(Map<String, Object> yamlData) {
+    private List<TableExporter> parseExporters(Map<String, Object> yamlData) {
         if (!yamlData.containsKey("export")) {
             System.out.println("No exporters found");
             return null;
