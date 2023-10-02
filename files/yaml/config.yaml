@@ -1,0 +1,32 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_1.yaml"
+      - "files/yaml/decision_tree_2.yaml"
+      - "files/yaml/decision_tree_3.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    columns:
+      - name: Criterion
+        from: "params.criterion"
+      - from: "params.min_samples_split"
+      - name: Zau 2
+
+  - name: table2
+    source: "file2"
+    columns:
+      - name: Zau master
+        from: "prop1.prop2"
+      - from: "prop3"
+
+operations:
+
+export:
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.html"
+    exportFullHtml: true
+    format: html

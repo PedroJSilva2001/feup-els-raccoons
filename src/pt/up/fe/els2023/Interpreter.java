@@ -33,7 +33,7 @@ public class Interpreter {
         ITable table = new Table(schema.name(), schema.source());
 
         for (var columnSchema : schema.columnSchemas()) {
-            String columnName = columnSchema.name() == null? columnSchema.from() : columnSchema.name();
+            String columnName = columnSchema.name() == null ? columnSchema.from() : columnSchema.name();
 
             if (!table.addColumn(columnName)) {
                 System.out.println("Column " + columnName + " in table " + table.getName() + " already exists");
@@ -87,5 +87,6 @@ public class Interpreter {
     }
 
 
-    void executeOperations(Config config) {}
+    void executeOperations(Config config) {
+    }
 }

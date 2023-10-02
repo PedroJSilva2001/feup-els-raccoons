@@ -12,4 +12,5 @@ public record Config(
         List<TableSchema> tableSchemas,
         List<TableOperation> operations,
         List<TableExporter> exporters
-){}
+) {
+}

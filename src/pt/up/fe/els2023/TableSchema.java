@@ -8,4 +8,5 @@ public record TableSchema(
         String name,
         List<ColumnSchema> columnSchemas,
         TableSource source
-){}
+) {
+}

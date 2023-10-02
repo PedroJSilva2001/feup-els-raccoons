@@ -31,7 +31,8 @@ public class ConfigReader {
         File file = new File(configFile);
         Map<String, Object> yamlData;
         try (YAMLParser parser = new YAMLFactory().createParser(file)) {
-            yamlData = objectMapper.readValue(parser, new TypeReference<>(){});
+            yamlData = objectMapper.readValue(parser, new TypeReference<>() {
+            });
         } catch (FileNotFoundException e) {
             System.out.println("Config file not found");
             return null;
@@ -117,9 +118,7 @@ public class ConfigReader {
 
                     configExporterBuilder = csvExporterBuilder;
                 }
-                case "tsv" -> {
-                    configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                }
+                case "tsv" -> configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                 case "html" -> {
                     HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                     if (export.containsKey("title")) {
@@ -134,12 +133,8 @@ public class ConfigReader {
 
                     configExporterBuilder = htmlExporterBuilder;
                 }
-                case "latex" -> {
-                    configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                }
-                case "markdown", "md" -> {
-                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                }
+                case "latex" -> configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                case "markdown", "md" -> configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                 default -> {
                     //TODO: SPECIFY FORMAT AND LINE
                     System.out.println("Unsupported format");
@@ -147,6 +142,7 @@ public class ConfigReader {
                 }
             }
 
+            // TODO: use enum for endOfLine, for example CR, LF, CRLF
             if (export.containsKey("endOfLine")) {
                 configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
             }

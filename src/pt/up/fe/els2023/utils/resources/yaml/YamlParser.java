@@ -9,11 +9,6 @@ import java.io.Reader;
 
 public class YamlParser implements ResourceParser {
     public YamlNode parse(Reader reader) throws IOException {
-        /*var objectMapper = new ObjectMapper(new YAMLFactory());
-        var yamlParser = new YAMLFactory().createParser(reader);
-
-        return new YamlNode(objectMapper.readValue(yamlParser, new TypeReference<>() {}));*/
-
         var objectMapper = new ObjectMapper(new YAMLFactory());
 
         return new YamlNode(objectMapper.readTree(reader));

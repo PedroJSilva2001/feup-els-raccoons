@@ -2,20 +2,20 @@ package pt.up.fe.els2023.table;
 
 import pt.up.fe.els2023.sources.TableSource;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 public class Table implements ITable {
-    private String name;
-    private List<Column> columns;
-    private List<Row> rows;
-    private TableSource source;
+    private final String name;
+    private final List<Column> columns;
+    private final List<Row> rows;
+    private final TableSource source;
 
     public Table(String name, TableSource source) {
         this.name = name;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("_inputFile"));
+        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
         this.source = source;
     }
