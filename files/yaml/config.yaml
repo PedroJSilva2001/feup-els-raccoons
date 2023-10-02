@@ -49,14 +49,13 @@ export:
     filename: "other_table.html"
     format: html
     exportFullHtml: true
-    style: "
+    style: >
         body {
             background-color: red;
         }
         * {
-            font-family: 'Fira Code';
+            font-family: 'Fira Code', 'serif';
         } 
-    "
   - name: other_table
     path: "files/"
     filename: "other_table.md"
