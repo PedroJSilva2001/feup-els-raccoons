@@ -1,8 +1,8 @@
-package pt.up.fe.els2023.utils.json;
+package pt.up.fe.els2023.utils.resources.json;
 
-import pt.up.fe.els2023.utils.yaml.YamlNode;
+import pt.up.fe.els2023.utils.resources.ResourceNode;
 
-public class JsonNode {
+public class JsonNode implements ResourceNode {
     private final com.fasterxml.jackson.databind.JsonNode node;
 
     protected JsonNode(com.fasterxml.jackson.databind.JsonNode node) {
@@ -36,6 +36,33 @@ public class JsonNode {
 
         return new JsonNode(value);
     }
+
+    public String getNested(String propertyPath) {
+        String[] properties = propertyPath.split("\\.");
+
+        var currentNode = new JsonNode(node);
+
+        for (var prop : properties) {
+            if (currentNode.isArray()) {
+                System.out.println("Property path not found: Array properties not supported");
+                return null;
+            }
+
+            if (currentNode.has(prop)) {
+                currentNode = currentNode.get(prop);
+            } else {
+                System.out.println("Property not found: " + prop);
+                return null;
+            }
+        }
+
+        if (currentNode.isNull()) {
+            return "";
+        }
+
+        return currentNode.asText();
+    }
+
 
     public boolean isNull() {
         return node.isNull();

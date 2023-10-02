@@ -1,13 +1,10 @@
 package pt.up.fe.els2023.sources;
 
-import pt.up.fe.els2023.TableSchema;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.utils.resources.ResourceParser;
 
-import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TableSource<ResourceNodeType> {
+public abstract class TableSource {
     protected String name;
 
     protected List<String> files;
@@ -17,45 +14,13 @@ public abstract class TableSource<ResourceNodeType> {
         this.files = files;
     }
 
-    public void populateTableFrom(TableSchema schema, ITable table) {
-        for (var file : files) {
-            List<Object> rowValues = new ArrayList<>();
-
-            BufferedReader reader = null;
-
-            try {
-                var fileReader = new FileReader(file);
-                reader = new BufferedReader(fileReader);
-            } catch (FileNotFoundException e) {
-                System.out.println("File " + file + " not found");
-                return;
-            }
-
-            // First column is always source file
-            rowValues.add(file);
-
-            try {
-                var rootNode = getResourceRootNode(reader);
-
-                for (var columnSchema : schema.columnSchemas()) {
-                    if (columnSchema.from() == null) {
-                        rowValues.add(null);
-                        continue;
-                    }
-
-                    var value = getPropertyValue(rootNode, columnSchema.from());
-
-                    rowValues.add(value);
-                }
-
-                table.addRow(rowValues);
-            } catch (IOException e) {
-                // TODO
-            }
-        }
+    public String getName() {
+        return name;
     }
 
-    protected abstract ResourceNodeType getResourceRootNode(Reader reader) throws IOException;
+    public List<String> getFiles() {
+        return files;
+    }
 
-    protected abstract String getPropertyValue(ResourceNodeType rootNode, String attributePath);
+    public abstract ResourceParser getResourceParser();
 }
