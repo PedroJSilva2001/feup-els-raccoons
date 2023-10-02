@@ -15,12 +15,11 @@ tables:
       - from: "params.min_samples_split"
       - name: Zau 2
 
-  - name: table2
-    source: "file2"
+  - name: other_table
+    source: "decision_tree"
     columns:
-      - name: Zau master
-        from: "prop1.prop2"
-      - from: "prop3"
+      - name: "Zau |&nbsp; \"mas.te\"r"
+        from: "params.ccp_alpha"
 
 operations:
 
@@ -28,5 +27,41 @@ export:
   - name: decision_tree
     path: "files/"
     filename: "decision_tree.html"
+    title: "This is my kingdom come"
+
     exportFullHtml: true
     format: html
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.md"
+    format: md
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.tsv"
+    format: tsv
+  - name: other_table
+    path: "files/"
+    filename: "other_table.csv"
+    format: csv
+    separator: "."
+  - name: other_table
+    path: "files/"
+    filename: "other_table.html"
+    format: html
+    exportFullHtml: true
+    style: "
+        body {
+            background-color: red;
+        }
+        * {
+            font-family: 'Fira Code';
+        } 
+    "
+  - name: other_table
+    path: "files/"
+    filename: "other_table.md"
+    format: md
+  - name: other_table
+    path: "files/"
+    filename: "other_table.tex"
+    format: latex

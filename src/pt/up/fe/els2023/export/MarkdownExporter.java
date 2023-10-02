@@ -15,6 +15,7 @@ public class MarkdownExporter extends TableExporter {
     private String escapeMarkdown(String string) {
         string = StringEscapeUtils.escapeHtml4(string);
         return string.replaceAll("([\\\\`*_{}\\[\\]()#+\\-.!<>])", "\\\\$1")
+                .replaceAll("\\|", "&#124;")
                 .replaceAll(" ", "&nbsp;")
                 .replaceAll("\\r\\n|\\n\\r|\\r|\\n", "<br />");
     }
