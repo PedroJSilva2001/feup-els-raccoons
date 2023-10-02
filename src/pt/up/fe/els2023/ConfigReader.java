@@ -4,16 +4,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
-import pt.up.fe.els2023.export.TableExporter;
+import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
+import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@SuppressWarnings (value="unchecked")
+@SuppressWarnings(value = "unchecked")
 public class ConfigReader {
     private final ObjectMapper objectMapper;
     private final String configFile;
@@ -57,7 +61,7 @@ public class ConfigReader {
             switch ((String) tableSource.get("type")) {
                 // TODO
                 case "json" -> configTableSources.put(sourceName, new JsonSource(sourceName, filesList));
-                case "yaml" -> System.out.println("TODO: yamlSource");
+                case "yaml" -> configTableSources.put(sourceName, new YamlSource(sourceName, filesList));
                 case "xml" -> System.out.println("TODO: xmlSource");
                 case "csv" -> System.out.println("TODO: csvSource");
                 default -> System.out.println("Unsupported source type");
@@ -103,10 +107,16 @@ public class ConfigReader {
 
         for (Map<String, Object> export : exporters) {
             switch ((String) export.get("format")) {
-                // TODO
-                case "csv" -> System.out.println("TODO: csvExporter");
-                case "html" -> System.out.println("TODO: htmlExporter");
-                case "latex" -> System.out.println("TODO: latexExporter");
+                case "csv" ->
+                        configExporter.add(new CsvExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine"), (String) export.get("separator")));
+                case "tsv" ->
+                        configExporter.add(new TsvExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
+                case "html" ->
+                        configExporter.add(new HtmlExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine"), (String) export.get("title"), (String) export.get("style"), (boolean) export.get("exportFullHtml")));
+                case "latex" ->
+                        configExporter.add(new LatexExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
+                case "markdown", "md" ->
+                        configExporter.add(new MarkdownExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
                 default -> System.out.println("Unsupported format");
             }
         }

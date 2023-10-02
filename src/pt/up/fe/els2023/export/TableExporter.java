@@ -38,4 +38,20 @@ public abstract class TableExporter {
     }
 
     abstract void export(Writer writer, ITable table) throws IOException;
+
+    public String getEndOfLine() {
+        return endOfLine;
+    }
+
+    public String getTable() {
+        return table;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public String getPath() {
+        return path;
+    }
 }
