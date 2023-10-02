@@ -12,4 +12,8 @@ public interface ITable {
     List<Row> getRows();
 
     TableSource getSource();
+
+    boolean addColumn(String columnName);
+
+    void addRow(List<Object> values);
 }
