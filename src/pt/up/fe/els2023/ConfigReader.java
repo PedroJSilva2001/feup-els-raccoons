@@ -106,19 +106,51 @@ public class ConfigReader {
         ArrayList<Map<String, Object>> exporters = (ArrayList<Map<String, Object>>) yamlData.get("export");
 
         for (Map<String, Object> export : exporters) {
+            TableExporterBuilder<?> configExporterBuilder;
+            // TODO: VALIDATE
             switch ((String) export.get("format")) {
-                case "csv" ->
-                        configExporter.add(new CsvExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine"), (String) export.get("separator")));
-                case "tsv" ->
-                        configExporter.add(new TsvExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
-                case "html" ->
-                        configExporter.add(new HtmlExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine"), (String) export.get("title"), (String) export.get("style"), (boolean) export.get("exportFullHtml")));
-                case "latex" ->
-                        configExporter.add(new LatexExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
-                case "markdown", "md" ->
-                        configExporter.add(new MarkdownExporter((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"), (String) export.get("endOfLine")));
-                default -> System.out.println("Unsupported format");
+                case "csv" -> {
+                    CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                    if (export.containsKey("separator")) {
+                        csvExporterBuilder.setSeparator((String) export.get("separator"));
+                    }
+
+                    configExporterBuilder = csvExporterBuilder;
+                }
+                case "tsv" -> {
+                    configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                }
+                case "html" -> {
+                    HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                    if (export.containsKey("title")) {
+                        htmlExporterBuilder.setTitle((String) export.get("title"));
+                    }
+                    if (export.containsKey("style")) {
+                        htmlExporterBuilder.setStyle((String) export.get("style"));
+                    }
+                    if (export.containsKey("exportFullHtml")) {
+                        htmlExporterBuilder.setExportFullHtml((boolean) export.get("exportFullHtml"));
+                    }
+
+                    configExporterBuilder = htmlExporterBuilder;
+                }
+                case "latex" -> {
+                    configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                }
+                case "markdown", "md" -> {
+                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                }
+                default -> {
+                    //TODO: SPECIFY FORMAT AND LINE
+                    System.out.println("Unsupported format");
+                    continue;
+                }
             }
+
+            if (export.containsKey("endOfLine")) {
+                configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
+            }
+            configExporter.add(configExporterBuilder.build());
         }
 
         return configExporter;

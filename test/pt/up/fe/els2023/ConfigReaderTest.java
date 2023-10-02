@@ -34,7 +34,7 @@ public class ConfigReaderTest {
         );
 
         var expectedExporters = List.of(
-                new CsvExporter("table1", "Table 1", "/dir1/dir2", null, null)
+                new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ",")
         );
 
         for (var expectedTableSource : expectedTableSources.entrySet()) {
