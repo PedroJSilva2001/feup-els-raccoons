@@ -57,10 +57,7 @@ public class InterpreterTest {
             var expectedColumn = expectedColumns.get(i);
             var resultColumn = table.getColumns().get(i);
             Assertions.assertEquals(expectedColumn.getName(), resultColumn.getName());
-
-            // TODO compare entries
-            // this doesn't work and i hate java
-            //Assertions.assertEquals(expectedColumn.getEntries(), resultColumn.getEntries());
+            Assertions.assertEquals(expectedColumn.getEntries().toString(), resultColumn.getEntries().toString());
         }
 
     }
