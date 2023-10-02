@@ -1,0 +1,66 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_1.yaml"
+      - "files/yaml/decision_tree_2.yaml"
+      - "files/yaml/decision_tree_3.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    columns:
+      - name: Criterion
+        from: "params.criterion"
+      - from: "params.min_samples_split"
+      - name: Zau 2
+
+  - name: other_table
+    source: "decision_tree"
+    columns:
+      - name: "Zau |&nbsp; \"mas.te\"r"
+        from: "params.ccp_alpha"
+
+operations:
+
+export:
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.html"
+    title: "This is my kingdom come"
+
+    exportFullHtml: true
+    format: html
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.md"
+    format: md
+  - name: decision_tree
+    path: "files/"
+    filename: "decision_tree.tsv"
+    format: tsv
+  - name: other_table
+    path: "files/"
+    filename: "other_table.csv"
+    format: csv
+    separator: "."
+  - name: other_table
+    path: "files/"
+    filename: "other_table.html"
+    format: html
+    exportFullHtml: true
+    style: >
+        body {
+            background-color: red;
+        }
+        * {
+            font-family: 'Fira Code', 'serif';
+        } 
+  - name: other_table
+    path: "files/"
+    filename: "other_table.md"
+    format: md
+  - name: other_table
+    path: "files/"
+    filename: "other_table.tex"
+    format: latex
