@@ -3,6 +3,8 @@ package pt.up.fe.els2023;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import pt.up.fe.els2023.config.ColumnSchema;
+import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.table.Column;
 
