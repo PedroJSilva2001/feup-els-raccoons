@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.operations;
 
-import pt.up.fe.els2023.Config;
+import pt.up.fe.els2023.table.Table;
 
 public interface TableOperation {
-    void execute(Config config);
+    void execute(Table table);
 }

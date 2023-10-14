@@ -62,4 +62,13 @@ public class Table implements ITable {
             columns.get(i).addEntry(value);
         }
     }
+
+    //public Table filter(Predicate<Integer> filterPredicate) {
+    //    FilterOperation op = new FilterOperation(filterPredicate, this);
+    //    return op.execute();
+    //}
+    //public Table concat(Table table2) {
+    //    ConcatOperation op = new ConcatOperation(this, table2);
+    //    return op.execute();
+    //}
 }

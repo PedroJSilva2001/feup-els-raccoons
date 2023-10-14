@@ -1,5 +1,6 @@
-package pt.up.fe.els2023;
+package pt.up.fe.els2023.config;
 
+import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.operations.TableOperation;
 import pt.up.fe.els2023.sources.TableSource;

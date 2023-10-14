@@ -1,5 +1,7 @@
 package pt.up.fe.els2023;
 
+import pt.up.fe.els2023.config.Config;
+import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 
@@ -12,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Interpreter {
+public class Interpreter implements NodeVisitor {
     Map<String, ITable> buildTables(Config config) {
         Map<String, ITable> tables = new HashMap<>();
 
