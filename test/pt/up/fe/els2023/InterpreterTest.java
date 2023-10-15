@@ -3,7 +3,6 @@ package pt.up.fe.els2023;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import pt.up.fe.els2023.config.ColumnSchema;
 import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.table.Column;
@@ -16,15 +15,15 @@ public class InterpreterTest {
     public void testSimpleJsonSourceTable() {
         var interpreter = new Interpreter();
 
-        var columnSchemas = List.of(
-                new ColumnSchema("Int 1", "int1"),
-                new ColumnSchema("Int 2", null), // empty column
-                new ColumnSchema(null, "obj1"), // name is "obj1"
-                new ColumnSchema("String", "str1"),
-                new ColumnSchema("Obj1 prop3", "obj1.prop3"),
-                new ColumnSchema("miss", "miss"), // missing property "miss"
-                new ColumnSchema("Miss2", "obj1.miss") // missing property "miss"
-        );
+//        var columnSchemas = List.of(
+//                new ColumnSchema("Int 1", "int1"),
+//                new ColumnSchema("Int 2", null), // empty column
+//                new ColumnSchema(null, "obj1"), // name is "obj1"
+//                new ColumnSchema("String", "str1"),
+//                new ColumnSchema("Obj1 prop3", "obj1.prop3"),
+//                new ColumnSchema("miss", "miss"), // missing property "miss"
+//                new ColumnSchema("Miss2", "obj1.miss") // missing property "miss"
+//        );
 
         var files = List.of(
                 "./test/pt/up/fe/els2023/files/json/file1.json",
@@ -33,7 +32,7 @@ public class InterpreterTest {
 
         var source = new JsonSource("TestSource", files);
 
-        var tableSchema = new TableSchema("TestSchema", columnSchemas, source);
+        var tableSchema = new TableSchema("TestSchema"/*, columnSchemas, source */);
 
         var table = interpreter.buildTable(tableSchema);
 

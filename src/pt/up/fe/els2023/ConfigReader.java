@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
-import pt.up.fe.els2023.config.ColumnSchema;
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.export.*;
@@ -88,13 +87,11 @@ public class ConfigReader {
             String name = (String) tableSchema.get("name");
             TableSource source = configTableSources.get((String) tableSchema.get("source"));
             ArrayList<Map<String, Object>> columns = (ArrayList<Map<String, Object>>) tableSchema.get("columns");
-            ArrayList<ColumnSchema> configColumns = new ArrayList<>();
             for (Map<String, Object> column : columns) {
                 String columnFrom = source != null ? (String) column.get("from") : null;
                 String columnName = column.get("name") != null ? (String) column.get("name") : columnFrom;
-                configColumns.add(new ColumnSchema(columnName, columnFrom));
             }
-            configTableSchemas.add(new TableSchema(name, configColumns, source));
+            configTableSchemas.add(new TableSchema(name));
         }
 
         return configTableSchemas;

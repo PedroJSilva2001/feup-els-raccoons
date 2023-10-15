@@ -3,6 +3,7 @@ package pt.up.fe.els2023.config;
 import pt.up.fe.els2023.sources.TableSource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,18 @@ public final class TableSchema {
     public TableSchema from(List<SchemaNode> from) {
         this.from = from;
         return this;
+    }
+
+    public List<SchemaNode> from() {
+        return Collections.unmodifiableList(from);
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public TableSource source() {
+        return source;
     }
 
     public TableSchema source(TableSource source) {
