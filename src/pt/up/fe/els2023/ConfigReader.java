@@ -88,6 +88,13 @@ public class ConfigReader {
             List<Object> eachListNode = (List<Object>) value;
             return parseListNode(eachListNode);
         } else if (value instanceof Map) {
+            // This could cause ambiguity, for example
+            // nft:
+            //    - params:
+            //        min_split: min_split_value
+            // is min_split_value the name of the column, or is it a key in the min_split map?
+            // the only correct way is for min_split_value to be a key in the min_split map, which
+            // removes the ability to name the column min_split_value
             Map<String, Object> eachMapNode = (Map<String, Object>) value;
             return parseMapNode(eachMapNode);
         } else if (value instanceof String columnName) {
@@ -104,9 +111,10 @@ public class ConfigReader {
 
         if (Objects.equals(keyName, "$each")) {
             return new EachNode(parseValue(value));
+        } else if (Objects.equals(keyName, "$except")) {
+            List<String> exceptList = (List<String>) value;
+            return new ExceptNode(exceptList);
         }
-
-        // TODO: $ALL, $ALL-VALUE, ...
 
         Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");
         Matcher matcher = pattern.matcher(keyName);
@@ -130,6 +138,26 @@ public class ConfigReader {
 
         for (Object node : listNode) {
             if (node instanceof String keyName) {
+                switch (keyName) {
+                    case "$all" -> {
+                        schemaNodes.add(new AllNode());
+                        continue;
+                    }
+                    case "$each" -> {
+                        schemaNodes.add(new EachNode(new NullNode()));
+                        continue;
+                    }
+                    case "$all-value" -> {
+                        schemaNodes.add(new AllValueNode());
+                        continue;
+                    }
+                    case "$all-container" -> {
+                        schemaNodes.add(new AllContainerNode());
+                        continue;
+                    }
+                }
+
+                keyName = unescapeString(keyName);
                 schemaNodes.add(new ChildNode(keyName, new NullNode()));
             } else if (node instanceof Map) {
                 Map<String, Object> mapNode = (Map<String, Object>) node;
