@@ -25,7 +25,7 @@ public class ConfigReaderTest {
         var expectedTableSchemas = List.of(
                 new TableSchema("decision_tree")
                         .source(expectedTableSources.get("decision_tree"))
-                        .from(
+                        .nft(
                             new ChildNode("params", new ListNode(
                                     new ChildNode("ccp_alpha", new ColumnNode("CCP Alpha")),
                                     new ChildNode("class_weight", new ColumnNode("Class weight")),
@@ -45,7 +45,7 @@ public class ConfigReaderTest {
                         ),
                 new TableSchema("Table 2")
                         .source(null)
-                        .from(
+                        .nft(
                                 new ChildNode("params", new NullNode())
                         )
         );
@@ -63,7 +63,7 @@ public class ConfigReaderTest {
         for (int i = 0; i < expectedTableSchemas.size(); i++) {
             var expectedTableSchema = expectedTableSchemas.get(i);
             var resultTableSchema = config.tableSchemas().get(i);
-            Assertions.assertEquals(expectedTableSchema.from(), resultTableSchema.from());
+            Assertions.assertEquals(expectedTableSchema.nft(), resultTableSchema.nft());
             Assertions.assertEquals(expectedTableSchema.name(), resultTableSchema.name());
 
             if (expectedTableSchema.source() != null) {

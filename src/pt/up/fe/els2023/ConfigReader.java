@@ -72,6 +72,17 @@ public class ConfigReader {
         return configTableSources;
     }
 
+    private String unescapeString(String string) {
+        // This unescapes the $ at the beginning of the keyName
+        Pattern escapePattern = Pattern.compile("^\\\\+\\$");
+        Matcher escapeMatcher = escapePattern.matcher(string);
+        if (escapeMatcher.find()) {
+            return string.replaceFirst("\\\\", "");
+        }
+
+        return string;
+    }
+
     private SchemaNode parseValue(Object value) {
         if (value instanceof List) {
             List<Object> eachListNode = (List<Object>) value;
@@ -110,13 +121,7 @@ public class ConfigReader {
             return new IndexNode(index, childName, parseValue(value));
         }
 
-        // This unescapes the $ at the beginning of the keyName
-        Pattern escapePattern = Pattern.compile("^\\\\+\\$");
-        Matcher escapeMatcher = escapePattern.matcher(keyName);
-        if (escapeMatcher.find()) {
-            keyName = keyName.replaceFirst("\\\\", "");
-        }
-
+        keyName = unescapeString(keyName);
         return new ChildNode(keyName, parseValue(value));
     }
 
@@ -167,7 +172,7 @@ public class ConfigReader {
             }
 
             ListNode fromNode = parseListNode(from);
-            table.from(fromNode.list());
+            table.nft(fromNode.list());
 
             configTableSchemas.add(table);
         }
