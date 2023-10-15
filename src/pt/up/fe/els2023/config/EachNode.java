@@ -4,7 +4,7 @@ import pt.up.fe.els2023.NodeVisitor;
 
 import java.util.List;
 
-public record EachNode(List<SchemaNode> nodes) implements SchemaNode {
+public record EachNode(SchemaNode nodes) implements SchemaNode {
     @Override
     public void accept(NodeVisitor visitor) {
         // TODO

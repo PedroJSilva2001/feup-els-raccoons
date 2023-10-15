@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
-import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
@@ -14,10 +13,9 @@ import pt.up.fe.els2023.sources.YamlSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings(value = "unchecked")
 public class ConfigReader {
@@ -55,12 +53,12 @@ public class ConfigReader {
         }
 
         Map<String, TableSource> configTableSources = new HashMap<>();
-        ArrayList<Map<String, Object>> tableSources = (ArrayList<Map<String, Object>>) yamlData.get("sources");
+        List<Map<String, Object>> tableSources = (ArrayList<Map<String, Object>>) yamlData.get("sources");
 
         for (Map<String, Object> tableSource : tableSources) {
             Object files = tableSource.get("path");
             String sourceName = (String) tableSource.get("name");
-            ArrayList<String> filesList = files instanceof String ? new ArrayList<>(List.of((String) files)) : (ArrayList<String>) files;
+            List<String> filesList = files instanceof String ? new ArrayList<>(List.of((String) files)) : (ArrayList<String>) files;
             switch ((String) tableSource.get("type")) {
                 // TODO
                 case "json" -> configTableSources.put(sourceName, new JsonSource(sourceName, filesList));
@@ -74,6 +72,71 @@ public class ConfigReader {
         return configTableSources;
     }
 
+    private SchemaNode parseValue(Object value) {
+        if (value instanceof List) {
+            List<Object> eachListNode = (List<Object>) value;
+            return parseListNode(eachListNode);
+        } else if (value instanceof Map) {
+            Map<String, Object> eachMapNode = (Map<String, Object>) value;
+            return parseMapNode(eachMapNode);
+        } else if (value instanceof String columnName) {
+            return new ColumnNode(columnName);
+        } else {
+            return new NullNode();
+        }
+    }
+
+    private SchemaNode parseMapNode(Map<String, Object> mapNode) {
+        // Should only have one key
+        String keyName = mapNode.keySet().iterator().next();
+        Object value = mapNode.get(keyName);
+
+        if (Objects.equals(keyName, "$each")) {
+            return new EachNode(parseValue(value));
+        }
+
+        // TODO: $ALL, $ALL-VALUE, ...
+
+        Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");
+        Matcher matcher = pattern.matcher(keyName);
+        if (matcher.matches()) {
+            String childName = matcher.group(1);
+            int index = Integer.parseInt(matcher.group(2));
+
+            if(childName == null || Objects.equals(childName, "")) {
+                return new IndexNode(index, parseValue(value));
+            }
+
+            return new IndexNode(index, childName, parseValue(value));
+        }
+
+        // This unescapes the $ at the beginning of the keyName
+        Pattern escapePattern = Pattern.compile("^\\\\+\\$");
+        Matcher escapeMatcher = escapePattern.matcher(keyName);
+        if (escapeMatcher.find()) {
+            keyName = keyName.replaceFirst("\\\\", "");
+        }
+
+        return new ChildNode(keyName, parseValue(value));
+    }
+
+    private ListNode parseListNode(List<Object> listNode) {
+        List<SchemaNode> schemaNodes = new ArrayList<>();
+
+        for (Object node : listNode) {
+            if (node instanceof String keyName) {
+                schemaNodes.add(new ChildNode(keyName, new NullNode()));
+            } else if (node instanceof Map) {
+                Map<String, Object> mapNode = (Map<String, Object>) node;
+                schemaNodes.add(parseMapNode(mapNode));
+            } else {
+                schemaNodes.add(new NullNode());
+            }
+        }
+
+        return new ListNode(schemaNodes);
+    }
+
     private List<TableSchema> parseTableSchemas(Map<String, Object> yamlData, Map<String, TableSource> configTableSources) {
         if (!yamlData.containsKey("tables")) {
             System.out.println("No tableSchemas found");
@@ -81,17 +144,32 @@ public class ConfigReader {
         }
 
         List<TableSchema> configTableSchemas = new ArrayList<>();
-        ArrayList<Map<String, Object>> tableSchemas = (ArrayList<Map<String, Object>>) yamlData.get("tables");
+        List<Map<String, Object>> tableSchemas = (ArrayList<Map<String, Object>>) yamlData.get("tables");
 
         for (Map<String, Object> tableSchema : tableSchemas) {
             String name = (String) tableSchema.get("name");
             TableSource source = configTableSources.get((String) tableSchema.get("source"));
-            ArrayList<Map<String, Object>> columns = (ArrayList<Map<String, Object>>) tableSchema.get("columns");
-            for (Map<String, Object> column : columns) {
-                String columnFrom = source != null ? (String) column.get("from") : null;
-                String columnName = column.get("name") != null ? (String) column.get("name") : columnFrom;
+            TableSchema table = new TableSchema(name);
+
+            if (source != null) {
+                table.source(source);
+            } else {
+                System.out.println("Source not found");
+                // TODO: SPECIFY LINE AND THROW EXCEPTION
             }
-            configTableSchemas.add(new TableSchema(name));
+
+            List<Object> from = (ArrayList<Object>) tableSchema.get("from");
+
+            if (from == null) {
+                System.out.println("No from found");
+                // TODO: SPECIFY LINE AND THROW EXCEPTION
+                throw new RuntimeException();
+            }
+
+            ListNode fromNode = parseListNode(from);
+            table.from(fromNode.list());
+
+            configTableSchemas.add(table);
         }
 
         return configTableSchemas;
