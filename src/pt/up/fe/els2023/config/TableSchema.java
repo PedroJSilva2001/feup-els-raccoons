@@ -29,6 +29,11 @@ public final class TableSchema {
         return this;
     }
 
+    public TableSchema from(SchemaNode... from) {
+        this.from = List.of(from);
+        return this;
+    }
+
     public List<SchemaNode> from() {
         return Collections.unmodifiableList(from);
     }

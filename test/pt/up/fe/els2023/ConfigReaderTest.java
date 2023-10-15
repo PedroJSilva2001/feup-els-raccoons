@@ -2,10 +2,9 @@ package pt.up.fe.els2023;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.config.ColumnSchema;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.CsvExporter;
-import pt.up.fe.els2023.sources.JsonSource;
+import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,20 +19,35 @@ public class ConfigReaderTest {
         var config = configReader.readConfig();
 
         var expectedTableSources = Map.of(
-                "file1", new JsonSource("file1", List.of("file1.json", "file2.json"))
+                "decision_tree", new YamlSource("decision_tree", List.of("files/yaml/decision_tree_*.yaml"))
         );
 
         var expectedTableSchemas = List.of(
-                new TableSchema("table")
-//                new TableSchema("table1", List.of(
-//                        new ColumnSchema("Zau", "prop1.prop2"),
-//                        new ColumnSchema("prop3", "prop3"), // empty name
-//                        new ColumnSchema("Zau 2", null) // empty from
-//                ), new JsonSource("file1", List.of("file1.json", "file2.json"))),
-//                new TableSchema("table2", List.of(
-//                        new ColumnSchema("Zau master", null),
-//                        new ColumnSchema(null, null)
-//                ), null) // source doesn't exist
+                new TableSchema("decision_tree")
+                        .source(expectedTableSources.get("decision_tree"))
+                        .from(
+                            new ChildNode("params", new ListNode(
+                                    new ChildNode("ccp_alpha", new ColumnNode("CCP Alpha")),
+                                    new ChildNode("class_weight", new ColumnNode("Class weight")),
+                                    new ChildNode("criterion", new ColumnNode("Criterion")),
+                                    new ChildNode("min_samples_split", new NullNode())
+                            )),
+                            new ChildNode("feature_importances",
+                                    new EachNode(new ColumnNode("Feature importances"))
+                            ),
+                            new ChildNode("nodes",
+                                    new IndexNode(0, new ListNode(
+                                            new ChildNode("$node[d]", new ColumnNode("Node 0")),
+                                            new IndexNode(1, "node", new ColumnNode("Node 1")),
+                                            new ChildNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
+                                    ))
+                            )
+                        ),
+                new TableSchema("Table 2")
+                        .source(null)
+                        .from(
+                                new ChildNode("params", new NullNode())
+                        )
         );
 
         var expectedExporters = List.of(
@@ -49,13 +63,9 @@ public class ConfigReaderTest {
         for (int i = 0; i < expectedTableSchemas.size(); i++) {
             var expectedTableSchema = expectedTableSchemas.get(i);
             var resultTableSchema = config.tableSchemas().get(i);
-//            for (int j = 0; j < expectedTableSchema.columnSchemas().size(); j++) {
-//                var expectedColumnSchema = expectedTableSchema.columnSchemas().get(j);
-//                var resultColumnSchema = resultTableSchema.columnSchemas().get(j);
-//                Assertions.assertEquals(expectedColumnSchema.name(), resultColumnSchema.name());
-//                Assertions.assertEquals(expectedColumnSchema.from(), resultColumnSchema.from());
-//            }
+            Assertions.assertEquals(expectedTableSchema.from(), resultTableSchema.from());
             Assertions.assertEquals(expectedTableSchema.name(), resultTableSchema.name());
+
             if (expectedTableSchema.source() != null) {
                 Assertions.assertEquals(expectedTableSchema.source().getName(), resultTableSchema.source().getName());
                 Assertions.assertEquals(expectedTableSchema.source().getFiles(), resultTableSchema.source().getFiles());
