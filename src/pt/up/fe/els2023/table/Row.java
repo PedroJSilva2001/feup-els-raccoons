@@ -19,6 +19,14 @@ public class Row {
         this.values = new ArrayList<>();
     }
 
+    public Row(Row row) {
+        this.values = new ArrayList<>();
+
+        for (Value value : row.values) {
+            values.add(new Value(value.value()));
+        }
+    }
+
     public void addValue(Object value) {
         this.values.add(new Value(value));
     }

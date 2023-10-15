@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.table;
 
-public record Value(Object value) {
+public record Value(Object value) implements Cloneable {
 
     @Override
     public String toString() {

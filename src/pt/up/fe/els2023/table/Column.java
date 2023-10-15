@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Column {
+public class Column implements Cloneable {
     private final String name;
 
     private final List<Value> entries;
@@ -15,6 +15,15 @@ public class Column {
 
         for (Object entry : entries) {
             this.entries.add(new Value(entry));
+        }
+    }
+
+    public Column(Column column) {
+        this.name = String.valueOf(column.name);
+        this.entries = new ArrayList<>();
+
+        for (Value entry : column.entries) {
+            entries.add(new Value(entry.value()));
         }
     }
 
