@@ -48,7 +48,7 @@ public class InterpreterTest {
         Assertions.assertEquals("criterion", columnNames.get(6));
         Assertions.assertEquals("min_impurity_split", columnNames.get(7));
         Assertions.assertEquals("max_depth", columnNames.get(8));
-        Assertions.assertEquals("min_samples_split", columnNames.get(9));
+        Assertions.assertEquals("min_samples_split_1", columnNames.get(9));
         Assertions.assertEquals("min_impurity_decrease", columnNames.get(10));
         Assertions.assertEquals("min_weight_fraction_leaf", columnNames.get(11));
         Assertions.assertEquals("random_state", columnNames.get(12));

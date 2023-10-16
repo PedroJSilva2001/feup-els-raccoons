@@ -20,6 +20,17 @@ public class ColumnVisitor implements NodeVisitor {
         this.rootNode = rootNode;
     }
 
+    private void addColumn(String columnName) {
+        String finalColumnName = columnName;
+        long count = columnNames.stream().filter((name) -> name.equals(finalColumnName)).count();
+
+        if (count != 0) {
+            columnName += "_" + count;
+        }
+
+        columnNames.add(columnName);
+    }
+
     @Override
     public void visit(AllContainerNode node) throws NodeNotAnObjectException {
         TraversingInfo info = this.traversingStack.peek();
@@ -32,7 +43,7 @@ public class ColumnVisitor implements NodeVisitor {
 
         for (var child : children.entrySet()) {
             if (child.getValue().isContainer()) {
-                this.columnNames.add(child.getKey());
+                addColumn(child.getKey());
             }
         }
     }
@@ -48,7 +59,7 @@ public class ColumnVisitor implements NodeVisitor {
         var children = info.node.getChildren();
 
         for (var child : children.entrySet()) {
-            this.columnNames.add(child.getKey());
+            addColumn(child.getKey());
         }
     }
 
@@ -64,7 +75,7 @@ public class ColumnVisitor implements NodeVisitor {
 
         for (var child : children.entrySet()) {
             if (child.getValue().isValue()) {
-                this.columnNames.add(child.getKey());
+                addColumn(child.getKey());
             }
         }
     }
@@ -87,7 +98,7 @@ public class ColumnVisitor implements NodeVisitor {
 
     @Override
     public void visit(ColumnNode node) {
-        this.columnNames.add(node.columName());
+        addColumn(node.columnName());
     }
 
     @Override
@@ -121,7 +132,7 @@ public class ColumnVisitor implements NodeVisitor {
 
         for (var child : children.entrySet()) {
             if (!node.except().contains(child.getKey())) {
-                this.columnNames.add(child.getKey());
+                addColumn(child.getKey());
             }
         }
     }
@@ -153,7 +164,7 @@ public class ColumnVisitor implements NodeVisitor {
     public void visit(NullNode node) {
         TraversingInfo info = this.traversingStack.peek();
 
-        this.columnNames.add(info.property);
+        addColumn(info.property);
     }
 
     public List<String> getColumnNames(List<SchemaNode> schemaNodes) throws NodeTraversalException {
