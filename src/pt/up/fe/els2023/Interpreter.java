@@ -2,6 +2,7 @@ package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.exceptions.NodeTraversalException;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 
@@ -9,12 +10,11 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Interpreter implements NodeVisitor {
+public class Interpreter {
     Map<String, ITable> buildTables(Config config) {
         Map<String, ITable> tables = new HashMap<>();
 
@@ -31,18 +31,35 @@ public class Interpreter implements NodeVisitor {
         return tables;
     }
 
+    List<String> columnNames(TableSchema schema) {
+        BufferedReader reader = null;
+        // TODO: NOT SURE IF THIS IS THE BEST WAY TO DO THIS
+        var file = schema.source().getFiles().get(0);
+
+        try {
+            var fileReader = new FileReader(file);
+            reader = new BufferedReader(fileReader);
+        } catch (FileNotFoundException e) {
+            System.out.println("File " + file + " not found");
+            return null;
+        }
+
+        try {
+            var rootNode = schema.source().getResourceParser().parse(reader);
+
+            ColumnVisitor visitor = new ColumnVisitor(rootNode);
+            return visitor.getColumnNames(schema.nft());
+        } catch (IOException | NodeTraversalException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public ITable buildTable(TableSchema schema) {
         ITable table = new Table(schema.name(), schema.source());
-//
-//        for (var columnSchema : schema.columnSchemas()) {
-//            String columnName = columnSchema.name() == null ? columnSchema.from() : columnSchema.name();
-//
-//            if (!table.addColumn(columnName)) {
-//                System.out.println("Column " + columnName + " in table " + table.getName() + " already exists");
-//                return null;
-//            }
-//        }
-//
+
+        List<String> columnNames = columnNames(schema);
+        columnNames.forEach(table::addColumn);
+
 //        if (schema.source() != null) {
 //            populateTableFromSource(schema, table);
 //        }

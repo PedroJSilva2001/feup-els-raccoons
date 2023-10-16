@@ -93,8 +93,10 @@ public class ConfigReader {
             //    - params:
             //        min_split: min_split_value
             // is min_split_value the name of the column, or is it a key in the min_split map?
-            // the only correct way is for min_split_value to be a key in the min_split map, which
-            // removes the ability to name the column min_split_value
+            // the only correct way is for min_split_value to be the name of the column, but this
+            // removes the ability of not having to specify the name of the column, and using the key as default
+            //
+            // TODO: for now, we will allow this, but we should probably change this in the future
             Map<String, Object> eachMapNode = (Map<String, Object>) value;
             return parseMapNode(eachMapNode);
         } else if (value instanceof String columnName) {
@@ -113,7 +115,7 @@ public class ConfigReader {
             return new EachNode(parseValue(value));
         } else if (Objects.equals(keyName, "$except")) {
             List<String> exceptList = (List<String>) value;
-            return new ExceptNode(exceptList);
+            return new ExceptNode(new HashSet<>(exceptList));
         }
 
         Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");
@@ -122,7 +124,7 @@ public class ConfigReader {
             String childName = matcher.group(1);
             int index = Integer.parseInt(matcher.group(2));
 
-            if(childName == null || Objects.equals(childName, "")) {
+            if (childName == null || Objects.equals(childName, "")) {
                 return new IndexNode(index, parseValue(value));
             }
 
@@ -229,7 +231,8 @@ public class ConfigReader {
 
                     configExporterBuilder = csvExporterBuilder;
                 }
-                case "tsv" -> configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                case "tsv" ->
+                        configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                 case "html" -> {
                     HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                     if (export.containsKey("title")) {
@@ -244,8 +247,10 @@ public class ConfigReader {
 
                     configExporterBuilder = htmlExporterBuilder;
                 }
-                case "latex" -> configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                case "markdown", "md" -> configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                case "latex" ->
+                        configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                case "markdown", "md" ->
+                        configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
                 default -> {
                     //TODO: SPECIFY FORMAT AND LINE
                     System.out.println("Unsupported format");

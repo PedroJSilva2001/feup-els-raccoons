@@ -5,6 +5,6 @@ import pt.up.fe.els2023.NodeVisitor;
 public record ColumnNode(String columName) implements SchemaNode {
     @Override
     public void accept(NodeVisitor visitor) {
-        // TODO
+        visitor.visit(this);
     }
 }

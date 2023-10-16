@@ -2,6 +2,8 @@ package pt.up.fe.els2023.utils.resources.json;
 
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
+import java.util.*;
+
 public class JsonNode implements ResourceNode {
     private final com.fasterxml.jackson.databind.JsonNode node;
 
@@ -9,14 +11,17 @@ public class JsonNode implements ResourceNode {
         this.node = node;
     }
 
+    @Override
     public boolean has(String property) {
         return node.has(property);
     }
 
+    @Override
     public boolean has(int index) {
         return node.has(index);
     }
 
+    @Override
     public JsonNode get(String property) {
         var value = node.get(property);
 
@@ -27,6 +32,7 @@ public class JsonNode implements ResourceNode {
         return new JsonNode(value);
     }
 
+    @Override
     public JsonNode get(int index) {
         var value = node.get(index);
 
@@ -35,6 +41,24 @@ public class JsonNode implements ResourceNode {
         }
 
         return new JsonNode(value);
+    }
+
+    @Override
+    public Map<String, ResourceNode> getChildren() {
+        if (isArray()) {
+            return null;
+        } else if (isValue()) {
+            return null;
+        }
+
+        var children = new HashMap<String, ResourceNode>();
+
+        for (Iterator<Map.Entry<String, com.fasterxml.jackson.databind.JsonNode>> it = node.fields(); it.hasNext(); ) {
+            var field = it.next();
+            children.put(field.getKey(), new JsonNode(field.getValue()));
+        }
+
+        return children;
     }
 
     public String getNested(String propertyPath) {
@@ -84,18 +108,22 @@ public class JsonNode implements ResourceNode {
         return node.isTextual();
     }
 
+    @Override
     public boolean isObject() {
         return node.isObject();
     }
 
+    @Override
     public boolean isArray() {
         return node.isArray();
     }
 
+    @Override
     public boolean isValue() {
         return node.isValueNode();
     }
 
+    @Override
     public boolean isContainer() {
         return node.isContainerNode();
     }
@@ -152,6 +180,7 @@ public class JsonNode implements ResourceNode {
         return null;
     }
 
+    @Override
     public String asText() {
         if (isNull()) {
             return "";

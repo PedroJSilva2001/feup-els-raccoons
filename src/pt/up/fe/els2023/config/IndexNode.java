@@ -1,6 +1,7 @@
 package pt.up.fe.els2023.config;
 
 import pt.up.fe.els2023.NodeVisitor;
+import pt.up.fe.els2023.exceptions.NodeTraversalException;
 
 public record IndexNode(int index, String keyName, SchemaNode value) implements SchemaNode {
     public IndexNode(int index, SchemaNode value) {
@@ -8,7 +9,7 @@ public record IndexNode(int index, String keyName, SchemaNode value) implements 
     }
 
     @Override
-    public void accept(NodeVisitor visitor) {
-        // TODO
+    public void accept(NodeVisitor visitor) throws NodeTraversalException {
+        visitor.visit(this);
     }
 }
