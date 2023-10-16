@@ -2,11 +2,8 @@ package pt.up.fe.els2023;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import pt.up.fe.els2023.config.*;
-import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.Column;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +16,7 @@ public class InterpreterTest {
 
         var source = new YamlSource(
                 "decision_tree",
-                List.of("./test/pt/up/fe/els2023/files/yaml/decision_tree_1.yaml"));
+                List.of("./test/pt/up/fe/els2023/files/yaml/decision_tree_*.yaml"));
 
         var tableSchema = new TableSchema("decision_tree")
                 .source(source)
@@ -40,7 +37,28 @@ public class InterpreterTest {
                 );
 
         var columnNames = interpreter.columnNames(tableSchema);
-        System.out.println(columnNames);
+
+        Assertions.assertEquals(18, columnNames.size());
+        Assertions.assertEquals("CCP Alpha", columnNames.get(0));
+        Assertions.assertEquals("Class weight", columnNames.get(1));
+        Assertions.assertEquals("Criterion", columnNames.get(2));
+        Assertions.assertEquals("min_samples_split", columnNames.get(3));
+        Assertions.assertEquals("Feature importances", columnNames.get(4));
+        Assertions.assertEquals("nodes[0]", columnNames.get(5));
+        Assertions.assertEquals("criterion", columnNames.get(6));
+        Assertions.assertEquals("min_impurity_split", columnNames.get(7));
+        Assertions.assertEquals("max_depth", columnNames.get(8));
+        Assertions.assertEquals("min_samples_split", columnNames.get(9));
+        Assertions.assertEquals("min_impurity_decrease", columnNames.get(10));
+        Assertions.assertEquals("min_weight_fraction_leaf", columnNames.get(11));
+        Assertions.assertEquals("random_state", columnNames.get(12));
+        Assertions.assertEquals("splitter", columnNames.get(13));
+        Assertions.assertEquals("min_samples_leaf", columnNames.get(14));
+        Assertions.assertEquals("max_features", columnNames.get(15));
+        Assertions.assertEquals("max_leaf_nodes", columnNames.get(16));
+        Assertions.assertEquals("class_weight", columnNames.get(17));
+
+//        Assertions
 
 //        var table = interpreter.buildTable(tableSchema);
 //

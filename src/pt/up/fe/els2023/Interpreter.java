@@ -10,11 +10,30 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Interpreter {
+    private List<Path> getFilesGlob(String glob) {
+        FileSystem fs = FileSystems.getDefault();
+        PathMatcher matcher = fs.getPathMatcher("glob:" + glob);
+        List<Path> files = new ArrayList<>();
+
+        try (Stream<Path> paths = Files.walk(Paths.get("."))) {
+            paths
+                    .filter(matcher::matches)
+                    .forEach(files::add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return files;
+    }
+
     Map<String, ITable> buildTables(Config config) {
         Map<String, ITable> tables = new HashMap<>();
 
@@ -33,11 +52,12 @@ public class Interpreter {
 
     List<String> columnNames(TableSchema schema) {
         BufferedReader reader = null;
-        // TODO: NOT SURE IF THIS IS THE BEST WAY TO DO THIS
-        var file = schema.source().getFiles().get(0);
+        // TODO: Not sure if getting the first file is the best way to do this
+        List<Path> files = getFilesGlob(schema.source().getFiles().get(0));
+        var file = files.get(0);
 
         try {
-            var fileReader = new FileReader(file);
+            var fileReader = new FileReader(file.toFile());
             reader = new BufferedReader(fileReader);
         } catch (FileNotFoundException e) {
             System.out.println("File " + file + " not found");
