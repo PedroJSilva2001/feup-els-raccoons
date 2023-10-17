@@ -10,6 +10,14 @@ public class Table implements ITable {
     private final List<Row> rows;
     private final TableSource source;
 
+    public Table() {
+        this.name = null;
+        this.columns = new ArrayList<>();
+        this.columns.add(new Column("File"));
+        this.rows = new ArrayList<>();
+        this.source = null;
+    }
+
     public Table(String name, TableSource source) {
         this.name = name;
         this.columns = new ArrayList<>();
@@ -18,21 +26,20 @@ public class Table implements ITable {
         this.source = source;
     }
 
+
+    // Empty table, just with column names
     public Table(ITable table) {
         this.name = String.valueOf(table.getName());
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
 
         for (var column : table.getColumns()) {
-            this.columns.add(new Column(column));
-        }
-
-        for (var row : table.getRows()) {
-            this.rows.add(new Row(row));
+            this.columns.add(new Column(column.getName()));
         }
 
         this.source = null;
     }
+
 
     @Override
     public String getName() {
@@ -75,5 +82,25 @@ public class Table implements ITable {
             var value = values.get(i);
             columns.get(i).addEntry(value);
         }
+    }
+
+    @Override
+    public Column getColumn(int index) {
+        if (index < 0 || index >= columns.size()) {
+            return null;
+        }
+
+        return columns.get(index);
+    }
+
+    @Override
+    public Column getColumn(String name) {
+        for (var column : columns) {
+            if (column.getName().equals(name)) {
+                return column;
+            }
+        }
+
+        return null;
     }
 }

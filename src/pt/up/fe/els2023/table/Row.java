@@ -34,4 +34,12 @@ public class Row {
     public List<Object> getValues() {
         return Collections.unmodifiableList(values);
     }
+
+    public Value get(int index) {
+        if (index < 0 || index >= values.size()) {
+            return null;
+        }
+
+        return values.get(index);
+    }
 }

@@ -18,6 +18,7 @@ public class Column implements Cloneable {
         }
     }
 
+    // Copies entire column
     public Column(Column column) {
         this.name = String.valueOf(column.name);
         this.entries = new ArrayList<>();

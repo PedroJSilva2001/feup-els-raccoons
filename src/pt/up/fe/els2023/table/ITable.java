@@ -16,4 +16,8 @@ public interface ITable {
     boolean addColumn(String columnName);
 
     void addRow(List<Object> values);
+
+    Column getColumn(int index);
+
+    Column getColumn(String name);
 }
