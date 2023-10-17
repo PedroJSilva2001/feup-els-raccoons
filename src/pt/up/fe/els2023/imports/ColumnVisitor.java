@@ -1,4 +1,4 @@
-package pt.up.fe.els2023;
+package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.exceptions.NodeNotAnObjectException;
@@ -12,12 +12,22 @@ import java.util.Stack;
 
 
 public class ColumnVisitor implements NodeVisitor {
-    private final ResourceNode rootNode;
     private final Stack<TraversingInfo> traversingStack = new Stack<>();
     private final List<String> columnNames = new ArrayList<>();
 
-    public ColumnVisitor(ResourceNode rootNode) {
-        this.rootNode = rootNode;
+    public List<String> getColumnNames(ResourceNode rootNode, List<SchemaNode> schemaNodes) throws NodeTraversalException {
+        this.columnNames.clear();
+        this.traversingStack.clear();
+
+        this.traversingStack.push(new TraversingInfo(rootNode, "$root"));
+
+        for (var node : schemaNodes) {
+            node.accept(this);
+        }
+
+        this.traversingStack.pop();
+
+        return this.columnNames;
     }
 
     private void addColumn(String columnName) {
@@ -165,21 +175,6 @@ public class ColumnVisitor implements NodeVisitor {
         TraversingInfo info = this.traversingStack.peek();
 
         addColumn(info.property);
-    }
-
-    public List<String> getColumnNames(List<SchemaNode> schemaNodes) throws NodeTraversalException {
-        this.columnNames.clear();
-        this.traversingStack.clear();
-
-        this.traversingStack.push(new TraversingInfo(this.rootNode, "$root"));
-
-        for (var node : schemaNodes) {
-            node.accept(this);
-        }
-
-        this.traversingStack.pop();
-
-        return this.columnNames;
     }
 
     private record TraversingInfo(ResourceNode node, String property) {

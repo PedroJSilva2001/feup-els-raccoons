@@ -3,8 +3,11 @@ package pt.up.fe.els2023;
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.exceptions.NodeTraversalException;
+import pt.up.fe.els2023.imports.ColumnVisitor;
+import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.utils.GlobFinder;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,24 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Interpreter {
-    private List<Path> getFilesGlob(String glob) {
-        FileSystem fs = FileSystems.getDefault();
-        PathMatcher matcher = fs.getPathMatcher("glob:" + glob);
-        List<Path> files = new ArrayList<>();
-
-        try (Stream<Path> paths = Files.walk(Paths.get("."))) {
-            paths
-                    .filter(matcher::matches)
-                    .forEach(files::add);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return files;
-    }
 
     Map<String, ITable> buildTables(Config config) {
         Map<String, ITable> tables = new HashMap<>();
@@ -53,7 +40,12 @@ public class Interpreter {
     List<String> columnNames(TableSchema schema) {
         BufferedReader reader = null;
         // TODO: Not sure if getting the first file is the best way to do this
-        List<Path> files = getFilesGlob(schema.source().getFiles().get(0));
+        List<Path> files = null;
+        try {
+            files = GlobFinder.getFilesGlob(schema.source().getFiles().get(0));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         var file = files.get(0);
 
         try {
@@ -67,8 +59,8 @@ public class Interpreter {
         try {
             var rootNode = schema.source().getResourceParser().parse(reader);
 
-            ColumnVisitor visitor = new ColumnVisitor(rootNode);
-            return visitor.getColumnNames(schema.nft());
+            ColumnVisitor visitor = new ColumnVisitor();
+            return visitor.getColumnNames(rootNode, schema.nft());
         } catch (IOException | NodeTraversalException e) {
             throw new RuntimeException(e);
         }
@@ -85,6 +77,30 @@ public class Interpreter {
 //        }
 
         return table;
+    }
+
+    private List<Path> getFiles(TableSource source) {
+        List<Path> files = new ArrayList<>();
+
+        source.getFiles().forEach((glob) -> {
+            try {
+                files.addAll(GlobFinder.getFilesGlob(glob));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return files
+                .stream()
+                .distinct()
+                .toList();
+    }
+
+    public void populateTable(TableSchema schema) {
+        TableSource source = schema.source();
+        List<Path> files = getFiles(source);
+
+
     }
 
     public void populateTableFromSource(TableSchema schema, ITable table) {

@@ -1,4 +1,4 @@
-package pt.up.fe.els2023;
+package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.exceptions.NodeTraversalException;
