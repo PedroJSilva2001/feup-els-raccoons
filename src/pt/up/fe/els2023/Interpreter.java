@@ -3,7 +3,7 @@ package pt.up.fe.els2023;
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.exceptions.NodeTraversalException;
-import pt.up.fe.els2023.imports.ColumnVisitor;
+import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
@@ -59,7 +59,7 @@ public class Interpreter {
         try {
             var rootNode = schema.source().getResourceParser().parse(reader);
 
-            ColumnVisitor visitor = new ColumnVisitor();
+            PopulateVisitor visitor = new PopulateVisitor();
             return visitor.getColumnNames(rootNode, schema.nft());
         } catch (IOException | NodeTraversalException e) {
             throw new RuntimeException(e);

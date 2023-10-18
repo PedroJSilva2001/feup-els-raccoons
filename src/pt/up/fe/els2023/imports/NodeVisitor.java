@@ -4,23 +4,23 @@ import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.exceptions.NodeTraversalException;
 
 public interface NodeVisitor {
-    void visit(AllContainerNode node) throws NodeTraversalException;
+    void visit(AllContainerNode node);
 
-    void visit(AllNode node) throws NodeTraversalException;
+    void visit(AllNode node);
 
-    void visit(AllValueNode node) throws NodeTraversalException;
+    void visit(AllValueNode node);
 
-    void visit(ChildNode node) throws NodeTraversalException;
+    void visit(ChildNode node);
 
     void visit(ColumnNode node);
 
-    void visit(EachNode node) throws NodeTraversalException;
+    void visit(EachNode node);
 
-    void visit(ExceptNode node) throws NodeTraversalException;
+    void visit(ExceptNode node);
 
-    void visit(IndexNode node) throws NodeTraversalException;
+    void visit(IndexNode node);
 
-    void visit(ListNode node) throws NodeTraversalException;
+    void visit(ListNode node);
 
     void visit(NullNode node);
 }

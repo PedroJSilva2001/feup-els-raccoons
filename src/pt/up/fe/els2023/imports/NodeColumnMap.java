@@ -17,15 +17,7 @@ public class NodeColumnMap {
 
         Set<String> columnNames = new HashSet<>(nodeColumnMap.values());
 
-        String newColumnName = columnName;
-        if (columnNames.contains(newColumnName)) {
-            int count = 1;
-            while (columnNames.contains(newColumnName + '_' + count)) {
-                count++;
-            }
-
-            newColumnName += '_' + count;
-        }
+        String newColumnName = ColumnUtils.makeUnique(columnName, columnNames);
 
         nodeColumnMap.put(new NodeColumnPair(new IdentityWrapper<>(node), columnName), newColumnName);
         return newColumnName;
