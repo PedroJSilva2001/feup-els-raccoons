@@ -6,14 +6,14 @@ import pt.up.fe.els2023.exceptions.NodeNotFoundException;
 import pt.up.fe.els2023.exceptions.NodeTraversalException;
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 
 public class ColumnVisitor implements NodeVisitor {
     private final Stack<TraversingInfo> traversingStack = new Stack<>();
-    private final List<String> columnNames = new ArrayList<>();
+    private final List<String> columnNames = new LinkedList<>();
+    private final Map<String, Object> rowValues = new HashMap<>();
+    private final Map<String, List<Object>> columnValues = new HashMap<>();
 
     public List<String> getColumnNames(ResourceNode rootNode, List<SchemaNode> schemaNodes) throws NodeTraversalException {
         this.columnNames.clear();
