@@ -9,31 +9,43 @@ import java.util.*;
 
 
 public class PopulateVisitor implements NodeVisitor {
-    private final Stack<TraversingInfo> traversingStack = new Stack<>();
+    private final Stack<TraversingInfo> traversingStack;
     private final NodeColumnMap nodeColumnMap;
     private final Map<String, Object> rowValues = new HashMap<>();
     private final Map<String, List<Object>> columnValues = new HashMap<>();
 
+    private PopulateVisitor(NodeColumnMap nodeColumnMap, Stack<TraversingInfo> traversingStack) {
+        this.nodeColumnMap = nodeColumnMap;
+        this.traversingStack = traversingStack;
+    }
+
     public PopulateVisitor(NodeColumnMap nodeColumnMap) {
         this.nodeColumnMap = nodeColumnMap;
+        this.traversingStack = new Stack<>();
     }
 
     public PopulateVisitor() {
         this.nodeColumnMap = new NodeColumnMap();
+        this.traversingStack = new Stack<>();
     }
 
     public Map<String, List<Object>> populateFromSource(ResourceNode rootNode, List<SchemaNode> schemaNodes) {
         this.rowValues.clear();
         this.columnValues.clear();
         this.traversingStack.clear();
+        boolean emptyStack = this.traversingStack.empty();
 
-        this.traversingStack.push(new TraversingInfo(rootNode, "$root"));
+        if (emptyStack) {
+            this.traversingStack.push(new TraversingInfo(rootNode, "$root"));
+        }
 
         for (var node : schemaNodes) {
             node.accept(this);
         }
 
-        this.traversingStack.pop();
+        if (emptyStack) {
+            this.traversingStack.pop();
+        }
         return this.columnValues;
     }
 
@@ -57,7 +69,7 @@ public class PopulateVisitor implements NodeVisitor {
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, child.getValue());
+                rowValues.put(columnName, child.getValue().asText());
             }
         }
     }
@@ -80,7 +92,7 @@ public class PopulateVisitor implements NodeVisitor {
             properties.add(columnName);
             columnName = nodeColumnMap.add(node, columnName);
 
-            rowValues.put(columnName, child.getValue());
+            rowValues.put(columnName, child.getValue().asText());
         }
     }
 
@@ -103,7 +115,7 @@ public class PopulateVisitor implements NodeVisitor {
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, child.getValue());
+                rowValues.put(columnName, child.getValue().asText());
             }
         }
     }
@@ -129,13 +141,11 @@ public class PopulateVisitor implements NodeVisitor {
         TraversingInfo info = this.traversingStack.peek();
         String columnName = nodeColumnMap.add(node, node.columnName());
 
-        rowValues.put(columnName, info.node);
+        rowValues.put(columnName, info.node.asText());
     }
 
     @Override
     public void visit(EachNode node) {
-        // Maybe we will need to check if all children have the required properties
-        // But for now we will just assume they do
         TraversingInfo info = this.traversingStack.peek();
 
         if (!info.node.isArray()) {
@@ -146,7 +156,21 @@ public class PopulateVisitor implements NodeVisitor {
 
         traversingStack.push(new TraversingInfo(firstItem, info.property));
 
-        node.value().accept(this);
+        PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
+
+        Map<String, List<Object>> concatenatedColumnValues = new HashMap<>();
+
+        for (var resourceNode : info.node.getChildren().values()) {
+            Map<String, List<Object>> columns = visitor.populateFromSource(resourceNode, List.of(node.value()));
+
+            for (var column : columns.entrySet()) {
+                concatenatedColumnValues.computeIfAbsent(column.getKey(), (key) -> new ArrayList<>()).addAll(column.getValue());
+                concatenatedColumnValues.computeIfPresent(column.getKey(), (key, value) -> {
+                    value.addAll(column.getValue());
+                    return value;
+                });
+            }
+        }
 
         traversingStack.pop();
     }
@@ -156,14 +180,21 @@ public class PopulateVisitor implements NodeVisitor {
         TraversingInfo info = this.traversingStack.peek();
 
         if (!info.node.isObject()) {
-            throw new NodeNotAnObjectException(info.property);
+            return;
         }
 
         var children = info.node.getChildren();
+        Set<String> properties = new HashSet<>();
 
         for (var child : children.entrySet()) {
             if (!node.except().contains(child.getKey())) {
-                addColumn(child.getKey());
+                String propertyName = child.getKey();
+                String columnName = ColumnUtils.makeUnique(propertyName, properties);
+
+                properties.add(columnName);
+                columnName = nodeColumnMap.add(node, columnName);
+
+                rowValues.put(columnName, child.getValue().asText());
             }
         }
     }
@@ -174,7 +205,7 @@ public class PopulateVisitor implements NodeVisitor {
         ResourceNode child = info.node.get(node.index());
 
         if (child == null) {
-            throw new NodeNotFoundException(String.valueOf(node.index()));
+            return;
         }
 
         this.traversingStack.push(new TraversingInfo(child, info.property + "[" + node.index() + "]"));
@@ -195,7 +226,8 @@ public class PopulateVisitor implements NodeVisitor {
     public void visit(NullNode node) {
         TraversingInfo info = this.traversingStack.peek();
 
-        addColumn(info.property);
+        String columnName = nodeColumnMap.add(node, info.property);
+        rowValues.put(columnName, info.node.asText());
     }
 
     private record TraversingInfo(ResourceNode node, String property) {
