@@ -44,6 +44,17 @@ public class JsonNode implements ResourceNode {
     }
 
     @Override
+    public Iterator<ResourceNode> iterator() {
+        Collection<ResourceNode> collection = new ArrayList<>();
+
+        for (Iterator<com.fasterxml.jackson.databind.JsonNode> it = node.elements(); it.hasNext(); ) {
+            collection.add(new JsonNode(it.next()));
+        }
+
+        return collection.iterator();
+    }
+
+    @Override
     public Map<String, ResourceNode> getChildren() {
         if (isArray()) {
             return null;

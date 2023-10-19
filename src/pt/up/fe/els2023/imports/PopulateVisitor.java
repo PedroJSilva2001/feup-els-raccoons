@@ -1,8 +1,6 @@
 package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
-import pt.up.fe.els2023.exceptions.NodeNotAnObjectException;
-import pt.up.fe.els2023.exceptions.NodeNotFoundException;
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
 import java.util.*;
@@ -30,9 +28,6 @@ public class PopulateVisitor implements NodeVisitor {
     }
 
     public Map<String, List<Object>> populateFromSource(ResourceNode rootNode, List<SchemaNode> schemaNodes) {
-        this.rowValues.clear();
-        this.columnValues.clear();
-        this.traversingStack.clear();
         boolean emptyStack = this.traversingStack.empty();
 
         if (emptyStack) {
@@ -46,7 +41,35 @@ public class PopulateVisitor implements NodeVisitor {
         if (emptyStack) {
             this.traversingStack.pop();
         }
-        return this.columnValues;
+
+        return merge();
+    }
+
+    private Map<String, List<Object>> merge() {
+        int maxColumnSize = rowValues.values().stream().anyMatch(obj -> !Objects.isNull(obj)) ? 1 : 0;
+
+        for (var column : columnValues.entrySet()) {
+            maxColumnSize = Math.max(maxColumnSize, column.getValue().size());
+        }
+
+        Map<String, List<Object>> merged = new HashMap<>();
+
+        for (var column : columnValues.entrySet()) {
+            // Pad with nulls
+            List<Object> values = new ArrayList<>(Collections.nCopies(maxColumnSize, null));
+
+            for (int i = 0; i < column.getValue().size(); i++) {
+                values.set(i, column.getValue().get(i));
+            }
+
+            merged.put(column.getKey(), values);
+        }
+
+        for (var row : rowValues.entrySet()) {
+            merged.put(row.getKey(), new ArrayList<>(Collections.nCopies(maxColumnSize, row.getValue())));
+        }
+
+        return merged;
     }
 
     @Override
@@ -152,27 +175,22 @@ public class PopulateVisitor implements NodeVisitor {
             return;
         }
 
-        ResourceNode firstItem = info.node.get(0);
+        for (var resourceNode : info.node) {
+            traversingStack.push(new TraversingInfo(resourceNode, info.property));
 
-        traversingStack.push(new TraversingInfo(firstItem, info.property));
-
-        PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
-
-        Map<String, List<Object>> concatenatedColumnValues = new HashMap<>();
-
-        for (var resourceNode : info.node.getChildren().values()) {
+            PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
             Map<String, List<Object>> columns = visitor.populateFromSource(resourceNode, List.of(node.value()));
 
             for (var column : columns.entrySet()) {
-                concatenatedColumnValues.computeIfAbsent(column.getKey(), (key) -> new ArrayList<>()).addAll(column.getValue());
-                concatenatedColumnValues.computeIfPresent(column.getKey(), (key, value) -> {
-                    value.addAll(column.getValue());
-                    return value;
-                });
-            }
-        }
+                if (!columnValues.containsKey(column.getKey())) {
+                    columnValues.put(column.getKey(), new ArrayList<>());
+                }
 
-        traversingStack.pop();
+                columnValues.get(column.getKey()).addAll(column.getValue());
+            }
+
+            traversingStack.pop();
+        }
     }
 
     @Override
@@ -202,6 +220,7 @@ public class PopulateVisitor implements NodeVisitor {
     @Override
     public void visit(IndexNode node) {
         TraversingInfo info = this.traversingStack.peek();
+        // TODO: FORGOT TO IMPLEMENT CHILD WITH NAME
         ResourceNode child = info.node.get(node.index());
 
         if (child == null) {

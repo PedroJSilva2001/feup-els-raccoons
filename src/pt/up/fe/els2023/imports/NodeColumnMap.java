@@ -32,11 +32,13 @@ public class NodeColumnMap {
         Map<IdentityWrapper<SchemaNode>, LinkedHashSet<String>> nodeColumnMap = new HashMap<>();
 
         for (var pair : this.nodeColumnMap.entrySet()) {
-            nodeColumnMap.computeIfAbsent(pair.getKey().node(), (key) -> new LinkedHashSet<>()).add(pair.getValue());
-            nodeColumnMap.computeIfPresent(pair.getKey().node(), (key, value) -> {
-                value.add(pair.getValue());
-                return value;
-            });
+            var node = pair.getKey().node();
+
+            if (!nodeColumnMap.containsKey(node)) {
+                nodeColumnMap.put(node, new LinkedHashSet<>());
+            }
+
+            nodeColumnMap.get(node).add(pair.getValue());
         }
 
         for (var node : nodes) {
