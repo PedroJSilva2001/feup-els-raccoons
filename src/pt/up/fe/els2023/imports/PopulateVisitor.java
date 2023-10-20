@@ -6,10 +6,30 @@ import pt.up.fe.els2023.utils.resources.ResourceNode;
 import java.util.*;
 
 
+/**
+ * The PopulateVisitor class is responsible for traversing and populating data
+ * from a ResourceNode into tables, following a provided schema defined by SchemaNode objects.
+ */
 public class PopulateVisitor implements NodeVisitor {
+    /**
+     * This stack is used to keep track of the current ResourceNode
+     * and the name of the column it maps to if a NullNode is
+     * encountered.
+     */
     private final Stack<TraversingInfo> traversingStack;
     private final NodeColumnMap nodeColumnMap;
+    /**
+     * This map is used to keep track of the values of the current row.
+     */
     private final Map<String, Object> rowValues = new HashMap<>();
+    /**
+     * This map is used to keep track of the results of EachNode.
+     * The columns that EachNode maps to are stored in this map,
+     * acting as a way to store intermediate results/tables.
+     * <p>
+     * Since column names are unique and assigned to a single SchemaNode,
+     * the results of EachNode are the final values of the column.
+     */
     private final Map<String, List<Object>> columnValues = new HashMap<>();
 
     private PopulateVisitor(NodeColumnMap nodeColumnMap, Stack<TraversingInfo> traversingStack) {
@@ -27,6 +47,13 @@ public class PopulateVisitor implements NodeVisitor {
         this.traversingStack = new Stack<>();
     }
 
+    /**
+     * Populates data from a ResourceNode into tables, following a provided schema defined by SchemaNode objects.
+     *
+     * @param rootNode    The root node of the data.
+     * @param schemaNodes The schema nodes that define the mapping of the data to the table.
+     * @return A map of column names to values.
+     */
     public Map<String, List<Object>> populateFromSource(ResourceNode rootNode, List<SchemaNode> schemaNodes) {
         boolean emptyStack = this.traversingStack.empty();
 
@@ -45,6 +72,15 @@ public class PopulateVisitor implements NodeVisitor {
         return merge();
     }
 
+    /**
+     * Combines the row values and column values into a unified map.
+     * <p>
+     * This process involves ensuring that all columns have the same size as the number of rows.
+     * If a column has fewer values than the maximum row count, it's padded with null values.
+     * Then, the row values are multiplied for each row.
+     *
+     * @return A map where column names are associated with corresponding values.
+     */
     private Map<String, List<Object>> merge() {
         int maxColumnSize = rowValues.values().stream().anyMatch(obj -> !Objects.isNull(obj)) ? 1 : 0;
 
@@ -175,12 +211,15 @@ public class PopulateVisitor implements NodeVisitor {
             return;
         }
 
+        // Iterate over each resource node in the array
         for (var resourceNode : info.node) {
             traversingStack.push(new TraversingInfo(resourceNode, info.property));
 
+            // Recursively populate the columns specified by the EachNode
             PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
             Map<String, List<Object>> columns = visitor.populateFromSource(resourceNode, List.of(node.value()));
 
+            // Concatenate the results of the EachNode vertically
             for (var column : columns.entrySet()) {
                 if (!columnValues.containsKey(column.getKey())) {
                     columnValues.put(column.getKey(), new ArrayList<>());

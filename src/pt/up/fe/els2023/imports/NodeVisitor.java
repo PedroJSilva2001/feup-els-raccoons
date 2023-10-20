@@ -2,6 +2,9 @@ package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
 
+/**
+ * A visitor for schema nodes.
+ */
 public interface NodeVisitor {
     void visit(AllContainerNode node);
 

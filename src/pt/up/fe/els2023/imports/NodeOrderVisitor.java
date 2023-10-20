@@ -6,6 +6,9 @@ import pt.up.fe.els2023.utils.IdentityWrapper;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This visitor visits all nodes in a schema and returns them in the order they were visited.
+ */
 public class NodeOrderVisitor implements NodeVisitor {
     private final List<IdentityWrapper<SchemaNode>> nodes = new LinkedList<>();
 
