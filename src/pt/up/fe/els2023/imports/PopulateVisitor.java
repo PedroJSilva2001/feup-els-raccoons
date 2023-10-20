@@ -259,7 +259,24 @@ public class PopulateVisitor implements NodeVisitor {
     @Override
     public void visit(IndexNode node) {
         TraversingInfo info = this.traversingStack.peek();
-        // TODO: FORGOT TO IMPLEMENT CHILD WITH NAME
+        ResourceNode child = info.node.get(node.index());
+
+        if (child == null) {
+            return;
+        }
+
+        this.traversingStack.push(new TraversingInfo(child, info.property + "[" + node.index() + "]"));
+
+        node.value().accept(this);
+
+        this.traversingStack.pop();
+    }
+
+    @Override
+    public void visit(IndexOfNode node) {
+        // TODO: I'm not sure how ResourceNode works with XML, so this might not work
+        // TODO: For now, this is just a copy of IndexNode
+        TraversingInfo info = this.traversingStack.peek();
         ResourceNode child = info.node.get(node.index());
 
         if (child == null) {

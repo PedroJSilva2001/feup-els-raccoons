@@ -10,6 +10,10 @@ import java.util.List;
  * @param list The list of nodes.
  */
 public record ListNode(List<SchemaNode> list) implements SchemaNode {
+    public static ListNode list(SchemaNode... nodes) {
+        return new ListNode(List.of(nodes));
+    }
+
     public ListNode(SchemaNode... nodes) {
         this(List.of(nodes));
     }

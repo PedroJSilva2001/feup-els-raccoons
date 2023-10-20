@@ -53,6 +53,11 @@ public class NodeOrderVisitor implements NodeVisitor {
     }
 
     @Override
+    public void visit(IndexOfNode node) {
+        node.value().accept(this);
+    }
+
+    @Override
     public void visit(ListNode node) {
         for (var child : node.list()) {
             child.accept(this);

@@ -22,6 +22,8 @@ public interface NodeVisitor {
 
     void visit(IndexNode node);
 
+    void visit(IndexOfNode node);
+
     void visit(ListNode node);
 
     void visit(NullNode node);

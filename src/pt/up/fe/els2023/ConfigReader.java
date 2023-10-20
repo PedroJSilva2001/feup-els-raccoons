@@ -128,7 +128,7 @@ public class ConfigReader {
                 return new IndexNode(index, parseValue(value));
             }
 
-            return new IndexNode(index, childName, parseValue(value));
+            return new IndexOfNode(index, childName, parseValue(value));
         }
 
         keyName = unescapeString(keyName);
