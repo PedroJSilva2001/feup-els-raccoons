@@ -4,7 +4,7 @@ package pt.up.fe.els2023.utils;
  * This class wraps a value and compares it by identity.
  *
  * @param value The value to wrap.
- * @param <T> The type of the value.
+ * @param <T>   The type of the value.
  */
 public record IdentityWrapper<T>(T value) {
 

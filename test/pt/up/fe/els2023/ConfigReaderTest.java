@@ -26,22 +26,22 @@ public class ConfigReaderTest {
                 new TableSchema("decision_tree")
                         .source(expectedTableSources.get("decision_tree"))
                         .nft(
-                            new PropertyNode("params", new ListNode(
-                                    new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
-                                    new PropertyNode("class_weight", new ColumnNode("Class weight")),
-                                    new PropertyNode("criterion", new ColumnNode("Criterion")),
-                                    new PropertyNode("min_samples_split", new NullNode())
-                            )),
-                            new PropertyNode("feature_importances",
-                                    new EachNode(new ColumnNode("Feature importances"))
-                            ),
-                            new PropertyNode("nodes",
-                                    new IndexNode(0, new ListNode(
-                                            new PropertyNode("$node[d]", new ColumnNode("Node 0")),
-                                            new IndexNode(1, "node", new ColumnNode("Node 1")),
-                                            new PropertyNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
-                                    ))
-                            )
+                                new PropertyNode("params", new ListNode(
+                                        new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
+                                        new PropertyNode("class_weight", new ColumnNode("Class weight")),
+                                        new PropertyNode("criterion", new ColumnNode("Criterion")),
+                                        new PropertyNode("min_samples_split", new NullNode())
+                                )),
+                                new PropertyNode("feature_importances",
+                                        new EachNode(new ColumnNode("Feature importances"))
+                                ),
+                                new PropertyNode("nodes",
+                                        new IndexNode(0, new ListNode(
+                                                new PropertyNode("$node[d]", new ColumnNode("Node 0")),
+                                                new IndexNode(1, "node", new ColumnNode("Node 1")),
+                                                new PropertyNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
+                                        ))
+                                )
                         ),
                 new TableSchema("Table 2")
                         .source(null)

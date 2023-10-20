@@ -15,6 +15,7 @@ public class JsonNodeTest {
     private JsonNode jsonNode(String s) throws IOException {
         return parser.parse(new StringReader(s));
     }
+
     @Test
     public void testIsNull() throws IOException {
         JsonNode nullNode = jsonNode("null");

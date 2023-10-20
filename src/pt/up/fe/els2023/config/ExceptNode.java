@@ -6,6 +6,7 @@ import java.util.Set;
 
 /**
  * This node matches all properties except the ones specified.
+ *
  * @param except The properties to exclude.
  */
 public record ExceptNode(Set<String> except) implements SchemaNode {

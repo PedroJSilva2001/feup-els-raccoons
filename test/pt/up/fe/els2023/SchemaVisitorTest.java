@@ -63,7 +63,6 @@ public class SchemaVisitorTest {
         Assertions.assertSame(paramsColumn, nodes.get(6).value());
     }
 
-
     @Test
     public void testStudentImport() throws IOException {
         var source = new YamlSource(
@@ -73,12 +72,12 @@ public class SchemaVisitorTest {
         var tableSchema = new TableSchema("students")
                 .source(source)
                 .nft(
-                    new PropertyNode("course", new ColumnNode("Course")),
-                    new PropertyNode("students", new EachNode(new ListNode(
-                            new PropertyNode("studID", new ColumnNode("Student ID")),
-                            new PropertyNode("grades", new EachNode(new ColumnNode("Grade"))),
-                            new PropertyNode("friends", new EachNode(new ColumnNode("Friend")))
-                    )))
+                        new PropertyNode("course", new ColumnNode("Course")),
+                        new PropertyNode("students", new EachNode(new ListNode(
+                                new PropertyNode("studID", new ColumnNode("Student ID")),
+                                new PropertyNode("grades", new EachNode(new ColumnNode("Grade"))),
+                                new PropertyNode("friends", new EachNode(new ColumnNode("Friend")))
+                        )))
                 );
 
         var fileReader = new FileReader(source.getFiles().get(0));

@@ -18,15 +18,6 @@ import java.util.*;
  */
 public class NodeColumnMap {
     /**
-     * This record is used as a key in the map, and represents a SchemaNode and the column name defined in the
-     * table schema, or found in the source file.
-     *
-     * @param node The SchemaNode
-     * @param columnName The column name
-     */
-    private record NodeColumnPair(IdentityWrapper<SchemaNode> node, String columnName) {}
-
-    /**
      * The map that maps SchemaNodes to column names.
      * <p>
      * The reason why we map NodeColumnPairs instead of SchemaNodes is because SchemaNodes can be
@@ -42,7 +33,7 @@ public class NodeColumnMap {
      * Adds a SchemaNode pairing to the map. If the pair is already in the map, then the previous column name
      * is returned.
      *
-     * @param node The SchemaNode
+     * @param node       The SchemaNode
      * @param columnName The column name defined in the table schema, or found in the source file.
      * @return The unique column name assigned to the SchemaNodePair.
      */
@@ -86,5 +77,15 @@ public class NodeColumnMap {
         }
 
         return columnNames;
+    }
+
+    /**
+     * This record is used as a key in the map, and represents a SchemaNode and the column name defined in the
+     * table schema, or found in the source file.
+     *
+     * @param node       The SchemaNode
+     * @param columnName The column name
+     */
+    private record NodeColumnPair(IdentityWrapper<SchemaNode> node, String columnName) {
     }
 }

@@ -10,7 +10,7 @@ public class ColumnUtils {
      * <b>Example</b>: if the column name is "id" and the set contains "id", the method will return "id_1". If the set
      * contains "id" and "id_1", the method will return "id_2".
      *
-     * @param columnName The original column name.
+     * @param columnName  The original column name.
      * @param columnNames The set of column names.
      * @return A column name that is not in the set.
      */

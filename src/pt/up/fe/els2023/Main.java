@@ -1,7 +1,6 @@
 package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 
 import java.io.IOException;
