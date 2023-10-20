@@ -8,6 +8,10 @@ import pt.up.fe.els2023.imports.NodeVisitor;
  * @param columnName The name assigned to the column
  */
 public record ColumnNode(String columnName) implements SchemaNode {
+    public static ColumnNode column(String columnName) {
+        return new ColumnNode(columnName);
+    }
+
     @Override
     public void accept(NodeVisitor visitor) {
         visitor.visit(this);
