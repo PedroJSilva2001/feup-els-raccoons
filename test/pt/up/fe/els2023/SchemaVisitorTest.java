@@ -3,94 +3,64 @@ package pt.up.fe.els2023;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.config.*;
+import pt.up.fe.els2023.imports.NodeOrderVisitor;
 import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.YamlSource;
+import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SchemaVisitorTest {
 
     @Test
-    public void testSimpleJsonSourceTable() {
-        var interpreter = new Interpreter();
-
+    public void testSchemaNodeOrder() {
         var source = new YamlSource(
                 "decision_tree",
                 List.of("./test/pt/up/fe/els2023/files/yaml/decision_tree_*.yaml"));
+
+        SchemaNode ccpAlphaColumn = new ColumnNode("CCP Alpha");
+        SchemaNode classWeightColumn = new ColumnNode("Class weight");
+        SchemaNode criterionColumn = new ColumnNode("Criterion");
+        SchemaNode minSamplesSplitColumn = new NullNode();
+        SchemaNode featureImportancesColumn = new ColumnNode("Feature importances");
+        SchemaNode nodesColumn = new NullNode();
+        SchemaNode paramsColumn = new ExceptNode(Set.of("ccp_alpha"));
 
         var tableSchema = new TableSchema("decision_tree")
                 .source(source)
                 .nft(
                         new PropertyNode("params", new ListNode(
-                                new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
-                                new PropertyNode("class_weight", new ColumnNode("Class weight")),
-                                new PropertyNode("criterion", new ColumnNode("Criterion")),
-                                new PropertyNode("min_samples_split", new NullNode())
+                                new PropertyNode("ccp_alpha", ccpAlphaColumn),
+                                new PropertyNode("class_weight", classWeightColumn),
+                                new PropertyNode("criterion", criterionColumn),
+                                new PropertyNode("min_samples_split", minSamplesSplitColumn)
                         )),
                         new PropertyNode("feature_importances_",
-                                new EachNode(new ColumnNode("Feature importances"))
+                                new EachNode(featureImportancesColumn)
                         ),
                         new PropertyNode("tree_", new PropertyNode("nodes",
-                                new IndexNode(0, new NullNode()))
+                                new IndexNode(0, nodesColumn))
                         ),
-                        new PropertyNode("params", new ExceptNode(Set.of("ccp_alpha")))
+                        new PropertyNode("params", paramsColumn)
                 );
 
-//        var columnNames = interpreter.columnNames(tableSchema);
-//
-//        Assertions.assertEquals(18, columnNames.size());
-//        Assertions.assertEquals("CCP Alpha", columnNames.get(0));
-//        Assertions.assertEquals("Class weight", columnNames.get(1));
-//        Assertions.assertEquals("Criterion", columnNames.get(2));
-//        Assertions.assertEquals("min_samples_split", columnNames.get(3));
-//        Assertions.assertEquals("Feature importances", columnNames.get(4));
-//        Assertions.assertEquals("nodes[0]", columnNames.get(5));
-//        Assertions.assertEquals("criterion", columnNames.get(6));
-//        Assertions.assertEquals("min_impurity_split", columnNames.get(7));
-//        Assertions.assertEquals("max_depth", columnNames.get(8));
-//        Assertions.assertEquals("min_samples_split_1", columnNames.get(9));
-//        Assertions.assertEquals("min_impurity_decrease", columnNames.get(10));
-//        Assertions.assertEquals("min_weight_fraction_leaf", columnNames.get(11));
-//        Assertions.assertEquals("random_state", columnNames.get(12));
-//        Assertions.assertEquals("splitter", columnNames.get(13));
-//        Assertions.assertEquals("min_samples_leaf", columnNames.get(14));
-//        Assertions.assertEquals("max_features", columnNames.get(15));
-//        Assertions.assertEquals("max_leaf_nodes", columnNames.get(16));
-//        Assertions.assertEquals("class_weight", columnNames.get(17));
+        NodeOrderVisitor visitor = new NodeOrderVisitor();
+        List<IdentityWrapper<SchemaNode>> nodes = visitor.getNodeOrder(tableSchema.nft());
 
-//        Assertions
+        Assertions.assertEquals(7, nodes.size());
 
-//        var table = interpreter.buildTable(tableSchema);
-//
-//        // List<Value>
-//        var expectedColumns = List.of(
-//                new Column("_inputFile",
-//                        List.of("./test/pt/up/fe/els2023/files/json/file1.json",
-//                                "./test/pt/up/fe/els2023/files/json/file2.json")),
-//                new Column("Int 1", List.of("1", "")),
-//                new Column("Int 2", List.of("", "")),
-//                new Column("obj1",
-//                        List.of("{\"prop1\":3,\"prop2\":[1,2,3]}",
-//                                "{\"prop1\":3,\"prop2\":\"hey\",\"prop3\":2.0}")),
-//                new Column("String", List.of("hello", "bye")),
-//                new Column("Obj1 prop3", List.of("", "2.0")),
-//                new Column("miss", List.of("", "")),
-//                new Column("Miss2", List.of("", ""))
-//        );
-//
-//        Assertions.assertEquals(expectedColumns.size(), table.getColumns().size());
-//
-//        for (int i = 0; i < expectedColumns.size(); i++) {
-//            var expectedColumn = expectedColumns.get(i);
-//            var resultColumn = table.getColumns().get(i);
-//            Assertions.assertEquals(expectedColumn.getName(), resultColumn.getName());
-//            Assertions.assertEquals(expectedColumn.getEntries().toString(), resultColumn.getEntries().toString());
-//        }
-
+        Assertions.assertSame(ccpAlphaColumn, nodes.get(0).value());
+        Assertions.assertSame(classWeightColumn, nodes.get(1).value());
+        Assertions.assertSame(criterionColumn, nodes.get(2).value());
+        Assertions.assertSame(minSamplesSplitColumn, nodes.get(3).value());
+        Assertions.assertSame(featureImportancesColumn, nodes.get(4).value());
+        Assertions.assertSame(nodesColumn, nodes.get(5).value());
+        Assertions.assertSame(paramsColumn, nodes.get(6).value());
     }
 
 
@@ -119,5 +89,15 @@ public class SchemaVisitorTest {
         var table = visitor.populateFromSource(rootNode, tableSchema.nft());
 
         Assertions.assertEquals(4, table.size());
+
+        List<Object> friendsList = new java.util.ArrayList<>(List.of("3", "2", "1"));
+        friendsList.add(null);
+
+        Assertions.assertEquals(Map.of(
+                "Course", List.of("7", "7", "7", "7"),
+                "Student ID", List.of("1", "1", "2", "2"),
+                "Grade", List.of("1", "2", "3", "4"),
+                "Friend", friendsList
+        ), table);
     }
 }
