@@ -9,7 +9,7 @@ public interface NodeVisitor {
 
     void visit(AllValueNode node);
 
-    void visit(ChildNode node);
+    void visit(PropertyNode node);
 
     void visit(ColumnNode node);
 

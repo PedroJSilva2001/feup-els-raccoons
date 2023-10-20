@@ -26,27 +26,27 @@ public class ConfigReaderTest {
                 new TableSchema("decision_tree")
                         .source(expectedTableSources.get("decision_tree"))
                         .nft(
-                            new ChildNode("params", new ListNode(
-                                    new ChildNode("ccp_alpha", new ColumnNode("CCP Alpha")),
-                                    new ChildNode("class_weight", new ColumnNode("Class weight")),
-                                    new ChildNode("criterion", new ColumnNode("Criterion")),
-                                    new ChildNode("min_samples_split", new NullNode())
+                            new PropertyNode("params", new ListNode(
+                                    new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
+                                    new PropertyNode("class_weight", new ColumnNode("Class weight")),
+                                    new PropertyNode("criterion", new ColumnNode("Criterion")),
+                                    new PropertyNode("min_samples_split", new NullNode())
                             )),
-                            new ChildNode("feature_importances",
+                            new PropertyNode("feature_importances",
                                     new EachNode(new ColumnNode("Feature importances"))
                             ),
-                            new ChildNode("nodes",
+                            new PropertyNode("nodes",
                                     new IndexNode(0, new ListNode(
-                                            new ChildNode("$node[d]", new ColumnNode("Node 0")),
+                                            new PropertyNode("$node[d]", new ColumnNode("Node 0")),
                                             new IndexNode(1, "node", new ColumnNode("Node 1")),
-                                            new ChildNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
+                                            new PropertyNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
                                     ))
                             )
                         ),
                 new TableSchema("Table 2")
                         .source(null)
                         .nft(
-                                new ChildNode("params", new NullNode())
+                                new PropertyNode("params", new NullNode())
                         )
         );
 

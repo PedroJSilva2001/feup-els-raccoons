@@ -144,7 +144,7 @@ public class PopulateVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(ChildNode node) {
+    public void visit(PropertyNode node) {
         TraversingInfo info = this.traversingStack.peek();
         ResourceNode child = info.node.get(node.keyName());
 

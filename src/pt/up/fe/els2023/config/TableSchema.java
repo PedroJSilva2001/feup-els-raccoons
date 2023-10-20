@@ -7,6 +7,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents a table schema for data mapping.
+ * <p>
+ * The table schema describes the structure of the table, including the name of the table, how sources are mapped to
+ * the table, and the source of the table.
+ */
 public final class TableSchema {
     private String name;
     private List<SchemaNode> nft;
@@ -24,11 +30,29 @@ public final class TableSchema {
         return this;
     }
 
+    /**
+     * Sets the nodes that define the mapping of the object to the table.
+     * <p>
+     * NFT stands for Nested Field Traversal. The nodes are traversed in depth-first order, and columns
+     * will be in the order defined by the nodes.
+     *
+     * @param from The nodes that define the mapping of the object to the table.
+     * @return This object.
+     */
     public TableSchema nft(List<SchemaNode> from) {
         this.nft = from;
         return this;
     }
 
+    /**
+     * Sets the nodes that define the mapping of the object to the table.
+     * <p>
+     * NFT stands for Nested Field Traversal. The nodes are traversed in depth-first order, and columns
+     * will be in the order defined by the nodes.
+     *
+     * @param from The nodes that define the mapping of the object to the table.
+     * @return This object.
+     */
     public TableSchema nft(SchemaNode... from) {
         this.nft = List.of(from);
         return this;

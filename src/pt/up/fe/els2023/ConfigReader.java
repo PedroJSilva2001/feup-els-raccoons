@@ -132,7 +132,7 @@ public class ConfigReader {
         }
 
         keyName = unescapeString(keyName);
-        return new ChildNode(keyName, parseValue(value));
+        return new PropertyNode(keyName, parseValue(value));
     }
 
     private ListNode parseListNode(List<Object> listNode) {
@@ -160,7 +160,7 @@ public class ConfigReader {
                 }
 
                 keyName = unescapeString(keyName);
-                schemaNodes.add(new ChildNode(keyName, new NullNode()));
+                schemaNodes.add(new PropertyNode(keyName, new NullNode()));
             } else if (node instanceof Map) {
                 Map<String, Object> mapNode = (Map<String, Object>) node;
                 schemaNodes.add(parseMapNode(mapNode));

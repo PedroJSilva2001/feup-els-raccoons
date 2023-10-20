@@ -25,7 +25,7 @@ public class NodeOrderVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(ChildNode node) {
+    public void visit(PropertyNode node) {
         node.value().accept(this);
     }
 

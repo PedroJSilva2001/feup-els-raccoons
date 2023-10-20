@@ -25,19 +25,19 @@ public class SchemaVisitorTest {
         var tableSchema = new TableSchema("decision_tree")
                 .source(source)
                 .nft(
-                        new ChildNode("params", new ListNode(
-                                new ChildNode("ccp_alpha", new ColumnNode("CCP Alpha")),
-                                new ChildNode("class_weight", new ColumnNode("Class weight")),
-                                new ChildNode("criterion", new ColumnNode("Criterion")),
-                                new ChildNode("min_samples_split", new NullNode())
+                        new PropertyNode("params", new ListNode(
+                                new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
+                                new PropertyNode("class_weight", new ColumnNode("Class weight")),
+                                new PropertyNode("criterion", new ColumnNode("Criterion")),
+                                new PropertyNode("min_samples_split", new NullNode())
                         )),
-                        new ChildNode("feature_importances_",
+                        new PropertyNode("feature_importances_",
                                 new EachNode(new ColumnNode("Feature importances"))
                         ),
-                        new ChildNode("tree_", new ChildNode("nodes",
+                        new PropertyNode("tree_", new PropertyNode("nodes",
                                 new IndexNode(0, new NullNode()))
                         ),
-                        new ChildNode("params", new ExceptNode(Set.of("ccp_alpha")))
+                        new PropertyNode("params", new ExceptNode(Set.of("ccp_alpha")))
                 );
 
 //        var columnNames = interpreter.columnNames(tableSchema);
@@ -103,11 +103,11 @@ public class SchemaVisitorTest {
         var tableSchema = new TableSchema("students")
                 .source(source)
                 .nft(
-                    new ChildNode("course", new ColumnNode("Course")),
-                    new ChildNode("students", new EachNode(new ListNode(
-                            new ChildNode("studID", new ColumnNode("Student ID")),
-                            new ChildNode("grades", new EachNode(new ColumnNode("Grade"))),
-                            new ChildNode("friends", new EachNode(new ColumnNode("Friend")))
+                    new PropertyNode("course", new ColumnNode("Course")),
+                    new PropertyNode("students", new EachNode(new ListNode(
+                            new PropertyNode("studID", new ColumnNode("Student ID")),
+                            new PropertyNode("grades", new EachNode(new ColumnNode("Grade"))),
+                            new PropertyNode("friends", new EachNode(new ColumnNode("Friend")))
                     )))
                 );
 
