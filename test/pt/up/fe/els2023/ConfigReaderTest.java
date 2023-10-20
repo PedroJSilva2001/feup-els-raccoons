@@ -38,7 +38,7 @@ public class ConfigReaderTest {
                                 new PropertyNode("nodes",
                                         new IndexNode(0, new ListNode(
                                                 new PropertyNode("$node[d]", new ColumnNode("Node 0")),
-                                                new IndexNode(1, "node", new ColumnNode("Node 1")),
+                                                new IndexOfNode(1, "node", new ColumnNode("Node 1")),
                                                 new PropertyNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
                                         ))
                                 )
