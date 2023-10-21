@@ -69,6 +69,21 @@ public class NodeOrderVisitor implements NodeVisitor {
         nodes.add(new IdentityWrapper<>(node));
     }
 
+    @Override
+    public void visit(DirectoryNode node) {
+        nodes.add(new IdentityWrapper<>(node));
+    }
+
+    @Override
+    public void visit(FileNode node) {
+        nodes.add(new IdentityWrapper<>(node));
+    }
+
+    @Override
+    public void visit(PathNode node) {
+        nodes.add(new IdentityWrapper<>(node));
+    }
+
     public List<IdentityWrapper<SchemaNode>> getNodeOrder(List<SchemaNode> nft) {
         nodes.clear();
 

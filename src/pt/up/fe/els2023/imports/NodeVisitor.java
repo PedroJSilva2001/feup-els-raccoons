@@ -27,4 +27,10 @@ public interface NodeVisitor {
     void visit(ListNode node);
 
     void visit(NullNode node);
+
+    void visit(DirectoryNode node);
+
+    void visit(FileNode node);
+
+    void visit(PathNode node);
 }

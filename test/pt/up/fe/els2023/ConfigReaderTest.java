@@ -26,6 +26,8 @@ public class ConfigReaderTest {
                 new TableSchema("decision_tree")
                         .source(expectedTableSources.get("decision_tree"))
                         .nft(
+                                new FileNode("File"),
+                                new DirectoryNode(),
                                 new PropertyNode("params", new ListNode(
                                         new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
                                         new PropertyNode("class_weight", new ColumnNode("Class weight")),

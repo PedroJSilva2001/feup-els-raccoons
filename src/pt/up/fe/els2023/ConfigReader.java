@@ -116,6 +116,15 @@ public class ConfigReader {
         } else if (Objects.equals(keyName, "$except")) {
             List<String> exceptList = (List<String>) value;
             return new ExceptNode(new HashSet<>(exceptList));
+        } else if (Objects.equals(keyName, "$file")) {
+            String columnName = (String) value;
+            return new FileNode(columnName);
+        } else if (Objects.equals(keyName, "$directory")) {
+            String columnName = (String) value;
+            return new DirectoryNode(columnName);
+        } else if (Objects.equals(keyName, "$path")) {
+            String columnName = (String) value;
+            return new PathNode(columnName);
         }
 
         Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");
@@ -147,6 +156,18 @@ public class ConfigReader {
                     }
                     case "$each" -> {
                         schemaNodes.add(new EachNode(new NullNode()));
+                        continue;
+                    }
+                    case "$file" -> {
+                        schemaNodes.add(new FileNode());
+                        continue;
+                    }
+                    case "$path" -> {
+                        schemaNodes.add(new PathNode());
+                        continue;
+                    }
+                    case "$directory" -> {
+                        schemaNodes.add(new DirectoryNode());
                         continue;
                     }
                     case "$all-value" -> {

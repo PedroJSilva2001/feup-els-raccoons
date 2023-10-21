@@ -11,6 +11,7 @@ import pt.up.fe.els2023.utils.IdentityWrapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,7 @@ public class SchemaVisitorTest {
     }
 
     @Test
-    public void testStudentImport() throws IOException {
+    public void testEachPopulate() throws IOException {
         var source = new YamlSource(
                 "students",
                 List.of("./test/pt/up/fe/els2023/files/yaml/students.yaml"));
@@ -72,6 +73,8 @@ public class SchemaVisitorTest {
         var tableSchema = new TableSchema("students")
                 .source(source)
                 .nft(
+                        new FileNode("File"),
+                        new DirectoryNode("Directory"),
                         new PropertyNode("course", new ColumnNode("Course")),
                         new PropertyNode("students", new EachNode(new ListNode(
                                 new PropertyNode("studID", new ColumnNode("Student ID")),
@@ -85,14 +88,16 @@ public class SchemaVisitorTest {
 
         var rootNode = tableSchema.source().getResourceParser().parse(reader);
         PopulateVisitor visitor = new PopulateVisitor();
-        var table = visitor.populateFromSource(rootNode, tableSchema.nft());
+        var table = visitor.populateFromSource(Path.of("/home/Documents/students.yaml"), rootNode, tableSchema.nft());
 
-        Assertions.assertEquals(4, table.size());
+        Assertions.assertEquals(6, table.size());
 
         List<Object> friendsList = new java.util.ArrayList<>(List.of("3", "2", "1"));
         friendsList.add(null);
 
         Assertions.assertEquals(Map.of(
+                "File", List.of("students.yaml", "students.yaml", "students.yaml", "students.yaml"),
+                "Directory", List.of("Documents", "Documents", "Documents", "Documents"),
                 "Course", List.of("7", "7", "7", "7"),
                 "Student ID", List.of("1", "1", "2", "2"),
                 "Grade", List.of("1", "2", "3", "4"),

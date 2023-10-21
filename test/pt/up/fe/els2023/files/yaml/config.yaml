@@ -8,6 +8,8 @@ tables:
   - name: decision_tree
     source: "decision_tree"
     from:
+      - $file: "File"
+      - $directory
       - params:
           - ccp_alpha: "CCP Alpha"
           - class_weight: "Class weight"

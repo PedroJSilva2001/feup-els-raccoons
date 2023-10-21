@@ -3,6 +3,7 @@ package pt.up.fe.els2023.imports;
 import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
+import java.nio.file.Path;
 import java.util.*;
 
 
@@ -31,6 +32,7 @@ public class PopulateVisitor implements NodeVisitor {
      * the results of EachNode are the final values of the column.
      */
     private final Map<String, List<Object>> columnValues = new HashMap<>();
+    private Path path;
 
     private PopulateVisitor(NodeColumnMap nodeColumnMap, Stack<TraversingInfo> traversingStack) {
         this.nodeColumnMap = nodeColumnMap;
@@ -54,8 +56,9 @@ public class PopulateVisitor implements NodeVisitor {
      * @param schemaNodes The schema nodes that define the mapping of the data to the table.
      * @return A map of column names to values.
      */
-    public Map<String, List<Object>> populateFromSource(ResourceNode rootNode, List<SchemaNode> schemaNodes) {
+    public Map<String, List<Object>> populateFromSource(Path path, ResourceNode rootNode, List<SchemaNode> schemaNodes) {
         boolean emptyStack = this.traversingStack.empty();
+        this.path = path;
 
         if (emptyStack) {
             this.traversingStack.push(new TraversingInfo(rootNode, "$root"));
@@ -217,7 +220,7 @@ public class PopulateVisitor implements NodeVisitor {
 
             // Recursively populate the columns specified by the EachNode
             PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
-            Map<String, List<Object>> columns = visitor.populateFromSource(resourceNode, List.of(node.value()));
+            Map<String, List<Object>> columns = visitor.populateFromSource(this.path, resourceNode, List.of(node.value()));
 
             // Concatenate the results of the EachNode vertically
             for (var column : columns.entrySet()) {
@@ -303,6 +306,24 @@ public class PopulateVisitor implements NodeVisitor {
 
         String columnName = nodeColumnMap.add(node, info.property);
         rowValues.put(columnName, info.node.asText());
+    }
+
+    @Override
+    public void visit(DirectoryNode node) {
+        String columnName = nodeColumnMap.add(node, node.columnName());
+        rowValues.put(columnName, path.getParent().getFileName().toString());
+    }
+
+    @Override
+    public void visit(FileNode node) {
+        String columnName = nodeColumnMap.add(node, node.columnName());
+        rowValues.put(columnName, path.getFileName().toString());
+    }
+
+    @Override
+    public void visit(PathNode node) {
+        String columnName = nodeColumnMap.add(node, node.columnName());
+        rowValues.put(columnName, path.toString());
     }
 
     private record TraversingInfo(ResourceNode node, String property) {
