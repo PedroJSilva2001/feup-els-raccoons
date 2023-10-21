@@ -137,8 +137,31 @@ public class BeginTableCascade {
         return (Optional<T>) Optional.of(res.getAsDouble());
     }
 
-    public <T extends Number> T sum(String column) {
-        return null;
+    public <T extends Number> Optional<T> sum(String column) throws ColumnNotFoundException {
+        var col = table.getColumn(column);
+
+        if (col == null) {
+            throw new ColumnNotFoundException(column);
+        }
+
+        var colEntries = col.getEntries();
+
+        var nonNumbers = colEntries.stream().filter((value -> value.value() == null || (!value.isLong() && !value.isDouble())));
+
+        if (nonNumbers.count() == colEntries.size()) {
+            return Optional.empty();
+        }
+
+        var res = colEntries.stream().filter((value) -> value.value() != null && (value.isLong() || value.isDouble())).mapToDouble(
+                (val) -> {
+                    if (val.isLong()) {
+                        return ((Long) val.value()).doubleValue();
+                    } else {
+                        return (Double) val.value();
+                    }
+                }).sum();
+
+        return (Optional<T>) Optional.of(res);
     }
 
     public double mean(String column) {
@@ -169,17 +192,17 @@ public class BeginTableCascade {
         r2.add(""); r2.add(Long.valueOf(6)); r2.add(null);
         table.addRow(r2);
 
-        BeginTableCascade btc = new BeginTableCascade(table);
-
-        var newTable = btc.dropWhere(
+        var newTable = table.btc().dropWhere(
                 (row) -> row.get("Col1").equals(1)
         ).get();
 
-        System.out.println(btc.count("Col2"));
+        System.out.println(table.btc().dropWhere((row) ->
+                row.get("hey").equals("hey")).count("Col2"));
 
-        System.out.println(btc.max("Col1").get());
+        System.out.println(table.btc().max("Col1").get());
 
-        System.out.println(btc.min("Col1").get());
+        System.out.println(table.btc().min("Col1").get());
 
+        System.out.println(table.btc().sum("Col1").get());
     }
 }
