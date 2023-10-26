@@ -3,11 +3,11 @@ package pt.up.fe.els2023.operations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,5 +118,12 @@ public class TableOperationsTest {
         ).get();
 
         Assertions.assertEquals(table, newTable);
+    }
+
+    @Test
+    public void testCount() throws ColumnNotFoundException {
+        Assertions.assertEquals(12, table.btc().count("Col1"));
+        Assertions.assertEquals(10, table.btc().count("Col2"));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table.btc().count("Col3"));
     }
 }

@@ -67,7 +67,7 @@ public class BeginTableCascade {
         }
 
         return col.getEntries().stream().filter(
-                (value) -> value.getValue() != null
+                (value) -> !value.isNull()
         ).count();
     }
 
