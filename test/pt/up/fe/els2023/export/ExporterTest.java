@@ -27,42 +27,42 @@ public class ExporterTest {
         Mockito.when(table.getName()).thenReturn("table1");
 
         Column column = new Column("data");
-        column.addEntry(new Value(1));
-        column.addEntry(new Value(2));
-        column.addEntry(new Value(3));
-        column.addEntry(new Value(4));
-        column.addEntry(new Value(null));
-        column.addEntry(new Value(1));
+        column.addEntry(Value.of(1));
+        column.addEntry(Value.of(2));
+        column.addEntry(Value.of(3));
+        column.addEntry(Value.of(4));
+        column.addEntry(Value.ofNull());
+        column.addEntry(Value.of(1));
 
         Column column2 = new Column("strings");
-        column.addEntry(new Value("stuff"));
-        column.addEntry(new Value("things"));
-        column.addEntry(new Value("zau"));
-        column.addEntry(new Value("ano\\ther & one"));
-        column.addEntry(new Value("multip\"le;spaces  ah"));
-        column.addEntry(new Value("  inner\r\n  "));
-        column.addEntry(new Value(" extra<!-- row"));
+        column.addEntry(Value.of("stuff"));
+        column.addEntry(Value.of("things"));
+        column.addEntry(Value.of("zau"));
+        column.addEntry(Value.of("ano\\ther & one"));
+        column.addEntry(Value.of("multip\"le;spaces  ah"));
+        column.addEntry(Value.of("  inner\r\n  "));
+        column.addEntry(Value.of(" extra<!-- row"));
 
         Column column3 = new Column("doubles");
-        column.addEntry(new Value(1.03));
-        column.addEntry(new Value(2.3));
-        column.addEntry(new Value(3.10345));
-        column.addEntry(new Value(4.0));
-        column.addEntry(new Value(5.123));
-        column.addEntry(new Value(1));
-        column.addEntry(new Value("&nbsp;"));
+        column.addEntry(Value.of(1.03));
+        column.addEntry(Value.of(2.3));
+        column.addEntry(Value.of(3.10345));
+        column.addEntry(Value.of(4.0));
+        column.addEntry(Value.of(5.123));
+        column.addEntry(Value.of(1));
+        column.addEntry(Value.of("&nbsp;"));
 
         List<Column> columns = List.of(column, column2, column3);
         Mockito.when(table.getColumns()).thenReturn(columns);
 
-        Row row1 = new Row(List.of(new Value(1), new Value("stuff"), new Value(1.03)));
-        Row row2 = new Row(List.of(new Value(2), new Value("things"), new Value(2.3)));
-        Row row3 = new Row(List.of(new Value(3), new Value("zau"), new Value(3.10345)));
-        Row row4 = new Row(List.of(new Value(4), new Value("ano\\ther & one"), new Value(4.0)));
-        Row row5 = new Row(Stream.of(new Value(null), new Value("multip\"le;spaces  ah"), new Value(5.123))
+        Row row1 = new Row(List.of(Value.of(1), Value.of("stuff"), Value.of(1.03)));
+        Row row2 = new Row(List.of(Value.of(2), Value.of("things"), Value.of(2.3)));
+        Row row3 = new Row(List.of(Value.of(3), Value.of("zau"), Value.of(3.10345)));
+        Row row4 = new Row(List.of(Value.of(4), Value.of("ano\\ther & one"), Value.of(4.0)));
+        Row row5 = new Row(Stream.of(Value.ofNull(), Value.of("multip\"le;spaces  ah"), Value.of(5.123))
                 .collect(Collectors.toList()));
-        Row row6 = new Row(List.of(new Value(1), new Value("  inner\r\n  "), new Value(1)));
-        Row row7 = new Row(Stream.of(new Value(null), new Value(" extra<!-- row"), new Value("&nbsp;")).collect(Collectors.toList()));
+        Row row6 = new Row(List.of(Value.of(1), Value.of("  inner\r\n  "), Value.of(1)));
+        Row row7 = new Row(Stream.of(Value.ofNull(), Value.of(" extra<!-- row"), Value.of("&nbsp;")).collect(Collectors.toList()));
 
         Mockito.when(table.getRows()).thenReturn(List.of(
                 row1, row2, row3, row4, row5, row6, row7

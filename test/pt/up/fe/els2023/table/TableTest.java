@@ -82,15 +82,15 @@ public class TableTest {
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addColumn("Column3");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1"), new Value(null)));
-        table1.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2"), new Value(null)));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
+        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
         var table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
-        table2.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1"), new Value(null)));
-        table2.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2"), new Value(null)));
+        table2.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
+        table2.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
         Assertions.assertEquals(table1, table2);
     }
@@ -100,14 +100,14 @@ public class TableTest {
         var table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table1.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         var table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
-        table2.addRow(List.of(new Value(""), new Value("differentfoo1"), new Value("differentbar1")));
-        table2.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table2.addRow(List.of(Value.of(""), Value.of("differentfoo1"), Value.of("differentbar1")));
+        table2.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         Assertions.assertNotEquals(table1, table2);
 
@@ -116,14 +116,14 @@ public class TableTest {
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table1.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
-        table2.addRow(List.of(new Value(""), new Value("differentfoo1"), new Value("differentbar1")));
-        table2.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table2.addRow(List.of(Value.of(""), Value.of("differentfoo1"), Value.of("differentbar1")));
+        table2.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         Assertions.assertNotEquals(table1, table2);
 
@@ -132,13 +132,13 @@ public class TableTest {
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table1.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
-        table2.addRow(List.of(new Value(""), new Value("differentfoo1"), new Value("differentbar1")));
+        table2.addRow(List.of(Value.of(""), Value.of("differentfoo1"), Value.of("differentbar1")));
 
         Assertions.assertNotEquals(table1, table2);
 
@@ -147,12 +147,12 @@ public class TableTest {
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
 
         table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
-        table2.addRow(List.of(new Value(""), new Value(1212), new Value(false)));
+        table2.addRow(List.of(Value.of(""), Value.of(1212L), Value.of(false)));
 
         Assertions.assertNotEquals(table1, table2);
 
@@ -161,14 +161,14 @@ public class TableTest {
         table1 = new Table();
         table1.addColumn("Column2");
         table1.addColumn("Column1");
-        table1.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table1.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
-        table2.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table2.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table2.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table2.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
         Assertions.assertNotEquals(table1, table2);
     }
 
@@ -222,8 +222,8 @@ public class TableTest {
         table.addColumn("Column1");
         table.addColumn("Column2");
 
-        table.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
-        table.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2")));
+        table.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
+        table.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2")));
 
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(2, table.getRowNumber());
@@ -238,8 +238,8 @@ public class TableTest {
         expectedTable.addColumn("Column1");
         expectedTable.addColumn("Column2");
         expectedTable.addColumn("Column3");
-        expectedTable.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1"), new Value(null)));
-        expectedTable.addRow(List.of(new Value(""), new Value("foo2"), new Value("bar2"), new Value(null)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, table);
     }
@@ -251,13 +251,13 @@ public class TableTest {
         table.addColumn("Column1");
         table.addColumn("Column2");
 
-        boolean rowWasAdded = table.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
+        boolean rowWasAdded = table.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
 
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(1, table.getRowNumber());
         Assertions.assertTrue(rowWasAdded);
 
-        rowWasAdded = table.addRow(List.of(new Value(""), new Value("foo2")));
+        rowWasAdded = table.addRow(List.of(Value.of(""), Value.of("foo2")));
 
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(1, table.getRowNumber());
@@ -268,7 +268,7 @@ public class TableTest {
 
         expectedTable.addColumn("Column1");
         expectedTable.addColumn("Column2");
-        expectedTable.addRow(List.of(new Value(""), new Value("foo1"), new Value("bar1")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1")));
 
         Assertions.assertEquals(expectedTable, table);
     }

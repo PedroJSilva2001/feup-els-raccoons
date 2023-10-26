@@ -59,7 +59,7 @@ public class Table implements ITable {
         columns.add(new Column(columnName));
 
         for (var row : rows) {
-            row.addValue(new Value(null));
+            row.addValue(Value.ofNull());
         }
 
         return true;
