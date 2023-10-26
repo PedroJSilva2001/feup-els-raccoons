@@ -72,17 +72,37 @@ public class Table implements ITable {
 
         columns.add(new Column(columnName));
 
+        for (var row : rows) {
+            row.addValue(Value.ofNull());
+        }
+
         return true;
     }
 
     @Override
-    public void addRow(List<Object> values) {
+    public boolean addRow(List<Value> values) {
+        if (values.size() != getColumnNumber()) {
+            return false;
+        }
+
         rows.add(new Row(values));
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < getColumnNumber(); i++) {
             var value = values.get(i);
             columns.get(i).addEntry(value);
         }
+
+        return true;
+    }
+
+    @Override
+    public int getColumnNumber() {
+        return columns.size();
+    }
+
+    @Override
+    public int getRowNumber() {
+        return rows.size();
     }
 
     @Override
@@ -105,8 +125,46 @@ public class Table implements ITable {
         return null;
     }
 
+    public Row getRow(int index) {
+        if (index < 0 || index >= rows.size()) {
+            return null;
+        }
+
+        return rows.get(index);
+    }
+
     @Override
     public BeginTableCascade btc() {
         return new BeginTableCascade(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Table other)) {
+            return false;
+        }
+
+        if (this.getColumnNumber() != other.getColumnNumber() ||
+                this.getRowNumber() != other.getRowNumber()) {
+            return false;
+        }
+
+        for (int i = 0; i < this.getColumnNumber(); i++) {
+            if (!this.getColumn(i).getName().equals(other.getColumn(i).getName())) {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < this.getRowNumber(); i++) {
+            if (!this.getRow(i).equals(other.getRow(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

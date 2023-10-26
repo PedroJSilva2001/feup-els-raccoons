@@ -9,13 +9,11 @@ public class Column implements Cloneable {
 
     private final List<Value> entries;
 
-    public Column(String name, List<Object> entries) {
+    public Column(String name, List<Value> entries) {
         this.entries = new ArrayList<>();
         this.name = name;
 
-        for (Object entry : entries) {
-            this.entries.add(new Value(entry));
-        }
+        this.entries.addAll(entries);
     }
 
     // Copies entire column
@@ -23,9 +21,7 @@ public class Column implements Cloneable {
         this.name = String.valueOf(column.name);
         this.entries = new ArrayList<>();
 
-        for (Value entry : column.entries) {
-            entries.add(new Value(entry.value()));
-        }
+        entries.addAll(column.entries);
     }
 
     public Column(String name) {
@@ -33,8 +29,8 @@ public class Column implements Cloneable {
         this.name = name;
     }
 
-    public void addEntry(Object value) {
-        entries.add(new Value(value));
+    public void addEntry(Value value) {
+        entries.add(value);
     }
 
     public String getName() {

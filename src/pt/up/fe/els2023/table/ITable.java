@@ -16,11 +16,17 @@ public interface ITable {
 
     boolean addColumn(String columnName);
 
-    void addRow(List<Object> values);
+    boolean addRow(List<Value> values);
+
+    int getColumnNumber();
+
+    int getRowNumber();
 
     Column getColumn(int index);
 
     Column getColumn(String name);
+
+    Row getRow(int index);
 
     BeginTableCascade btc();
 }

@@ -33,7 +33,7 @@ public class BeginTableCascade {
             Map<String, Object> mapping = new HashMap<>();
 
             for (int i = 0; i < row.getValues().size(); i++) {
-                mapping.put(table.getColumn(i).getName(), row.get(i).value());
+                mapping.put(table.getColumn(i).getName(), row.get(i).getValue());
             }
 
             var wrapper = new RowWrapper(mapping);
@@ -66,7 +66,7 @@ public class BeginTableCascade {
         }
 
         return col.getEntries().stream().filter(
-                (value) -> value.value() != null
+                (value) -> value.getValue() != null
         ).count();
     }
 
@@ -86,12 +86,12 @@ public class BeginTableCascade {
             return Optional.empty();
         }
 
-        var res = col.getEntries().stream().filter((value) -> value.value() != null).mapToDouble(
+        var res = col.getEntries().stream().filter((value) -> value.getValue() != null).mapToDouble(
                 (val) -> {
                     if (val.isLong()) {
-                        return ((Long) val.value()).doubleValue();
+                        return ((Long) val.getValue()).doubleValue();
                     } else {
-                        return (Double) val.value();
+                        return (Double) val.getValue();
                     }
                 }).max();
 
@@ -120,12 +120,12 @@ public class BeginTableCascade {
             // error, can't apply max to non-numbers
         }
 
-        var res = col.getEntries().stream().filter((value) -> value.value() != null).mapToDouble(
+        var res = col.getEntries().stream().filter((value) -> value.getValue() != null).mapToDouble(
                 (val) -> {
                     if (val.isLong()) {
-                        return ((Long) val.value()).doubleValue();
+                        return ((Long) val.getValue()).doubleValue();
                     } else {
-                        return (Double) val.value();
+                        return (Double) val.getValue();
                     }
                 }).min();
 
@@ -146,18 +146,18 @@ public class BeginTableCascade {
 
         var colEntries = col.getEntries();
 
-        var nonNumbers = colEntries.stream().filter((value -> value.value() == null || (!value.isLong() && !value.isDouble())));
+        var nonNumbers = colEntries.stream().filter((value -> value.getValue() == null || (!value.isLong() && !value.isDouble())));
 
         if (nonNumbers.count() == colEntries.size()) {
             return Optional.empty();
         }
 
-        var res = colEntries.stream().filter((value) -> value.value() != null && (value.isLong() || value.isDouble())).mapToDouble(
+        var res = colEntries.stream().filter((value) -> value.getValue() != null && (value.isLong() || value.isDouble())).mapToDouble(
                 (val) -> {
                     if (val.isLong()) {
-                        return ((Long) val.value()).doubleValue();
+                        return ((Long) val.getValue()).doubleValue();
                     } else {
-                        return (Double) val.value();
+                        return (Double) val.getValue();
                     }
                 }).sum();
 
@@ -174,35 +174,5 @@ public class BeginTableCascade {
 
     public double var(String column) {
         return 0.0;
-    }
-
-    public static void main(String[] args) throws ColumnNotFoundException {
-        ITable table = new Table();
-        table.addColumn("Col1");
-        table.addColumn("Col2");
-
-        table.addRow(List.of("", Long.valueOf(1), "hello"));
-        table.addRow(List.of("", Long.valueOf(2), "bye"));
-        table.addRow(List.of("", Long.valueOf(3), ""));
-        var r1 = new ArrayList<>();
-        r1.add(""); r1.add(Long.valueOf(4)); r1.add(null);
-        table.addRow(r1);
-
-        var r2 = new ArrayList<>();
-        r2.add(""); r2.add(Long.valueOf(6)); r2.add(null);
-        table.addRow(r2);
-
-        var newTable = table.btc().dropWhere(
-                (row) -> row.get("Col1").equals(1)
-        ).get();
-
-        System.out.println(table.btc().dropWhere((row) ->
-                row.get("hey").equals("hey")).count("Col2"));
-
-        System.out.println(table.btc().max("Col1").get());
-
-        System.out.println(table.btc().min("Col1").get());
-
-        System.out.println(table.btc().sum("Col1").get());
     }
 }

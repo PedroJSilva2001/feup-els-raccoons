@@ -3,6 +3,7 @@ package pt.up.fe.els2023.export;
 import pt.up.fe.els2023.table.Column;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Row;
+import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -46,7 +47,7 @@ public class CsvExporter extends TableExporter {
         writer.write(endOfLine);
 
         for (Row row : table.getRows()) {
-            List<Object> values = row.getValues();
+            List<Value> values = row.getValues();
 
             if (!values.isEmpty()) {
                 writer.write(escapeSeparatorAndNewLine(values.get(0).toString()));
