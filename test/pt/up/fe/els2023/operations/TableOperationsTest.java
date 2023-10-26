@@ -26,7 +26,10 @@ public class TableOperationsTest {
         table.addRow(List.of(Value.of(""), Value.of(1L), Value.of("hello")));
         table.addRow(List.of(Value.of(""),  Value.of(2L),  Value.of("bye")));
         table.addRow(List.of(Value.of(""),  Value.of(3L), Value.of("")));
-        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of("")));
+        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(55)));
+        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(56)));
+        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(55)));
+        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(56)));
         table.addRow(List.of(Value.of(""),  Value.of(242), Value.of("")));
         table.addRow(List.of(Value.of(""),  Value.of(221.12), Value.of("")));
         table.addRow(List.of(Value.of(""),  Value.of(false), Value.of("")));
@@ -47,5 +50,73 @@ public class TableOperationsTest {
 
         Assertions.assertEquals(expectedTable, newTable);
 
+
+
+        newTable = table.btc().where(
+                (row) -> row.getObject("Col1").equals(2L) ||
+                        (row.getObject("Col2") != null && row.getObject("Col2").equals("bye"))
+        ).get();
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("bye")));
+
+        Assertions.assertEquals(expectedTable, newTable);
+
+
+
+        newTable = table.btc().where(
+                (row) -> row.getObject("Col1").equals("not int")
+        ).get();
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(56)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(56)));
+
+        Assertions.assertEquals(expectedTable, newTable);
+
+
+
+        newTable = table.btc().where(
+                (row) -> row.getObject("Col1").equals("not int") &&
+                        row.getObject("Col2").equals(55L) // TODO remove integer overload ?
+        ).get();
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
+
+        Assertions.assertEquals(expectedTable, newTable);
+
+
+
+        newTable = table.btc().where(
+                (row) -> row.get("Col2").isNull() || row.get("Col1").isBoolean() || row.get("Col1").isDouble()
+        ).get();
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(""),  Value.of(221.12), Value.of("")));
+        expectedTable.addRow(List.of(Value.of(""),  Value.of(false), Value.of("")));
+        expectedTable.addRow(Stream.of(Value.of(""), Value.of(4L), Value.ofNull()).collect(Collectors.toList()));
+        expectedTable.addRow(Stream.of(Value.of(6L), Value.of(5L), Value.ofNull()).collect(Collectors.toList()));
+
+        Assertions.assertEquals(expectedTable, newTable);
+
+
+
+        newTable = table.btc().where(
+                (row) -> row.get("Col3") == null
+        ).get();
+
+        Assertions.assertEquals(table, newTable);
     }
 }
