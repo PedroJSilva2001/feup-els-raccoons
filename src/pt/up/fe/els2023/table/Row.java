@@ -20,7 +20,7 @@ public class Row {
         this.values.add(value);
     }
 
-    public List<Object> getValues() {
+    public List<Value> getValues() {
         return Collections.unmodifiableList(values);
     }
 
