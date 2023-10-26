@@ -3,6 +3,7 @@ package pt.up.fe.els2023.operations;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.Value;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -30,10 +31,10 @@ public class BeginTableCascade {
         ITable newTable = new Table(table);
 
         for (var row : table.getRows()) {
-            Map<String, Object> mapping = new HashMap<>();
+            Map<String, Value> mapping = new HashMap<>();
 
             for (int i = 0; i < row.getValues().size(); i++) {
-                mapping.put(table.getColumn(i).getName(), row.get(i).getValue());
+                mapping.put(table.getColumn(i).getName(), row.get(i));
             }
 
             var wrapper = new RowWrapper(mapping);

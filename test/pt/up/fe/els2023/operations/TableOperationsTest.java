@@ -9,6 +9,8 @@ import pt.up.fe.els2023.table.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class TableOperationsTest {
@@ -24,24 +26,26 @@ public class TableOperationsTest {
         table.addRow(List.of(Value.of(""), Value.of(1L), Value.of("hello")));
         table.addRow(List.of(Value.of(""),  Value.of(2L),  Value.of("bye")));
         table.addRow(List.of(Value.of(""),  Value.of(3L), Value.of("")));
-
-        var r1 = new ArrayList<Value>();
-        r1.add(Value.of("")); r1.add(Value.of(4L)); r1.add(Value.ofNull());
-        table.addRow(r1);
-
-        var r2 = new ArrayList<Value>();
-        r2.add(Value.of("")); r2.add(Value.of(6L)); r2.add(Value.ofNull());
-        table.addRow(r2);
+        table.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of("")));
+        table.addRow(List.of(Value.of(""),  Value.of(242), Value.of("")));
+        table.addRow(List.of(Value.of(""),  Value.of(221.12), Value.of("")));
+        table.addRow(List.of(Value.of(""),  Value.of(false), Value.of("")));
+        table.addRow(Stream.of(Value.of(""), Value.of(4L), Value.ofNull()).collect(Collectors.toList()));
+        table.addRow(Stream.of(Value.of(6L), Value.of(5L), Value.ofNull()).collect(Collectors.toList()));
     }
 
     @Test
     public void testWhere() {
         var newTable = table.btc().where(
-                (row) -> row.get("Col1").equals(2L)
+                (row) -> row.getObject("Col1").equals(2L)
         ).get();
 
-        Assertions.assertEquals(1, newTable.getRows().size());
+        var expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("bye")));
 
-        Assertions.assertEquals(2L, Long.parseLong(newTable.getRows().get(0).get(1).getValue().toString()));
+        Assertions.assertEquals(expectedTable, newTable);
+
     }
 }
