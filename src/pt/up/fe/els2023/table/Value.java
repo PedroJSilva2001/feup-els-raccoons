@@ -70,6 +70,10 @@ public class Value {
         return !isNull() && value instanceof BigDecimal;
     }
 
+    public Object getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
         if (this.value == null) {
