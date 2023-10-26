@@ -19,7 +19,7 @@ public class Value {
     }
 
     public static Value of(Integer value) {
-        return new Value(value);
+        return new Value(value.longValue());
     }
 
     public static Value of(Long value) {
