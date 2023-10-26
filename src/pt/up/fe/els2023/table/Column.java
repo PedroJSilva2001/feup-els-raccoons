@@ -9,13 +9,11 @@ public class Column {
 
     private final List<Value> entries;
 
-    public Column(String name, List<Object> entries) {
+    public Column(String name, List<Value> entries) {
         this.entries = new ArrayList<>();
         this.name = name;
 
-        for (Object entry : entries) {
-            this.entries.add(new Value(entry));
-        }
+        this.entries.addAll(entries);
     }
 
     public Column(String name) {
@@ -23,8 +21,8 @@ public class Column {
         this.name = name;
     }
 
-    public void addEntry(Object value) {
-        entries.add(new Value(value));
+    public void addEntry(Value value) {
+        entries.add(value);
     }
 
     public String getName() {

@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import pt.up.fe.els2023.table.Column;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Row;
+import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,50 +20,52 @@ import java.util.stream.Stream;
 public class ExporterTest {
     ITable table;
 
+
     @BeforeEach
     public void init() {
         table = Mockito.mock(ITable.class);
         Mockito.when(table.getName()).thenReturn("table1");
 
         Column column = new Column("data");
-        column.addEntry(1);
-        column.addEntry(2);
-        column.addEntry(3);
-        column.addEntry(4);
-        column.addEntry(null);
-        column.addEntry(1);
+        column.addEntry(new Value(1));
+        column.addEntry(new Value(2));
+        column.addEntry(new Value(3));
+        column.addEntry(new Value(4));
+        column.addEntry(new Value(null));
+        column.addEntry(new Value(1));
 
         Column column2 = new Column("strings");
-        column.addEntry("stuff");
-        column.addEntry("things");
-        column.addEntry("zau");
-        column.addEntry("ano\\ther & one");
-        column.addEntry("multip\"le;spaces  ah");
-        column.addEntry("  inner\r\n  ");
-        column.addEntry(" extra<!-- row");
+        column.addEntry(new Value("stuff"));
+        column.addEntry(new Value("things"));
+        column.addEntry(new Value("zau"));
+        column.addEntry(new Value("ano\\ther & one"));
+        column.addEntry(new Value("multip\"le;spaces  ah"));
+        column.addEntry(new Value("  inner\r\n  "));
+        column.addEntry(new Value(" extra<!-- row"));
 
         Column column3 = new Column("doubles");
-        column.addEntry(1.03);
-        column.addEntry(2.3);
-        column.addEntry(3.10345);
-        column.addEntry(4.0);
-        column.addEntry(5.123);
-        column.addEntry(1);
-        column.addEntry("&nbsp;");
+        column.addEntry(new Value(1.03));
+        column.addEntry(new Value(2.3));
+        column.addEntry(new Value(3.10345));
+        column.addEntry(new Value(4.0));
+        column.addEntry(new Value(5.123));
+        column.addEntry(new Value(1));
+        column.addEntry(new Value("&nbsp;"));
 
         List<Column> columns = List.of(column, column2, column3);
         Mockito.when(table.getColumns()).thenReturn(columns);
 
-        Row row = new Row(List.of(1, "stuff", 1.03));
-        Row row2 = new Row(List.of(2, "things", 2.3));
-        Row row3 = new Row(List.of(3, "zau", 3.10345));
-        Row row4 = new Row(List.of(4, "ano\\ther & one", 4.0));
-        Row row5 = new Row(Stream.of(null, "multip\"le;spaces  ah", 5.123).collect(Collectors.toList()));
-        Row row6 = new Row(List.of(1, "  inner\r\n  ", 1));
-        Row row7 = new Row(Stream.of(null, " extra<!-- row", "&nbsp;").collect(Collectors.toList()));
+        Row row1 = new Row(List.of(new Value(1), new Value("stuff"), new Value(1.03)));
+        Row row2 = new Row(List.of(new Value(2), new Value("things"), new Value(2.3)));
+        Row row3 = new Row(List.of(new Value(3), new Value("zau"), new Value(3.10345)));
+        Row row4 = new Row(List.of(new Value(4), new Value("ano\\ther & one"), new Value(4.0)));
+        Row row5 = new Row(Stream.of(new Value(null), new Value("multip\"le;spaces  ah"), new Value(5.123))
+                .collect(Collectors.toList()));
+        Row row6 = new Row(List.of(new Value(1), new Value("  inner\r\n  "), new Value(1)));
+        Row row7 = new Row(Stream.of(new Value(null), new Value(" extra<!-- row"), new Value("&nbsp;")).collect(Collectors.toList()));
 
         Mockito.when(table.getRows()).thenReturn(List.of(
-                row, row2, row3, row4, row5, row6, row7
+                row1, row2, row3, row4, row5, row6, row7
         ));
     }
 
