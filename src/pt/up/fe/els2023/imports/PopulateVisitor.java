@@ -75,6 +75,10 @@ public class PopulateVisitor implements NodeVisitor {
         return merge();
     }
 
+    private Object getValueFromNode(ResourceNode node) {
+        return null;
+    }
+
     /**
      * Combines the row values and column values into a unified map.
      * <p>

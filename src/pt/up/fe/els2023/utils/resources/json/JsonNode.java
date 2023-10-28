@@ -2,6 +2,8 @@ package pt.up.fe.els2023.utils.resources.json;
 
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 public class JsonNode implements ResourceNode {
@@ -99,24 +101,49 @@ public class JsonNode implements ResourceNode {
     }
 
 
+    @Override
     public boolean isNull() {
         return node.isNull();
     }
 
+    @Override
     public boolean isBoolean() {
         return node.isBoolean();
     }
 
+    @Override
     public boolean isInteger() {
         return node.isIntegralNumber();
     }
 
+    @Override
     public boolean isDouble() {
-        return node.isDouble();
+        return node.isFloat() || node.isDouble();
     }
 
+    @Override
     public boolean isText() {
         return node.isTextual();
+    }
+
+    @Override
+    public boolean isLong() {
+        return node.isInt() || node.isLong() || node.isIntegralNumber();
+    }
+
+    @Override
+    public boolean isFloat() {
+        return node.isFloat();
+    }
+
+    @Override
+    public boolean isBigDecimal() {
+        return node.isBigDecimal();
+    }
+
+    @Override
+    public boolean isBigInteger() {
+        return node.isBigInteger();
     }
 
     @Override
@@ -139,6 +166,7 @@ public class JsonNode implements ResourceNode {
         return node.isContainerNode();
     }
 
+    @Override
     public Boolean asBoolean() {
         if (isBoolean() || isInteger()) {
             return node.asBoolean();
@@ -153,6 +181,57 @@ public class JsonNode implements ResourceNode {
 
             if ("false".equalsIgnoreCase(text)) {
                 return Boolean.FALSE;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Long asLong() {
+        if (isInteger() || isBoolean() || isDouble() || isLong()) {
+            return node.asLong();
+        }
+
+        if (isText()) {
+            try {
+                return Long.parseLong(node.asText());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public BigDecimal asBigDecimal() {
+        if (isInteger() || isBoolean() || isDouble() || isLong() || isBigInteger() || isBigDecimal()) {
+            return node.decimalValue();
+        }
+
+        if (isText()) {
+            try {
+                return new BigDecimal(node.asText());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public BigInteger asBigInteger() {
+        if (isInteger() || isBoolean() || isDouble() || isLong() || isBigInteger()) {
+            return node.bigIntegerValue();
+        }
+
+        if (isText()) {
+            try {
+                return new BigInteger(node.asText());
+            } catch (NumberFormatException e) {
+                return null;
             }
         }
 
@@ -175,6 +254,7 @@ public class JsonNode implements ResourceNode {
         return null;
     }
 
+    @Override
     public Double asDouble() {
         if (isDouble() || isInteger() || isBoolean()) {
             return node.asDouble();

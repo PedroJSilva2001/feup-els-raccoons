@@ -1,11 +1,16 @@
 package pt.up.fe.els2023.config;
 
+import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.TableSource;
+import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.utils.GlobFinder;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents a table schema for data mapping.
@@ -74,6 +79,30 @@ public final class TableSchema {
         this.source = source;
         return this;
     }
+
+    public Table collect() {
+        List<String> globs = source.getFiles();
+        List<Path> files = new ArrayList<>();
+
+        for (String glob : globs) {
+            try {
+                files.addAll(GlobFinder.getFilesGlob(glob));
+            } catch (Exception e) {
+                System.err.println("Error while collecting files from glob " + glob);
+                e.printStackTrace();
+            }
+        }
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        for (Path file : files) {
+            //visitor.popul
+
+
+        }
+
+        return new Table("1", source);
+    }
+
 
     @Override
     public boolean equals(Object obj) {
