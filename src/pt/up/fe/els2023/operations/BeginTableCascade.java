@@ -5,11 +5,9 @@ import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BeginTableCascade {
     private final ITable table;
@@ -22,12 +20,50 @@ public class BeginTableCascade {
         return table;
     }
 
-    public BeginTableCascade select(String ...columns) {
-        return null;
+    public BeginTableCascade select(String ...columns) throws ColumnNotFoundException {
+        ITable newTable = new Table();
+
+        var columnsToKeep = new TreeSet<Integer>();
+
+        for (var column : columns) {
+            if (!table.containsColumn(column)) {
+                throw new ColumnNotFoundException(column);
+            }
+
+            newTable.addColumn(column);
+
+            columnsToKeep.add(table.getIndexOfColumn(column));
+        }
+
+        for (var row : table.getRows()) {
+            List<Value> values = new ArrayList<>();
+
+            for (var column : columnsToKeep) {
+                values.add(row.get(column));
+            }
+
+            newTable.addRow(values);
+        }
+
+        return new BeginTableCascade(newTable);
     }
 
-    public BeginTableCascade reject(String ...columns) {
-        return null;
+    public BeginTableCascade reject(String ...columns) throws ColumnNotFoundException {
+        for (var column : columns) {
+            if (!table.containsColumn(column)) {
+                throw new ColumnNotFoundException(column);
+            }
+        }
+
+        var columnsToKeep = new ArrayList<String>();
+
+        for (var column : table.getColumns()) {
+            if (!Arrays.asList(columns).contains(column.getName())) {
+                columnsToKeep.add(column.getName());
+            }
+        }
+
+        return select(columnsToKeep.toArray(String[]::new));
     }
 
     public BeginTableCascade where(Predicate<RowWrapper> predicate) {

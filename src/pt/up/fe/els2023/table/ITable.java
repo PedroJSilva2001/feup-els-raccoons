@@ -29,4 +29,8 @@ public interface ITable {
     Row getRow(int index);
 
     BeginTableCascade btc();
+
+    boolean containsColumn(String name);
+
+    int getIndexOfColumn(String name);
 }

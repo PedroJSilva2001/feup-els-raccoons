@@ -125,6 +125,7 @@ public class Table implements ITable {
         return null;
     }
 
+    @Override
     public Row getRow(int index) {
         if (index < 0 || index >= rows.size()) {
             return null;
@@ -132,6 +133,7 @@ public class Table implements ITable {
 
         return rows.get(index);
     }
+
 
     @Override
     public BeginTableCascade btc() {
@@ -166,5 +168,21 @@ public class Table implements ITable {
         }
 
         return true;
+    }
+
+    @Override
+    public int getIndexOfColumn(String name) {
+        for (int i = 0; i < getColumnNumber(); i++) {
+            if (getColumn(i).getName().equals(name)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return getIndexOfColumn(name) != -1;
     }
 }

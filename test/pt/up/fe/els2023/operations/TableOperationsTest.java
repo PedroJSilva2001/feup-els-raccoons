@@ -166,4 +166,63 @@ public class TableOperationsTest {
         Assertions.assertTrue(table2.btc().min("Col2").isEmpty());
         Assertions.assertEquals(Value.of(new BigInteger("12")), table2.btc().min("Col3").get());
     }
+
+    @Test
+    public void testSelect() throws ColumnNotFoundException {
+        var expectedTable = new Table();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col3");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(25L), Value.of("hello"), Value.of(new BigInteger("123"))));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(0L), Value.of("hello"), Value.of(1221L)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of("hey")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(332), Value.of(true), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
+
+
+        Assertions.assertEquals(expectedTable, table2.btc().select("File", "Col1", "Col2", "Col3").get());
+
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col3");
+
+        expectedTable.addRow(List.of(Value.of(25L), Value.of(new BigInteger("123"))));
+        expectedTable.addRow(List.of(Value.of(0L), Value.of(1221L)));
+        expectedTable.addRow(List.of(Value.of(12), Value.of("hey")));
+        expectedTable.addRow(List.of(Value.of(12), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(332), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(12), Value.of(new BigInteger("12"))));
+
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
+
+
+        expectedTable = new Table();
+
+        Assertions.assertEquals(expectedTable, table2.btc().select().get());
+    }
+
+    @Test
+    public void testReject() throws ColumnNotFoundException {
+        var expectedTable = new Table();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col3");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(25L), Value.of(new BigInteger("123"))));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(0L), Value.of(1221L)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of("hey")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(332), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(new BigInteger("12"))));
+
+        Assertions.assertEquals(expectedTable, table2.btc().reject("Col2").get());
+
+
+
+        Assertions.assertEquals(table2, table2.btc().reject().get());
+    }
 }
