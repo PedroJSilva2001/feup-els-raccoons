@@ -5,8 +5,11 @@ import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BeginTableCascade {
     private final ITable table;
@@ -71,98 +74,32 @@ public class BeginTableCascade {
         ).count();
     }
 
-    public <T extends Number> Optional<T> max(String column) throws ColumnNotFoundException {
-        var col = table.getColumn(column);
+    public Optional<Value> max(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
 
-        if (col == null) {
-            throw new ColumnNotFoundException(column);
-        }
-
-
-        var anyNonNumbers = col.getEntries().stream().anyMatch(
-                (value) -> !value.isNull() && !value.isLong() && !value.isDouble()
-        );
-
-        if (anyNonNumbers) {
+        if (colValues.isEmpty()) {
             return Optional.empty();
         }
 
-        var res = col.getEntries().stream().filter((value) -> value.getValue() != null).mapToDouble(
-                (val) -> {
-                    if (val.isLong()) {
-                        return ((Long) val.getValue()).doubleValue();
-                    } else {
-                        return (Double) val.getValue();
-                    }
-                }).max();
+        var commonNumberRep = colValues.get(0).getType();
 
-
-        if (res.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return (Optional<T>) Optional.of(res.getAsDouble());
+        return colValues.stream().max(commonNumberRep.comparator());
     }
 
-    public <T extends Number> Optional<T> min(String column) throws ColumnNotFoundException {
-        var col = table.getColumn(column);
+    public Optional<Value> min(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
 
-        if (col == null) {
-            throw new ColumnNotFoundException(column);
-        }
-
-
-        var anyNonNumbers = col.getEntries().stream().anyMatch(
-                (value) -> !value.isNull() && !value.isLong() && !value.isDouble()
-        );
-
-        if (anyNonNumbers) {
-            return Optional.empty();
-            // error, can't apply max to non-numbers
-        }
-
-        var res = col.getEntries().stream().filter((value) -> value.getValue() != null).mapToDouble(
-                (val) -> {
-                    if (val.isLong()) {
-                        return ((Long) val.getValue()).doubleValue();
-                    } else {
-                        return (Double) val.getValue();
-                    }
-                }).min();
-
-
-        if (res.isEmpty()) {
+        if (colValues.isEmpty()) {
             return Optional.empty();
         }
 
-        return (Optional<T>) Optional.of(res.getAsDouble());
+        var commonNumberRep = colValues.get(0).getType();
+
+        return colValues.stream().min(commonNumberRep.comparator());
     }
 
-    public <T extends Number> Optional<T> sum(String column) throws ColumnNotFoundException {
-        var col = table.getColumn(column);
-
-        if (col == null) {
-            throw new ColumnNotFoundException(column);
-        }
-
-        var colEntries = col.getEntries();
-
-        var nonNumbers = colEntries.stream().filter((value -> value.getValue() == null || (!value.isLong() && !value.isDouble())));
-
-        if (nonNumbers.count() == colEntries.size()) {
-            return Optional.empty();
-        }
-
-        var res = colEntries.stream().filter((value) -> value.getValue() != null && (value.isLong() || value.isDouble())).mapToDouble(
-                (val) -> {
-                    if (val.isLong()) {
-                        return ((Long) val.getValue()).doubleValue();
-                    } else {
-                        return (Double) val.getValue();
-                    }
-                }).sum();
-
-        return (Optional<T>) Optional.of(res);
+    public Optional<Value> sum(String column) throws ColumnNotFoundException {
+        return Optional.empty();
     }
 
     public double mean(String column) {
@@ -175,5 +112,23 @@ public class BeginTableCascade {
 
     public double var(String column) {
         return 0.0;
+    }
+
+    private List<Value> getColumnWithCommonNumberRep(String column) throws ColumnNotFoundException {
+        var col = table.getColumn(column);
+
+        if (col == null) {
+            throw new ColumnNotFoundException(column);
+        }
+
+        var commonNumberRep = col.getMostGeneralNumberRep();
+
+        if (commonNumberRep == null) {
+            // Column has no numbers
+            return Collections.emptyList();
+        }
+
+        // Aggregate statistics ignore values other than numbers
+        return col.getEntries().stream().filter(Value::isNumber).map(commonNumberRep::cast).collect(Collectors.toList());
     }
 }
