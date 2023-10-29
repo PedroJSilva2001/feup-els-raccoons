@@ -186,6 +186,8 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table2.btc().select("File", "Col1", "Col2", "Col3").get());
 
 
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
+
         expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
@@ -221,6 +223,8 @@ public class TableOperationsTest {
 
         Assertions.assertEquals(expectedTable, table2.btc().reject("Col2").get());
 
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col25").get());
 
 
         Assertions.assertEquals(table2, table2.btc().reject().get());
