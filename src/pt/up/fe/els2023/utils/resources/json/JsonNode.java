@@ -113,7 +113,7 @@ public class JsonNode implements ResourceNode {
 
     @Override
     public boolean isInteger() {
-        return node.isIntegralNumber();
+        return node.isInt();
     }
 
     @Override
@@ -128,12 +128,7 @@ public class JsonNode implements ResourceNode {
 
     @Override
     public boolean isLong() {
-        return node.isInt() || node.isLong() || node.isIntegralNumber();
-    }
-
-    @Override
-    public boolean isFloat() {
-        return node.isFloat();
+        return node.isInt() || node.isLong();
     }
 
     @Override

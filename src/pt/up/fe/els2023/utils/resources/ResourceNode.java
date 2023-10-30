@@ -24,8 +24,6 @@ public interface ResourceNode extends Iterable<ResourceNode> {
 
     boolean isLong();
 
-    boolean isFloat();
-
     boolean isBigDecimal();
 
     boolean isBigInteger();
