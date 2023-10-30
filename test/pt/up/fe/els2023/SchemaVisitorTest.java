@@ -6,6 +6,7 @@ import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.imports.NodeOrderVisitor;
 import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.YamlSource;
+import pt.up.fe.els2023.table.Value;
 import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.io.BufferedReader;
@@ -15,6 +16,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SchemaVisitorTest {
 
@@ -92,15 +95,15 @@ public class SchemaVisitorTest {
 
         Assertions.assertEquals(6, table.size());
 
-        List<Object> friendsList = new java.util.ArrayList<>(List.of("3", "2", "1"));
-        friendsList.add(null);
+        List<Value> friendsList = new java.util.ArrayList<>(List.of(Value.of(3), Value.of(2), Value.of(1)));
+        friendsList.add(Value.ofNull());
 
         Assertions.assertEquals(Map.of(
-                "File", List.of("students.yaml", "students.yaml", "students.yaml", "students.yaml"),
-                "Directory", List.of("Documents", "Documents", "Documents", "Documents"),
-                "Course", List.of("7", "7", "7", "7"),
-                "Student ID", List.of("1", "1", "2", "2"),
-                "Grade", List.of("1", "2", "3", "4"),
+                "File", Stream.of("students.yaml", "students.yaml", "students.yaml", "students.yaml").map(Value::of).collect(Collectors.toList()),
+                "Directory", Stream.of("Documents", "Documents", "Documents", "Documents").map(Value::of).collect(Collectors.toList()),
+                "Course", Stream.of(7, 7, 7, 7).map(Value::of).collect(Collectors.toList()),
+                "Student ID", Stream.of(1, 1, 2, 2).map(Value::of).collect(Collectors.toList()),
+                "Grade", Stream.of(1, 2, 3, 4).map(Value::of).collect(Collectors.toList()),
                 "Friend", friendsList
         ), table);
     }

@@ -1,6 +1,7 @@
 package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
+import pt.up.fe.els2023.table.Value;
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
 import java.nio.file.Path;
@@ -22,7 +23,7 @@ public class PopulateVisitor implements NodeVisitor {
     /**
      * This map is used to keep track of the values of the current row.
      */
-    private final Map<String, Object> rowValues = new HashMap<>();
+    private final Map<String, Value> rowValues = new HashMap<>();
     /**
      * This map is used to keep track of the results of EachNode.
      * The columns that EachNode maps to are stored in this map,
@@ -31,7 +32,7 @@ public class PopulateVisitor implements NodeVisitor {
      * Since column names are unique and assigned to a single SchemaNode,
      * the results of EachNode are the final values of the column.
      */
-    private final Map<String, List<Object>> columnValues = new HashMap<>();
+    private final Map<String, List<Value>> columnValues = new HashMap<>();
     private Path path;
 
     private PopulateVisitor(NodeColumnMap nodeColumnMap, Stack<TraversingInfo> traversingStack) {
@@ -56,7 +57,7 @@ public class PopulateVisitor implements NodeVisitor {
      * @param schemaNodes The schema nodes that define the mapping of the data to the table.
      * @return A map of column names to values.
      */
-    public Map<String, List<Object>> populateFromSource(Path path, ResourceNode rootNode, List<SchemaNode> schemaNodes) {
+    public Map<String, List<Value>> populateFromSource(Path path, ResourceNode rootNode, List<SchemaNode> schemaNodes) {
         boolean emptyStack = this.traversingStack.empty();
         this.path = path;
 
@@ -75,8 +76,24 @@ public class PopulateVisitor implements NodeVisitor {
         return merge();
     }
 
-    private Object getValueFromNode(ResourceNode node) {
-        return null;
+    private Value getValueFromNode(ResourceNode node) {
+        if (node.isValue()) {
+            if (node.isBoolean()) {
+                return Value.of(node.asBoolean());
+            } else if (node.isLong()) {
+                return Value.of(node.asLong());
+            } else if (node.isDouble()) {
+                return Value.of(node.asDouble());
+            } else if (node.isBigInteger()) {
+                return Value.of(node.asBigInteger());
+            } else if (node.isBigDecimal()) {
+                return Value.of(node.asBigDecimal());
+            } else if (node.isNull()) {
+                return Value.ofNull();
+            }
+        }
+
+        return Value.of(node.asText());
     }
 
     /**
@@ -88,18 +105,18 @@ public class PopulateVisitor implements NodeVisitor {
      *
      * @return A map where column names are associated with corresponding values.
      */
-    private Map<String, List<Object>> merge() {
+    private Map<String, List<Value>> merge() {
         int maxColumnSize = rowValues.values().stream().anyMatch(obj -> !Objects.isNull(obj)) ? 1 : 0;
 
         for (var column : columnValues.entrySet()) {
             maxColumnSize = Math.max(maxColumnSize, column.getValue().size());
         }
 
-        Map<String, List<Object>> merged = new HashMap<>();
+        Map<String, List<Value>> merged = new HashMap<>();
 
         for (var column : columnValues.entrySet()) {
             // Pad with nulls
-            List<Object> values = new ArrayList<>(Collections.nCopies(maxColumnSize, null));
+            List<Value> values = new ArrayList<>(Collections.nCopies(maxColumnSize, Value.ofNull()));
 
             for (int i = 0; i < column.getValue().size(); i++) {
                 values.set(i, column.getValue().get(i));
@@ -135,7 +152,7 @@ public class PopulateVisitor implements NodeVisitor {
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, child.getValue().asText());
+                rowValues.put(columnName, getValueFromNode(child.getValue()));
             }
         }
     }
@@ -158,7 +175,7 @@ public class PopulateVisitor implements NodeVisitor {
             properties.add(columnName);
             columnName = nodeColumnMap.add(node, columnName);
 
-            rowValues.put(columnName, child.getValue().asText());
+            rowValues.put(columnName, getValueFromNode(child.getValue()));
         }
     }
 
@@ -181,7 +198,7 @@ public class PopulateVisitor implements NodeVisitor {
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, child.getValue().asText());
+                rowValues.put(columnName, getValueFromNode(child.getValue()));
             }
         }
     }
@@ -207,7 +224,7 @@ public class PopulateVisitor implements NodeVisitor {
         TraversingInfo info = this.traversingStack.peek();
         String columnName = nodeColumnMap.add(node, node.columnName());
 
-        rowValues.put(columnName, info.node.asText());
+        rowValues.put(columnName, getValueFromNode(info.node));
     }
 
     @Override
@@ -224,7 +241,7 @@ public class PopulateVisitor implements NodeVisitor {
 
             // Recursively populate the columns specified by the EachNode
             PopulateVisitor visitor = new PopulateVisitor(nodeColumnMap, traversingStack);
-            Map<String, List<Object>> columns = visitor.populateFromSource(this.path, resourceNode, List.of(node.value()));
+            Map<String, List<Value>> columns = visitor.populateFromSource(this.path, resourceNode, List.of(node.value()));
 
             // Concatenate the results of the EachNode vertically
             for (var column : columns.entrySet()) {
@@ -258,7 +275,7 @@ public class PopulateVisitor implements NodeVisitor {
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, child.getValue().asText());
+                rowValues.put(columnName, getValueFromNode(child.getValue()));
             }
         }
     }
@@ -309,25 +326,25 @@ public class PopulateVisitor implements NodeVisitor {
         TraversingInfo info = this.traversingStack.peek();
 
         String columnName = nodeColumnMap.add(node, info.property);
-        rowValues.put(columnName, info.node.asText());
+        rowValues.put(columnName, getValueFromNode(info.node));
     }
 
     @Override
     public void visit(DirectoryNode node) {
         String columnName = nodeColumnMap.add(node, node.columnName());
-        rowValues.put(columnName, path.getParent().getFileName().toString());
+        rowValues.put(columnName, Value.of(path.getParent().getFileName().toString()));
     }
 
     @Override
     public void visit(FileNode node) {
         String columnName = nodeColumnMap.add(node, node.columnName());
-        rowValues.put(columnName, path.getFileName().toString());
+        rowValues.put(columnName, Value.of(path.getFileName().toString()));
     }
 
     @Override
     public void visit(PathNode node) {
         String columnName = nodeColumnMap.add(node, node.columnName());
-        rowValues.put(columnName, path.toString());
+        rowValues.put(columnName, Value.of(path.toString()));
     }
 
     private record TraversingInfo(ResourceNode node, String property) {
