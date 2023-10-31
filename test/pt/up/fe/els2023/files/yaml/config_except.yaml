@@ -1,0 +1,26 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_*.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    nft:
+      - $except:
+          - "nodes"
+          - "feature_importances"
+          - "params"
+      - $except:
+          - "nodes"
+          - a: "feature_importances" # this is ignored, because it is not a string. perhaps at some point we should allow this
+      - $except: "params"
+
+operations:
+
+export:
+  - name: table1
+    path: "/dir1/dir2"
+    filename: "Table 1"
+    format: csv

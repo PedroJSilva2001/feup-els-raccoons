@@ -114,7 +114,20 @@ public class ConfigReader {
         if (Objects.equals(keyName, "$each")) {
             return new EachNode(parseValue(value));
         } else if (Objects.equals(keyName, "$except")) {
-            List<String> exceptList = (List<String>) value;
+            List<String> exceptList = new ArrayList<>();
+
+            if (value instanceof String) {
+                exceptList.add((String) value);
+            } else if (value instanceof List) {
+                List<Object> exceptListNode = (List<Object>) value;
+
+                for (Object except : exceptListNode) {
+                    if (except instanceof String) {
+                        exceptList.add((String) except);
+                    }
+                }
+            }
+
             return new ExceptNode(new HashSet<>(exceptList));
         } else if (Objects.equals(keyName, "$file")) {
             String columnName = (String) value;
@@ -214,16 +227,16 @@ public class ConfigReader {
                 // TODO: SPECIFY LINE AND THROW EXCEPTION
             }
 
-            List<Object> from = (ArrayList<Object>) tableSchema.get("from");
+            List<Object> nft = (ArrayList<Object>) tableSchema.get("nft");
 
-            if (from == null) {
-                System.out.println("No from found");
+            if (nft == null) {
+                System.out.println("No nft found");
                 // TODO: SPECIFY LINE AND THROW EXCEPTION
                 throw new RuntimeException();
             }
 
-            ListNode fromNode = parseListNode(from);
-            table.nft(fromNode.list());
+            ListNode nftNode = parseListNode(nft);
+            table.nft(nftNode.list());
 
             configTableSchemas.add(table);
         }

@@ -10,7 +10,6 @@ import pt.up.fe.els2023.table.Value;
 import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
