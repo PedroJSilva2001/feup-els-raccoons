@@ -10,6 +10,7 @@ import pt.up.fe.els2023.table.Value;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +25,6 @@ public class TableOperationsTest {
     private ITable table3;
 
     private ITable table4;
-
     @BeforeEach
     public void setup() {
         table1 = new Table();
@@ -292,7 +292,28 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.of(4L), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, table4.btc().concatHorizontal(table3).get());
+    }
 
+    @Test
+    public void testSum() throws ColumnNotFoundException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), table1.btc().sum("Col1").get());
+        Assertions.assertEquals(Value.of(222), table1.btc().sum("Col2").get());
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().sum("Col3"));
 
+        Assertions.assertEquals(Value.of(393L), table2.btc().sum("Col1").get());
+        Assertions.assertTrue(table2.btc().sum("Col2").isEmpty());
+        Assertions.assertEquals(Value.of(new BigInteger("1356")), table2.btc().sum("Col3").get());
+    }
+
+    @Test
+    public void testMean() throws ColumnNotFoundException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))),
+                table1.btc().mean("Col1").get());
+        Assertions.assertEquals(Value.of(222/4), table1.btc().mean("Col2").get());
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col3"));
+
+        Assertions.assertEquals(Value.of(393L/6), table2.btc().mean("Col1").get());
+        Assertions.assertTrue(table2.btc().mean("Col2").isEmpty());
+        Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), table2.btc().mean("Col3").get());
     }
 }

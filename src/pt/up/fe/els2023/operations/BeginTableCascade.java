@@ -218,19 +218,41 @@ public class BeginTableCascade {
     }
 
     public Optional<Value> sum(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
+
+        if (colValues.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var commonNumberRep = colValues.get(0).getType();
+
+        return Optional.of(colValues.stream().reduce(commonNumberRep.additiveIdentity(), Value::addS));
+    }
+
+    public Optional<Value> mean(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
+
+        if (colValues.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var sumOpt = sum(column);
+
+        if(sumOpt.isEmpty()){
+            return Optional.empty();
+        }
+
+        var sum = sumOpt.get();
+
+        return Optional.of(sum.divide(Value.of(colValues.size())));
+    }
+
+    public Optional<Value> std(String column) {
         return Optional.empty();
     }
 
-    public double mean(String column) {
-        return 0.0;
-    }
-
-    public double std(String column) {
-        return 0.0;
-    }
-
-    public double var(String column) {
-        return 0.0;
+    public Optional<Value> var(String column) {
+        return Optional.empty();
     }
 
     private List<Value> getColumnWithCommonNumberRep(String column) throws ColumnNotFoundException {
