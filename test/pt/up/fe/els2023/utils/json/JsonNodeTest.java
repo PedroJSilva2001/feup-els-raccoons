@@ -505,6 +505,7 @@ public class JsonNodeTest {
         JsonNode longNode = jsonNode("9223372036854775807");
         Assertions.assertNull(longNode.asInteger());
     }
+
     @Test
     public void testAsLong() throws IOException {
         JsonNode integerNode1 = jsonNode("42");

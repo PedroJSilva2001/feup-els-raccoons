@@ -3,7 +3,6 @@ package pt.up.fe.els2023.table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 import java.util.List;
 
 
@@ -65,7 +64,6 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-
         table1 = new Table();
 
         table2 = new Table();
@@ -112,7 +110,6 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
@@ -128,7 +125,6 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
@@ -143,7 +139,6 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-
         table1 = new Table();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
@@ -155,7 +150,6 @@ public class TableTest {
         table2.addRow(List.of(Value.of(""), Value.of(1212L), Value.of(false)));
 
         Assertions.assertNotEquals(table1, table2);
-
 
 
         table1 = new Table();
@@ -183,13 +177,11 @@ public class TableTest {
         Assertions.assertTrue(columnWasAdded);
 
 
-
         columnWasAdded = table.addColumn("Column2");
 
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(0, table.getRowNumber());
         Assertions.assertTrue(columnWasAdded);
-
 
 
         columnWasAdded = table.addColumn("Column1");
@@ -199,13 +191,11 @@ public class TableTest {
         Assertions.assertFalse(columnWasAdded);
 
 
-
         columnWasAdded = table.addColumn("Column2");
 
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(0, table.getRowNumber());
         Assertions.assertFalse(columnWasAdded);
-
 
 
         columnWasAdded = table.addColumn("Co3");

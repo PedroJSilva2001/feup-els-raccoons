@@ -19,11 +19,11 @@ public class ColumnUtils {
         String newColumnName = columnName;
         if (columnNames.contains(newColumnName)) {
             int count = 1;
-            while (columnNames.contains(newColumnName + '_' + count)) {
+            while (columnNames.contains(newColumnName + "_" + count)) {
                 count++;
             }
 
-            newColumnName += '_' + count;
+            newColumnName += "_" + count;
         }
 
         return newColumnName;
