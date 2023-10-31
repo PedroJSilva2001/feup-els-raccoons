@@ -65,19 +65,7 @@ public class ConfigReaderTest {
             Assertions.assertEquals(expectedTableSource.getValue().getFiles(), resultTableSource.getFiles());
         }
 
-        for (int i = 0; i < expectedTableSchemas.size(); i++) {
-            var expectedTableSchema = expectedTableSchemas.get(i);
-            var resultTableSchema = config.tableSchemas().get(i);
-            Assertions.assertEquals(expectedTableSchema.nft(), resultTableSchema.nft());
-            Assertions.assertEquals(expectedTableSchema.name(), resultTableSchema.name());
-
-            if (expectedTableSchema.source() != null) {
-                Assertions.assertEquals(expectedTableSchema.source().getName(), resultTableSchema.source().getName());
-                Assertions.assertEquals(expectedTableSchema.source().getFiles(), resultTableSchema.source().getFiles());
-            } else {
-                Assertions.assertNull(resultTableSchema.source());
-            }
-        }
+        Assertions.assertEquals(expectedTableSchemas, config.tableSchemas());
 
         for (int i = 0; i < expectedExporters.size(); i++) {
             var expectedExporter = expectedExporters.get(i);

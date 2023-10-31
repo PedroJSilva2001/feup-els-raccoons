@@ -81,9 +81,9 @@ public final class TableSchema {
         return this;
     }
 
-    private List<Path> getFiles() {
+    private Set<Path> getFiles() {
         List<String> globs = source.getFiles();
-        List<Path> files = new ArrayList<>();
+        Set<Path> files = new LinkedHashSet<>();
 
         for (String glob : globs) {
             try {
@@ -102,6 +102,7 @@ public final class TableSchema {
         // we assume that all columns have the same height, which should be enforced by the parser
         // hopefully :) (needs some testing)
         int columnHeight = previousMap.isEmpty() ? 0 : previousMap.values().iterator().next().size();
+        int newColumnHeight = columnHeight;
 
         for (Map.Entry<String, List<Value>> entry : currentMap.entrySet()) {
             var key = entry.getKey();
@@ -115,20 +116,20 @@ public final class TableSchema {
 
                 previousMap.put(key, column);
             }
-        }
 
-        int newColumnHeight = previousMap.isEmpty() ? 0 : previousMap.values().iterator().next().size();
+            newColumnHeight = Math.max(newColumnHeight, previousMap.get(key).size());
+        }
 
         // fill in the blanks
         for (var value : previousMap.values()) {
             if (value.size() < newColumnHeight) {
-                value.addAll(Collections.nCopies(columnHeight - value.size(), Value.ofNull()));
+                value.addAll(Collections.nCopies(newColumnHeight - value.size(), Value.ofNull()));
             }
         }
     }
 
     private Table mapToTable(Map<String, List<Value>> columnMap, List<String> columnOrder) {
-        Table table = new Table(this.name, this.source);
+        Table table = new Table(this.name);
 
         for (String columnName : columnOrder) {
             table.addColumn(columnName);
@@ -150,13 +151,13 @@ public final class TableSchema {
     }
 
     public Table collect() {
-        List<Path> files = getFiles();
+        var orderVisitor = new NodeOrderVisitor();
 
-        NodeOrderVisitor orderVisitor = new NodeOrderVisitor();
         var nodeOrder = orderVisitor.getNodeOrder(this.nft);
         var columnMap = new HashMap<String, List<Value>>();
+        var files = getFiles();
 
-        PopulateVisitor visitor = new PopulateVisitor();
+        var visitor = new PopulateVisitor();
         for (Path file : files) {
             try (var fileReader = new FileReader(file.toFile())) {
                 var reader = new BufferedReader(fileReader);

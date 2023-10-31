@@ -302,4 +302,36 @@ public class SchemaVisitorTest {
                 "studID_2", List.of(Value.of(3))
         ), table);
     }
+
+    @Test
+    public void testDoubleBoolNull() throws IOException {
+        var source = new YamlSource(
+                "all_test",
+                List.of("./test/pt/up/fe/els2023/files/yaml/double_bool_null.yaml"));
+
+        var tableSchema = new TableSchema("all_test")
+                .source(source)
+                .nft(
+                        new PropertyNode("new", new ColumnNode("bool")),
+                        new PropertyNode("old", new ColumnNode("false")),
+                        new PropertyNode("null-val", new ColumnNode("null")),
+                        new PropertyNode("float", new NullNode())
+                );
+
+        var fileReader = new FileReader(source.getFiles().get(0));
+        var reader = new BufferedReader(fileReader);
+
+        var rootNode = tableSchema.source().getResourceParser().parse(reader);
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        var table = visitor.populateFromSource(Path.of("/home/Documents/double_bool_null.yaml"), rootNode, tableSchema.nft());
+
+        Assertions.assertEquals(4, table.size());
+        Assertions.assertEquals(Map.of(
+                "bool", List.of(Value.of(true)),
+                "false", List.of(Value.of(false)),
+                "null", List.of(Value.ofNull()),
+                "float", List.of(Value.of(1.2))
+        ), table);
+    }
 }
