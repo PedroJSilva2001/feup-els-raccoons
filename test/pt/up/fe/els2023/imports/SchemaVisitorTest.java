@@ -1,13 +1,10 @@
-package pt.up.fe.els2023;
+package pt.up.fe.els2023.imports;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.config.*;
-import pt.up.fe.els2023.imports.NodeOrderVisitor;
-import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.YamlSource;
 import pt.up.fe.els2023.table.Value;
-import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -54,17 +51,17 @@ public class SchemaVisitorTest {
                 );
 
         NodeOrderVisitor visitor = new NodeOrderVisitor();
-        List<IdentityWrapper<SchemaNode>> nodes = visitor.getNodeOrder(tableSchema.nft());
+        List<SchemaNode> nodes = visitor.getNodeOrder(tableSchema.nft());
 
         Assertions.assertEquals(7, nodes.size());
 
-        Assertions.assertSame(ccpAlphaColumn, nodes.get(0).value());
-        Assertions.assertSame(classWeightColumn, nodes.get(1).value());
-        Assertions.assertSame(criterionColumn, nodes.get(2).value());
-        Assertions.assertSame(minSamplesSplitColumn, nodes.get(3).value());
-        Assertions.assertSame(featureImportancesColumn, nodes.get(4).value());
-        Assertions.assertSame(nodesColumn, nodes.get(5).value());
-        Assertions.assertSame(paramsColumn, nodes.get(6).value());
+        Assertions.assertSame(ccpAlphaColumn, nodes.get(0));
+        Assertions.assertSame(classWeightColumn, nodes.get(1));
+        Assertions.assertSame(criterionColumn, nodes.get(2));
+        Assertions.assertSame(minSamplesSplitColumn, nodes.get(3));
+        Assertions.assertSame(featureImportancesColumn, nodes.get(4));
+        Assertions.assertSame(nodesColumn, nodes.get(5));
+        Assertions.assertSame(paramsColumn, nodes.get(6));
     }
 
     @Test

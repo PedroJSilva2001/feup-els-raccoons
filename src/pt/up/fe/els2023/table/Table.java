@@ -15,7 +15,6 @@ public class Table implements ITable {
     public Table() {
         this.name = null;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
         this.source = null;
     }
@@ -23,7 +22,6 @@ public class Table implements ITable {
     public Table(String name, TableSource source) {
         this.name = name;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
         this.source = source;
     }

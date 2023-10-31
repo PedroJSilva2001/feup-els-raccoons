@@ -1,7 +1,6 @@
 package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.*;
-import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,21 +9,21 @@ import java.util.List;
  * This visitor visits all nodes in a schema and returns them in the order they were visited.
  */
 public class NodeOrderVisitor implements NodeVisitor {
-    private final List<IdentityWrapper<SchemaNode>> nodes = new LinkedList<>();
+    private final List<SchemaNode> nodes = new LinkedList<>();
 
     @Override
     public void visit(AllContainerNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
     public void visit(AllNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
     public void visit(AllValueNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
@@ -34,7 +33,7 @@ public class NodeOrderVisitor implements NodeVisitor {
 
     @Override
     public void visit(ColumnNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
@@ -44,7 +43,7 @@ public class NodeOrderVisitor implements NodeVisitor {
 
     @Override
     public void visit(ExceptNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
@@ -66,25 +65,25 @@ public class NodeOrderVisitor implements NodeVisitor {
 
     @Override
     public void visit(NullNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
     public void visit(DirectoryNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
     public void visit(FileNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
     @Override
     public void visit(PathNode node) {
-        nodes.add(new IdentityWrapper<>(node));
+        nodes.add(node);
     }
 
-    public List<IdentityWrapper<SchemaNode>> getNodeOrder(List<SchemaNode> nft) {
+    public List<SchemaNode> getNodeOrder(List<SchemaNode> nft) {
         nodes.clear();
 
         for (var node : nft) {

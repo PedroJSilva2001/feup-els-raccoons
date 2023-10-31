@@ -50,6 +50,10 @@ public class PopulateVisitor implements NodeVisitor {
         this.traversingStack = new Stack<>();
     }
 
+    public NodeColumnMap getNodeColumnMap() {
+        return nodeColumnMap;
+    }
+
     /**
      * Populates data from a ResourceNode into tables, following a provided schema defined by SchemaNode objects.
      *
@@ -106,7 +110,7 @@ public class PopulateVisitor implements NodeVisitor {
      * @return A map where column names are associated with corresponding values.
      */
     private Map<String, List<Value>> merge() {
-        int maxColumnSize = rowValues.values().stream().anyMatch(obj -> !Objects.isNull(obj)) ? 1 : 0;
+        int maxColumnSize = rowValues.values().stream().anyMatch(obj -> !obj.isNull()) ? 1 : 0;
 
         for (var column : columnValues.entrySet()) {
             maxColumnSize = Math.max(maxColumnSize, column.getValue().size());

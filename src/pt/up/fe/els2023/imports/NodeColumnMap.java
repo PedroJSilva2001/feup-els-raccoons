@@ -1,7 +1,6 @@
 package pt.up.fe.els2023.imports;
 
 import pt.up.fe.els2023.config.SchemaNode;
-import pt.up.fe.els2023.utils.IdentityWrapper;
 
 import java.util.*;
 
@@ -58,7 +57,7 @@ public class NodeColumnMap {
      * @param nodes The list of SchemaNodes that define the order of the columns.
      * @return The ordered list of column names.
      */
-    public List<String> getOrderedColumnNames(List<IdentityWrapper<SchemaNode>> nodes) {
+    public List<String> getOrderedColumnNames(List<SchemaNode> nodes) {
         List<String> columnNames = new ArrayList<>();
         Map<IdentityWrapper<SchemaNode>, LinkedHashSet<String>> nodeColumnMap = new HashMap<>();
 
@@ -73,7 +72,12 @@ public class NodeColumnMap {
         }
 
         for (var node : nodes) {
-            columnNames.addAll(nodeColumnMap.get(node));
+            Set<String> columnNamesSet = nodeColumnMap.get(new IdentityWrapper<>(node));
+            if (columnNamesSet == null) {
+                continue;
+            }
+
+            columnNames.addAll(columnNamesSet);
         }
 
         return columnNames;
@@ -87,5 +91,28 @@ public class NodeColumnMap {
      * @param columnName The column name
      */
     private record NodeColumnPair(IdentityWrapper<SchemaNode> node, String columnName) {
+    }
+
+    /**
+     * This class wraps a value and compares it by identity.
+     *
+     * @param value The value to wrap.
+     * @param <T>   The type of the value.
+     */
+    private record IdentityWrapper<T>(T value) {
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IdentityWrapper<?> that = (IdentityWrapper<?>) o;
+
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(value);
+        }
     }
 }
