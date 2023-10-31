@@ -97,7 +97,7 @@ public final class TableSchema {
         return files;
     }
 
-    // it isn't pretty to alter the maps in place, but it should be faster than creating new maps
+    // it isn't pretty to alter the maps in place, but it should be faster than creating new maps so ¯\_(ツ)_/¯
     private void concatColumnMaps(Map<String, List<Value>> previousMap, Map<String, List<Value>> currentMap) {
         // we assume that all columns have the same height, which should be enforced by the parser
         // hopefully :) (needs some testing)

@@ -125,13 +125,14 @@ public class SchemaVisitorTest {
         var rootNode = tableSchema.source().getResourceParser().parse(reader);
 
         PopulateVisitor visitor = new PopulateVisitor();
-        var table = visitor.populateFromSource(Path.of("/home/Documents/students.yaml"), rootNode, tableSchema.nft());
+        Path path = Path.of("/home/Documents/students.yaml");
+        var table = visitor.populateFromSource(path, rootNode, tableSchema.nft());
 
         Assertions.assertEquals(3, table.size());
         Assertions.assertEquals(Map.of(
                 "File", List.of(Value.of("students.yaml")),
                 "Directory", List.of(Value.of("Documents")),
-                "Path", List.of(Value.of("/home/Documents/students.yaml"))
+                "Path", List.of(Value.of(path.toString()))
         ), table);
     }
 
