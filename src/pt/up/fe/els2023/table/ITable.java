@@ -3,6 +3,7 @@ package pt.up.fe.els2023.table;
 import pt.up.fe.els2023.operations.BeginTableCascade;
 import pt.up.fe.els2023.sources.TableSource;
 
+import java.util.Iterator;
 import java.util.List;
 
 public interface ITable {
@@ -33,4 +34,6 @@ public interface ITable {
     boolean containsColumn(String name);
 
     int getIndexOfColumn(String name);
+
+    Iterator<Row> rowIterator();
 }

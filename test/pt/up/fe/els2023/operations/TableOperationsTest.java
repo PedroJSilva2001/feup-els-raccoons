@@ -21,6 +21,10 @@ public class TableOperationsTest {
 
     private ITable table2;
 
+    private ITable table3;
+
+    private ITable table4;
+
     @BeforeEach
     public void setup() {
         table1 = new Table();
@@ -52,6 +56,27 @@ public class TableOperationsTest {
         table2.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of(false)));
         table2.addRow(List.of(Value.of(""), Value.of(332), Value.of(true), Value.of(true)));
         table2.addRow(List.of(Value.of(""), Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
+
+
+        table3 = new Table();
+
+        table3.addColumn("Col1");
+        table3.addColumn("Col2");
+
+        table3.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes")));
+        table3.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no")));
+        table3.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe")));
+        table3.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull()));
+
+
+
+        table4 = new Table();
+
+        table4.addColumn("Col1");
+        table4.addColumn("Col1_1");
+
+        table4.addRow(List.of(Value.of(""), Value.of(false), Value.of(true)));
+        table4.addRow(List.of(Value.of(""), Value.of(true), Value.of(false)));
 
     }
 
@@ -228,5 +253,46 @@ public class TableOperationsTest {
 
 
         Assertions.assertEquals(table2, table2.btc().reject().get());
+    }
+
+    @Test
+    public void testConcatHorizontal() {
+        var expectedTable = new Table(false);
+
+        expectedTable.addColumn("File");
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addColumn("File_1");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addColumn("Col1_1_1");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes"), Value.of(""), Value.of(false), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no"), Value.of(""), Value.of(true), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.ofNull()));
+
+        Assertions.assertEquals(expectedTable, table3.btc().concatHorizontal(table4).get());
+
+
+
+        expectedTable = new Table(false);
+        expectedTable.addColumn("File");
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+
+        expectedTable.addColumn("File_1");
+        expectedTable.addColumn("Col1_2");
+        expectedTable.addColumn("Col2");
+
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.of(true), Value.of(""), Value.of(1L), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.of(false), Value.of(""), Value.of(2L), Value.of("no")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.of(4L), Value.ofNull()));
+
+        Assertions.assertEquals(expectedTable, table4.btc().concatHorizontal(table3).get());
+
+
     }
 }

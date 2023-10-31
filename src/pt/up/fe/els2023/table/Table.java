@@ -19,6 +19,16 @@ public class Table implements ITable {
         this.source = null;
     }
 
+    public Table(boolean withFileColumn) {
+        this.name = null;
+        this.columns = new ArrayList<>();
+        if (withFileColumn) {
+            this.columns.add(new Column("File"));
+        }
+        this.rows = new ArrayList<>();
+        this.source = null;
+    }
+
     public Table(String name, TableSource source) {
         this.name = name;
         this.columns = new ArrayList<>();
@@ -184,5 +194,28 @@ public class Table implements ITable {
     @Override
     public boolean containsColumn(String name) {
         return getIndexOfColumn(name) != -1;
+    }
+
+    @Override
+    public Iterator<Row> rowIterator() {
+        return new RowIterator();
+    }
+
+    private class RowIterator implements Iterator<Row> {
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < getRowNumber();
+        }
+
+        @Override
+        public Row next() {
+            if (!hasNext()) {
+                return null;
+            }
+
+            return getRow(currentIndex++);
+        }
     }
 }

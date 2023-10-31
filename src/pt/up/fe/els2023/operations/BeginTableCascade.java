@@ -98,6 +98,89 @@ public class BeginTableCascade {
         return null;
     }
 
+    public BeginTableCascade concatVertical(ITable ...others) {
+        // stacked on top of each other
+        return null;
+    }
+
+    public BeginTableCascade concatHorizontal(ITable ...others) {
+        // side by side
+
+        ITable newTable = new Table(table);
+
+        Map<String, Integer> columnNameSuffixCount = new HashMap<>();
+
+        for (var column : table.getColumns()) {
+            columnNameSuffixCount.put(column.getName(), 0);
+        }
+
+        for (var other : others) {
+
+            for (var column : other.getColumns()) {
+                var name = column.getName();
+                if(columnNameSuffixCount.containsKey(name)){
+                    int count = columnNameSuffixCount.get(name);
+                    var suffixedName = name + "_" + (count + 1);
+
+                    while(columnNameSuffixCount.containsKey(suffixedName)){
+                        count++;
+                        suffixedName = name + "_" + (count + 1);
+                    }
+
+                    newTable.addColumn(suffixedName);
+                    columnNameSuffixCount.put(suffixedName, 0);
+                    columnNameSuffixCount.put(name,count);
+                }else{
+                    newTable.addColumn(name);
+                    columnNameSuffixCount.put(name, 0);
+                }
+            }
+
+            var it1 = table.rowIterator();
+            var it2 = other.rowIterator();
+
+            while (it1.hasNext() && it2.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row1 = it1.next();
+                var row2 = it2.next();
+
+                row.addAll(row1.getValues());
+                row.addAll(row2.getValues());
+
+                newTable.addRow(row);
+            }
+
+            while (it1.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row1 = it1.next();
+
+                List<Value> nulls = Collections.nCopies(other.getColumnNumber(), Value.ofNull());
+
+                row.addAll(row1.getValues());
+                row.addAll(nulls);
+
+                newTable.addRow(row);
+            }
+
+            while (it2.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row2 = it2.next();
+
+                List<Value> nulls = Collections.nCopies(table.getColumnNumber(), Value.ofNull());
+
+                row.addAll(nulls);
+                row.addAll(row2.getValues());
+
+                newTable.addRow(row);
+            }
+
+        }
+        return new BeginTableCascade(newTable);
+    }
+
     public long count(String column) throws ColumnNotFoundException {
         var col = table.getColumn(column);
 
