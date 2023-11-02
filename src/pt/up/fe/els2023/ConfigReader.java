@@ -121,6 +121,14 @@ public class ConfigReader {
                 List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
                 return new RejectOperation(columns);
             }
+            case "export" -> {
+                operationNode.put("name", operationNode.get("table"));
+                operationNode.put("filename", operationNode.get("result"));
+                var exporterBuilder = parseExportNode(operationNode);
+                if (exporterBuilder != null) {
+                    return new ExportOperation(exporterBuilder.build());
+                }
+            }
             default -> System.out.println("Unsupported operation");
         }
         return null;
@@ -185,48 +193,61 @@ public class ConfigReader {
         ArrayList<Map<String, Object>> exporters = (ArrayList<Map<String, Object>>) yamlData.get("export");
 
         for (Map<String, Object> export : exporters) {
-            TableExporterBuilder<?> configExporterBuilder;
-            // TODO: VALIDATE
-            switch ((String) export.get("format")) {
-                case "csv" -> {
-                    CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                    if (export.containsKey("separator")) {
-                        csvExporterBuilder.setSeparator((String) export.get("separator"));
-                    }
-
-                    configExporterBuilder = csvExporterBuilder;
-                }
-                case "tsv" -> configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                case "html" -> {
-                    HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                    if (export.containsKey("title")) {
-                        htmlExporterBuilder.setTitle((String) export.get("title"));
-                    }
-                    if (export.containsKey("style")) {
-                        htmlExporterBuilder.setStyle((String) export.get("style"));
-                    }
-                    if (export.containsKey("exportFullHtml")) {
-                        htmlExporterBuilder.setExportFullHtml((boolean) export.get("exportFullHtml"));
-                    }
-
-                    configExporterBuilder = htmlExporterBuilder;
-                }
-                case "latex" -> configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                case "markdown", "md" -> configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                default -> {
-                    //TODO: SPECIFY FORMAT AND LINE
-                    System.out.println("Unsupported format");
-                    continue;
-                }
+            TableExporterBuilder<?> configExporterBuilder = parseExportNode(export);
+            if (configExporterBuilder == null) {
+                continue;
             }
 
-            // TODO: use enum for endOfLine, for example CR, LF, CRLF
-            if (export.containsKey("endOfLine")) {
-                configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
-            }
             configExporter.add(configExporterBuilder.build());
         }
 
         return configExporter;
+    }
+
+    private TableExporterBuilder<?> parseExportNode(Map<String, Object> export) {
+        TableExporterBuilder<?> configExporterBuilder;
+        // TODO: VALIDATE
+        switch ((String) export.get("format")) {
+            case "csv" -> {
+                CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                if (export.containsKey("separator")) {
+                    csvExporterBuilder.setSeparator((String) export.get("separator"));
+                }
+
+                configExporterBuilder = csvExporterBuilder;
+            }
+            case "tsv" ->
+                    configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            case "html" -> {
+                HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                if (export.containsKey("title")) {
+                    htmlExporterBuilder.setTitle((String) export.get("title"));
+                }
+                if (export.containsKey("style")) {
+                    htmlExporterBuilder.setStyle((String) export.get("style"));
+                }
+                if (export.containsKey("exportFullHtml")) {
+                    htmlExporterBuilder.setExportFullHtml((boolean) export.get("exportFullHtml"));
+                }
+
+                configExporterBuilder = htmlExporterBuilder;
+            }
+            case "latex" ->
+                    configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            case "markdown", "md" ->
+                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            default -> {
+                //TODO: SPECIFY FORMAT AND LINE
+                System.out.println("Unsupported format");
+                return null;
+            }
+        }
+
+        // TODO: use enum for endOfLine, for example CR, LF, CRLF
+        if (export.containsKey("endOfLine")) {
+            configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
+        }
+
+        return configExporterBuilder;
     }
 }

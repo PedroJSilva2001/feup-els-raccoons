@@ -1,7 +1,6 @@
 package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             });
-        } catch (IOException | ColumnNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
