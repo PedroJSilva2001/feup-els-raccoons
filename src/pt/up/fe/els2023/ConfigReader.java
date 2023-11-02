@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.config.TableSchema;
 import pt.up.fe.els2023.export.*;
+import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.sources.YamlSource;
@@ -14,10 +15,7 @@ import pt.up.fe.els2023.sources.YamlSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings(value = "unchecked")
 public class ConfigReader {
@@ -42,10 +40,80 @@ public class ConfigReader {
 
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
         List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
-        // TODO: operations
+        List<Pipeline> configOperations = parseOperations(yamlData);
         List<TableExporter> configExporter = parseExporters(yamlData);
 
-        return new Config(configTableSources, configTableSchemas, null, configExporter);
+        return new Config(configTableSources, configTableSchemas, configOperations, configExporter);
+    }
+
+    private List<Pipeline> parseOperations(Map<String, Object> yamlData) {
+        if (!yamlData.containsKey("operations")) {
+            System.out.println("No operations found");
+            return null;
+        }
+
+        List<Pipeline> configOperations = new ArrayList<>();
+        List<Map<String, Object>> operations = (ArrayList<Map<String, Object>>) yamlData.get("operations");
+
+        if (operations == null) {
+            System.out.println("No operations found");
+            return null;
+        }
+
+        for (Map<String, Object> operation : operations) {
+            String initialTable = null;
+            String result = null;
+            List<TableOperation> ops = new ArrayList<>();
+            if (operation.containsKey("pipeline")) {
+                Map<String, Object> pipeline = (Map<String, Object>) operation.get("pipeline");
+                initialTable = (String) pipeline.get("table");
+                result = (String) pipeline.get("result");
+                for (Map<String, Object> pipelineOperation : (ArrayList<Map<String, Object>>) pipeline.get("operations")) {
+                    TableOperation op = parseOperationNode(pipelineOperation);
+                    if (op != null) {
+                        ops.add(op);
+                    }
+                }
+            } else if (operation.containsKey("operation")) {
+                TableOperation op = parseOperationNode(operation);
+                if (op != null) {
+                    initialTable = (String) operation.get("table");
+                    result = (String) operation.get("result");
+                    ops.add(op);
+                }
+            } else {
+                System.out.println("No operation found");
+            }
+
+            if (!ops.isEmpty() && initialTable != null && result != null) {
+                Pipeline pipeline = new Pipeline(initialTable, result, ops);
+                configOperations.add(pipeline);
+            }
+        }
+
+        return configOperations;
+    }
+
+    private TableOperation parseOperationNode(Map<String, Object> operationNode) {
+        switch ((String) operationNode.get("operation")) {
+            case "maxArg" -> {
+                return new MaxArgOperation((String) operationNode.get("columns"));
+            }
+            case "minArg" -> {
+                return new MinArgOperation((String) operationNode.get("columns"));
+            }
+            case "concat" -> {
+                Object additionalTablesObject = operationNode.get("additionalTables");
+                List<String> additionalTables = additionalTablesObject instanceof String ? new ArrayList<>(List.of((String) additionalTablesObject)) : (ArrayList<String>) additionalTablesObject;
+                if (Objects.equals(operationNode.get("axis"), "horizontal")) {
+                    return new ConcatHorizontalOperation(additionalTables);
+                } else if (Objects.equals(operationNode.get("axis"), "vertical")) {
+                    System.out.println("Unsupported operation");
+                }
+            }
+            default -> System.out.println("Unsupported operation");
+        }
+        return null;
     }
 
     private Map<String, TableSource> parseTableSources(Map<String, Object> yamlData) {

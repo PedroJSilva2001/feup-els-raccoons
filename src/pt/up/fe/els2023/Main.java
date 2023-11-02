@@ -1,7 +1,7 @@
 package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 
 import java.io.IOException;
@@ -23,6 +23,13 @@ public class Main {
             Interpreter interpreter = new Interpreter();
             var tables = interpreter.buildTables(config);
 
+            var operations = config.operations();
+            for (var pipeline : operations) {
+                var btcInterpreter = pipeline.updateBTC(tables);
+                var resultingTable = btcInterpreter.getBtc().get();
+                tables.put(pipeline.getResult(), resultingTable);
+            }
+
             config.exporters().forEach((exporter) -> {
                 try {
                     exporter.export(tables);
@@ -32,7 +39,7 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             });
-        } catch (IOException e) {
+        } catch (IOException | ColumnNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
