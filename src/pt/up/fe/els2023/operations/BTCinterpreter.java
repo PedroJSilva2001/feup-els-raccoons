@@ -32,6 +32,14 @@ public class BTCinterpreter {
         btc = operation.execute(btc, additionalTables);
     }
 
+    public void apply(SelectOperation operation) throws ColumnNotFoundException {
+        btc = operation.execute(btc);
+    }
+
+    public void apply(RejectOperation operation) throws ColumnNotFoundException {
+        btc = operation.execute(btc);
+    }
+
     public BeginTableCascade getBtc() {
         return btc;
     }

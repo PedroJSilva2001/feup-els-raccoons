@@ -111,6 +111,16 @@ public class ConfigReader {
                     System.out.println("Unsupported operation");
                 }
             }
+            case "select" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                return new SelectOperation(columns);
+            }
+            case "reject" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                return new RejectOperation(columns);
+            }
             default -> System.out.println("Unsupported operation");
         }
         return null;
