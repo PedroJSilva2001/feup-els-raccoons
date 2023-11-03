@@ -102,11 +102,66 @@ public class BeginTableCascade {
         return null;
     }
 
+
     public BeginTableCascade concatVertical(ITable ...others) {
         // stacked on top of each other
-        return null;
+
+        ITable newTable = new Table(table);
+
+        for (var other : others) {
+            // ignores repeated columns
+            for (var column : other.getColumns()) {
+                var name = column.getName();
+                newTable.addColumn(name);
+            }
+        }
+
+        var tableRowIt = table.rowIterator();
+
+        while (tableRowIt.hasNext()) {
+            var row = new ArrayList<>(tableRowIt.next().getValues());
+
+            // the nulls are always added to the end of the row because the first table will produce
+            // the first n unique columns, where n is the number of columns of the first table
+            List<Value> nulls = Collections.nCopies(newTable.getColumnNumber() - table.getColumnNumber(), Value.ofNull());
+
+            row.addAll(nulls);
+
+            newTable.addRow(row);
+        }
+
+        for (var other : others) {
+            var otherRowIt = other.rowIterator();
+
+            var otherColumnNameIndexMapping = new HashMap<String, Integer>();
+
+            for (int i = 0; i < other.getColumnNumber(); i++) {
+                otherColumnNameIndexMapping.put(other.getColumn(i).getName(), i);
+            }
+
+            while (otherRowIt.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var otherRow = otherRowIt.next();
+
+                for (var newTableColumn : newTable.getColumns()) {
+                    var name = newTableColumn.getName();
+
+                    if (otherColumnNameIndexMapping.containsKey(name)) {
+                        row.add(otherRow.get(otherColumnNameIndexMapping.get(name)));
+                    } else {
+                        row.add(Value.ofNull());
+                    }
+                }
+
+                newTable.addRow(row);
+            }
+        }
+
+        return new BeginTableCascade(newTable);
     }
 
+    // TODO: optimize O(C*R) -> O(C + R)
     public BeginTableCascade concatHorizontal(ITable ...others) {
         // side by side
 
@@ -134,7 +189,7 @@ public class BeginTableCascade {
                     newTable.addColumn(suffixedName);
                     columnNameSuffixCount.put(suffixedName, 0);
                     columnNameSuffixCount.put(name,count);
-                }else{
+                } else{
                     newTable.addColumn(name);
                     columnNameSuffixCount.put(name, 0);
                 }
@@ -180,8 +235,8 @@ public class BeginTableCascade {
 
                 newTable.addRow(row);
             }
-
         }
+
         return new BeginTableCascade(newTable);
     }
 

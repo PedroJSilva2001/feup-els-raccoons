@@ -25,6 +25,11 @@ public class TableOperationsTest {
     private ITable table3;
 
     private ITable table4;
+
+    private ITable table5;
+
+    private ITable table6;
+
     @BeforeEach
     public void setup() {
         table1 = new Table();
@@ -78,6 +83,24 @@ public class TableOperationsTest {
         table4.addRow(List.of(Value.of(""), Value.of(false), Value.of(true)));
         table4.addRow(List.of(Value.of(""), Value.of(true), Value.of(false)));
 
+
+
+        table5 = new Table(false);
+
+        table5.addColumn("ColA");
+        table5.addColumn("ColB");
+
+        table5.addRow(List.of(Value.of("ada"), Value.of(false)));
+        table5.addRow(List.of(Value.of(2L), Value.of(true)));
+
+
+        table6 = new Table(false);
+
+        table6.addColumn("Col1");
+        table6.addColumn("Col1_1");
+
+        table6.addRow(List.of(Value.of(false), Value.of(true)));
+        table6.addRow(List.of(Value.of(true), Value.of(false)));
     }
 
     @Test
@@ -153,7 +176,6 @@ public class TableOperationsTest {
         expectedTable.addRow(Stream.of(Value.of(6L), Value.of(5L), Value.ofNull()).collect(Collectors.toList()));
 
         Assertions.assertEquals(expectedTable, newTable);
-
 
 
         newTable = table1.btc().where(
@@ -254,6 +276,75 @@ public class TableOperationsTest {
 
 
         Assertions.assertEquals(table2, table2.btc().reject().get());
+    }
+
+    @Test
+    public void testConcatVertical() {
+        var expectedTable = new Table(true);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col1_1");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.ofNull(), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.ofNull(), Value.of(false)));
+
+        Assertions.assertEquals(expectedTable, table3.btc().concatVertical(table4).get());
+
+
+        expectedTable = new Table(true);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.of(true), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.of(false), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.ofNull(), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.ofNull(), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
+
+
+
+        expectedTable = new Table(false);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addColumn("ColA");
+        expectedTable.addColumn("ColB");
+
+
+        expectedTable.addRow(List.of(Value.of(false), Value.of(true), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(false), Value.ofNull(), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of("ada"), Value.of(false)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(2L), Value.of(true)));
+
+        Assertions.assertEquals(expectedTable, table6.btc().concatVertical(table5).get());
+
+
+
+        expectedTable = new Table(false);
+
+        expectedTable.addColumn("ColA");
+        expectedTable.addColumn("ColB");
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+
+
+        expectedTable.addRow(List.of(Value.of("ada"), Value.of(false), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of(true), Value.ofNull(), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(false), Value.of(true)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(true), Value.of(false)));
+
+        Assertions.assertEquals(expectedTable, table5.btc().concatVertical(table6).get());
     }
 
     @Test
