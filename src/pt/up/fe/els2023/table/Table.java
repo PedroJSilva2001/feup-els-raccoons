@@ -1,7 +1,5 @@
 package pt.up.fe.els2023.table;
 
-import pt.up.fe.els2023.sources.TableSource;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,22 +8,17 @@ public class Table implements ITable {
     private final String name;
     private final List<Column> columns;
     private final List<Row> rows;
-    private final TableSource source;
 
     public Table() {
         this.name = null;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
-        this.source = null;
     }
 
-    public Table(String name, TableSource source) {
+    public Table(String name) {
         this.name = name;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
-        this.source = source;
     }
 
     @Override
@@ -41,11 +34,6 @@ public class Table implements ITable {
     @Override
     public List<Row> getRows() {
         return Collections.unmodifiableList(rows);
-    }
-
-    @Override
-    public TableSource getSource() {
-        return source;
     }
 
     @Override

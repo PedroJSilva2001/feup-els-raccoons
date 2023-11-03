@@ -5,6 +5,7 @@ import pt.up.fe.els2023.table.ITable;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Objects;
 
 public class HtmlExporter extends TableExporter {
     private final String title;
@@ -84,5 +85,18 @@ public class HtmlExporter extends TableExporter {
         } else {
             writer.write(body.toString());
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof HtmlExporter that)) return false;
+        if (!super.equals(o)) return false;
+        return exportFullHtml == that.exportFullHtml && Objects.equals(title, that.title) && Objects.equals(style, that.style);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, style, exportFullHtml);
     }
 }

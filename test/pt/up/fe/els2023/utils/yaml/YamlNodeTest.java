@@ -238,6 +238,7 @@ public class YamlNodeTest {
         YamlNode arrayNode = yamlNode("- item1\n- item2");
         Assertions.assertTrue(arrayNode.isContainer());
     }
+
     @Test
     public void testGetStringProperty() throws IOException {
         YamlNode objectNode = yamlNode("name: John\nage: 30");

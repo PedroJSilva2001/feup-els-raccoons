@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0'
+    }
+}
+
 plugins {
   
 	// For runnable JARs
@@ -5,10 +14,9 @@ plugins {
  	id 'distribution'
 }
 
-
 // Java project
 apply plugin: 'java'
-
+apply plugin: 'info.solidsoft.pitest'
 
 // Repositories providers
 repositories {
@@ -24,6 +32,12 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.4.0")
     testImplementation(platform('org.junit:junit-bom:5.10.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
+}
+
+pitest {
+    junit5PluginVersion = '1.2.1'
+    pitestVersion = '1.15.2'
+    targetClasses = ['pt.up.fe.els2023.*']
 }
 
 test {
