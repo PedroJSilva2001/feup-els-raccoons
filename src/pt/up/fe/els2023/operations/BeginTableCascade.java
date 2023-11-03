@@ -252,6 +252,16 @@ public class BeginTableCascade {
         ).count();
     }
 
+    public Map<String, Long> count(String ...columns) throws ColumnNotFoundException {
+        Map<String, Long> counts = new HashMap<>();
+
+        for (var column : columns) {
+            counts.put(column, count(column));
+        }
+
+        return counts;
+    }
+
     public Optional<Value> max(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
 
@@ -262,6 +272,16 @@ public class BeginTableCascade {
         var commonNumberRep = colValues.get(0).getType();
 
         return colValues.stream().max(commonNumberRep.comparator());
+    }
+
+    public Map<String, Optional<Value>> max(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> maxes = new HashMap<>();
+
+        for (var column : columns) {
+            maxes.put(column, max(column));
+        }
+
+        return maxes;
     }
 
     public Optional<Value> min(String column) throws ColumnNotFoundException {
@@ -276,6 +296,16 @@ public class BeginTableCascade {
         return colValues.stream().min(commonNumberRep.comparator());
     }
 
+    public Map<String, Optional<Value>> min(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> mins = new HashMap<>();
+
+        for (var column : columns) {
+            mins.put(column, min(column));
+        }
+
+        return mins;
+    }
+
     public Optional<Value> sum(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
 
@@ -287,6 +317,17 @@ public class BeginTableCascade {
 
         return Optional.of(colValues.stream().reduce(commonNumberRep.additiveIdentity(), (v1, v2) -> Value.add(v1, v2)));
     }
+
+    public Map<String, Optional<Value>> sum(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> sums = new HashMap<>();
+
+        for (var column : columns) {
+            sums.put(column, sum(column));
+        }
+
+        return sums;
+    }
+
 
     public Optional<Value> mean(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
@@ -306,12 +347,42 @@ public class BeginTableCascade {
         return Optional.of(sum.divide(Value.of(colValues.size())));
     }
 
+    public Map<String, Optional<Value>> mean(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> means = new HashMap<>();
+
+        for (var column : columns) {
+            means.put(column, mean(column));
+        }
+
+        return means;
+    }
+
     public Optional<Value> std(String column) {
         return Optional.empty();
     }
 
+    public Map<String, Optional<Value>> std(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> stds = new HashMap<>();
+
+        for (var column : columns) {
+            stds.put(column, mean(column));
+        }
+
+        return stds;
+    }
+
     public Optional<Value> var(String column) {
         return Optional.empty();
+    }
+
+    public Map<String, Optional<Value>> var(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> vars = new HashMap<>();
+
+        for (var column : columns) {
+            vars.put(column, mean(column));
+        }
+
+        return vars;
     }
 
     private List<Value> getColumnWithCommonNumberRep(String column) throws ColumnNotFoundException {
