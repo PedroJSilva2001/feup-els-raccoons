@@ -230,6 +230,8 @@ public class Value {
     private final Object value;
     private final Type type;
 
+    private static final MathContext defaultMathContext = new MathContext(1000);
+
     private Value(Object value, Type type) {
         this.value = value;
         this.type = type;
@@ -363,7 +365,7 @@ public class Value {
         return addS(this, v2);
     }
 
-    public static Value divideS(Value nume, Value denom) {
+    public static Value divideS(Value nume, Value denom, MathContext ctx) {
         var commonNumberRep = Type.mostGeneralNumberRep(nume.type, denom.type);
 
         if (commonNumberRep == null) {
@@ -386,11 +388,15 @@ public class Value {
                                     (BigInteger) denomCasted.getValue()));
             case BIG_DECIMAL -> Value.of(((BigDecimal)thisCasted.getValue())
                     .divide(
-                            (BigDecimal) denomCasted.getValue(), new MathContext(1000)));
+                            (BigDecimal) denomCasted.getValue(), ctx));
         };
     }
 
+    public Value divide(Value v2, MathContext ctx) {
+        return divideS(this, v2, ctx);
+    }
+
     public Value divide(Value v2) {
-        return divideS(this, v2);
+        return divideS(this, v2, defaultMathContext);
     }
 }
