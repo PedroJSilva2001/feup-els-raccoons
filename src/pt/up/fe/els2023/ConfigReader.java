@@ -96,11 +96,11 @@ public class ConfigReader {
 
     private TableOperation parseOperationNode(Map<String, Object> operationNode) {
         switch ((String) operationNode.get("operation")) {
-            case "maxArg" -> {
-                return new MaxArgOperation((String) operationNode.get("columns"));
+            case "argMax" -> {
+                return new ArgMaxOperation((String) operationNode.get("columns"));
             }
-            case "minArg" -> {
-                return new MinArgOperation((String) operationNode.get("columns"));
+            case "argMin" -> {
+                return new ArgMinOperation((String) operationNode.get("columns"));
             }
             case "concat" -> {
                 Object additionalTablesObject = operationNode.get("additionalTables");
@@ -128,6 +128,9 @@ public class ConfigReader {
                 if (exporterBuilder != null) {
                     return new ExportOperation(exporterBuilder.build());
                 }
+            }
+            case "where" -> {
+                return new WhereOperation((String) operationNode.get("condition"));
             }
             default -> System.out.println("Unsupported operation");
         }

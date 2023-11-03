@@ -3,11 +3,11 @@ package pt.up.fe.els2023.operations;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.table.Table;
 
-public class MinArgOperation implements TableOperation {
+public class ArgMaxOperation implements TableOperation {
 
     private final String columnName;
 
-    public MinArgOperation(String columnName) {
+    public ArgMaxOperation(String columnName) {
         this.columnName = columnName;
     }
 
@@ -16,15 +16,15 @@ public class MinArgOperation implements TableOperation {
     }
 
     public BeginTableCascade execute(BeginTableCascade btc) throws ColumnNotFoundException {
-        var minValue = btc.min(columnName);
+        var maxValue = btc.max(columnName);
 
-        if (minValue.isEmpty()) {
+        if (maxValue.isEmpty()) {
             var table = new Table();
             var firstRow = btc.get().getRows().get(0);
             table.addRow(firstRow.getValues());
             return new BeginTableCascade(table);
         } else {
-            return btc.where(rowWrapper -> rowWrapper.get(columnName).equals(minValue.get()));
+            return btc.where(rowWrapper -> rowWrapper.get(columnName).equals(maxValue.get()));
         }
     }
 }
