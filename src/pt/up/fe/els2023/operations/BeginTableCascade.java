@@ -285,7 +285,7 @@ public class BeginTableCascade {
 
         var commonNumberRep = colValues.get(0).getType();
 
-        return Optional.of(colValues.stream().reduce(commonNumberRep.additiveIdentity(), Value::addS));
+        return Optional.of(colValues.stream().reduce(commonNumberRep.additiveIdentity(), (v1, v2) -> Value.add(v1, v2)));
     }
 
     public Optional<Value> mean(String column) throws ColumnNotFoundException {

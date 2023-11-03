@@ -336,7 +336,7 @@ public class Value {
     }
 
     // TODO refactor ops
-    public static Value addS(Value v1, Value v2) throws IllegalArgumentException {
+    public static Value add(Value v1, Value v2) throws IllegalArgumentException {
         if (!v1.isNumber() || !v2.isNumber()) {
             throw new IllegalArgumentException("Cannot add non-numbers");
         }
@@ -362,10 +362,10 @@ public class Value {
     }
 
     public Value add(Value v2) throws IllegalArgumentException {
-        return addS(this, v2);
+        return add(this, v2);
     }
 
-    public static Value divideS(Value nume, Value denom, MathContext ctx) {
+    public static Value divide(Value nume, Value denom, MathContext ctx) {
         var commonNumberRep = Type.mostGeneralNumberRep(nume.type, denom.type);
 
         if (commonNumberRep == null) {
@@ -393,10 +393,10 @@ public class Value {
     }
 
     public Value divide(Value v2, MathContext ctx) {
-        return divideS(this, v2, ctx);
+        return divide(this, v2, ctx);
     }
 
     public Value divide(Value v2) {
-        return divideS(this, v2, defaultMathContext);
+        return divide(this, v2, defaultMathContext);
     }
 }
