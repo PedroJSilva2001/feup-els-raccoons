@@ -213,7 +213,7 @@ public class TableOperationsTest {
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
 
-        expectedTable = new Table();
+        expectedTable = new Table(false);
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
@@ -227,9 +227,10 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
 
 
-        expectedTable = new Table();
+        expectedTable = new Table(false);
 
         Assertions.assertEquals(expectedTable, table2.btc().select().get());
+
     }
 
     @Test
