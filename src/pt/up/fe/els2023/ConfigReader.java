@@ -135,6 +135,9 @@ public class ConfigReader {
             case "where" -> {
                 return new WhereOperation((String) operationNode.get("condition"));
             }
+            case "dropWhere" -> {
+                return new DropWhereOperation((String) operationNode.get("condition"));
+            }
             case "max" -> {
                 return new MaxOperation((String) operationNode.get("column"));
             }

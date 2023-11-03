@@ -53,6 +53,10 @@ public class BTCinterpreter {
         btc = operation.execute(btc, resultVariables);
     }
 
+    public void apply(DropWhereOperation operation) {
+        btc = operation.execute(btc, resultVariables);
+    }
+
     public void apply(MaxOperation operation) throws ColumnNotFoundException {
         operation.execute(btc).ifPresent(value -> valueResult = value);
     }

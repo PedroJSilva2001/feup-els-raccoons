@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public class WhereOperation implements TableOperation {
 
-    private final String predicate;
+    protected final String predicate;
 
     public WhereOperation(String predicate) {
         this.predicate = predicate;
@@ -22,7 +22,7 @@ public class WhereOperation implements TableOperation {
         return btc.where(parsePredicate(predicate, resultVariables));
     }
 
-    private Predicate<RowWrapper> parsePredicate(String predicate, Map<String, Value> resultVariables) {
+    protected Predicate<RowWrapper> parsePredicate(String predicate, Map<String, Value> resultVariables) {
         String[] parts = predicate.split(" ");
 
         if (parts.length < 3) {
@@ -32,7 +32,7 @@ public class WhereOperation implements TableOperation {
 
         Predicate<RowWrapper> result = parseCondition(parts[0] + " " + parts[1] + " " + parts[2], resultVariables);
 
-        for (int i = 4; i + 3 < parts.length; i+=4) {
+        for (int i = 3; i + 3 < parts.length; i+=4) {
             if (parts[i].equals("AND") || parts[i].equals("and") || parts[i].equals("&&")) {
                 assert result != null;
                 result = result.and(Objects.requireNonNull(parseCondition(parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3], resultVariables)));
