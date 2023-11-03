@@ -21,7 +21,7 @@ public class BeginTableCascade {
     }
 
     public BeginTableCascade select(String ...columns) throws ColumnNotFoundException {
-        ITable newTable = new Table();
+        ITable newTable = new Table(false);
 
         var columnsToKeep = new TreeSet<Integer>();
 
