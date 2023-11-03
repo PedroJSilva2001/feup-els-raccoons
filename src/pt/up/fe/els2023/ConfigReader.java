@@ -139,10 +139,13 @@ public class ConfigReader {
                 return new DropWhereOperation((String) operationNode.get("condition"));
             }
             case "max" -> {
-                return new MaxOperation((String) operationNode.get("column"));
+                return new MaxOperation((String) operationNode.get("columns"));
             }
             case "min" -> {
-                return new MinOperation((String) operationNode.get("column"));
+                return new MinOperation((String) operationNode.get("columns"));
+            }
+            case "count" -> {
+                return new CountOperation((String) operationNode.get("columns"));
             }
             default -> System.out.println("Unsupported operation");
         }

@@ -65,6 +65,10 @@ public class BTCinterpreter {
         operation.execute(btc).ifPresent(value -> valueResult = value);
     }
 
+    public void apply(CountOperation operation) throws ColumnNotFoundException {
+        valueResult = Value.of(operation.execute(btc));
+    }
+
     public Value getValueResult() {
         return valueResult;
     }
