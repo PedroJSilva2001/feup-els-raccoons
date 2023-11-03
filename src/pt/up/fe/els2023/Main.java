@@ -2,8 +2,10 @@ package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
+import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class Main {
 
@@ -22,11 +24,16 @@ public class Main {
             Interpreter interpreter = new Interpreter();
             var tables = interpreter.buildTables(config);
 
+            var resultVariables = new HashMap<String, Value>();
             var operations = config.operations();
             for (var pipeline : operations) {
-                var btcInterpreter = pipeline.updateBTC(tables);
-                var resultingTable = btcInterpreter.getBtc().get();
-                tables.put(pipeline.getResult(), resultingTable);
+                var btcInterpreter = pipeline.updateBTC(tables, resultVariables);
+                if (pipeline.getResult() != null) {
+                    tables.put(pipeline.getResult(), btcInterpreter.getBtc().get());
+                }
+                if (pipeline.getResultVariable() != null) {
+                    resultVariables.put(pipeline.getResultVariable(), btcInterpreter.getValueResult());
+                }
             }
 
             config.exporters().forEach((exporter) -> {

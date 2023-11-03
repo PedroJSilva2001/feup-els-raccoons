@@ -63,11 +63,13 @@ public class ConfigReader {
         for (Map<String, Object> operation : operations) {
             String initialTable = null;
             String result = null;
+            String resultVariable = null;
             List<TableOperation> ops = new ArrayList<>();
             if (operation.containsKey("pipeline")) {
                 Map<String, Object> pipeline = (Map<String, Object>) operation.get("pipeline");
                 initialTable = (String) pipeline.get("table");
                 result = (String) pipeline.get("result");
+                resultVariable = (String) pipeline.get("resultVar");
                 for (Map<String, Object> pipelineOperation : (ArrayList<Map<String, Object>>) pipeline.get("operations")) {
                     TableOperation op = parseOperationNode(pipelineOperation);
                     if (op != null) {
@@ -79,14 +81,15 @@ public class ConfigReader {
                 if (op != null) {
                     initialTable = (String) operation.get("table");
                     result = (String) operation.get("result");
+                    resultVariable = (String) operation.get("resultVar");
                     ops.add(op);
                 }
             } else {
                 System.out.println("No operation found");
             }
 
-            if (!ops.isEmpty() && initialTable != null && result != null) {
-                Pipeline pipeline = new Pipeline(initialTable, result, ops);
+            if (!ops.isEmpty() && initialTable != null && (result != null || resultVariable != null)) {
+                Pipeline pipeline = new Pipeline(initialTable, result, ops, resultVariable);
                 configOperations.add(pipeline);
             }
         }
@@ -131,6 +134,12 @@ public class ConfigReader {
             }
             case "where" -> {
                 return new WhereOperation((String) operationNode.get("condition"));
+            }
+            case "max" -> {
+                return new MaxOperation((String) operationNode.get("column"));
+            }
+            case "min" -> {
+                return new MinOperation((String) operationNode.get("column"));
             }
             default -> System.out.println("Unsupported operation");
         }

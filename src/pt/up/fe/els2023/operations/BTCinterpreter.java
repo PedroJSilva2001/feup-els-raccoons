@@ -3,17 +3,21 @@ package pt.up.fe.els2023.operations;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class BTCinterpreter {
     private BeginTableCascade btc;
+    private Value valueResult;
     private final Map<String, ITable> tables;
+    private final Map<String, Value> resultVariables;
 
-    public BTCinterpreter(BeginTableCascade btc, Map<String, ITable> tables) {
+    public BTCinterpreter(BeginTableCascade btc, Map<String, ITable> tables, Map<String, Value> resultVariables) {
         this.btc = btc;
         this.tables = tables;
+        this.resultVariables = resultVariables;
     }
 
     public void apply(ArgMaxOperation operation) throws ColumnNotFoundException {
@@ -46,7 +50,19 @@ public class BTCinterpreter {
     }
 
     public void apply(WhereOperation operation) {
-        btc = operation.execute(btc);
+        btc = operation.execute(btc, resultVariables);
+    }
+
+    public void apply(MaxOperation operation) throws ColumnNotFoundException {
+        operation.execute(btc).ifPresent(value -> valueResult = value);
+    }
+
+    public void apply(MinOperation operation) throws ColumnNotFoundException {
+        operation.execute(btc).ifPresent(value -> valueResult = value);
+    }
+
+    public Value getValueResult() {
+        return valueResult;
     }
 
     public BeginTableCascade getBtc() {
