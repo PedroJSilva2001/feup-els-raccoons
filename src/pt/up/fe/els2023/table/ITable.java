@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.table;
 
-import pt.up.fe.els2023.operations.BeginTableCascade;
+import pt.up.fe.els2023.operations.TableCascade;
 import pt.up.fe.els2023.sources.TableSource;
 
 import java.util.Iterator;
@@ -29,7 +29,7 @@ public interface ITable {
 
     Row getRow(int index);
 
-    BeginTableCascade btc();
+    TableCascade btc();
 
     boolean containsColumn(String name);
 

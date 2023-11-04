@@ -9,10 +9,10 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class BeginTableCascade {
+public class TableCascade {
     private final ITable table;
 
-    public BeginTableCascade(ITable table) {
+    public TableCascade(ITable table) {
         this.table = table;
     }
 
@@ -20,7 +20,7 @@ public class BeginTableCascade {
         return table;
     }
 
-    public BeginTableCascade select(String ...columns) throws ColumnNotFoundException {
+    public TableCascade select(String ...columns) throws ColumnNotFoundException {
         ITable newTable = new Table(false);
 
         var columnsToKeep = new TreeSet<Integer>();
@@ -36,7 +36,7 @@ public class BeginTableCascade {
         }
 
         if (columnsToKeep.isEmpty()) {
-            return new BeginTableCascade(newTable);
+            return new TableCascade(newTable);
         }
 
         for (var row : table.getRows()) {
@@ -49,10 +49,10 @@ public class BeginTableCascade {
             newTable.addRow(values);
         }
 
-        return new BeginTableCascade(newTable);
+        return new TableCascade(newTable);
     }
 
-    public BeginTableCascade reject(String ...columns) throws ColumnNotFoundException {
+    public TableCascade reject(String ...columns) throws ColumnNotFoundException {
         for (var column : columns) {
             if (!table.containsColumn(column)) {
                 throw new ColumnNotFoundException(column);
@@ -70,7 +70,7 @@ public class BeginTableCascade {
         return select(columnsToKeep.toArray(String[]::new));
     }
 
-    public BeginTableCascade where(Predicate<RowWrapper> predicate) {
+    public TableCascade where(Predicate<RowWrapper> predicate) {
         ITable newTable = new Table(table);
 
         for (var row : table.getRows()) {
@@ -87,23 +87,23 @@ public class BeginTableCascade {
             }
         }
 
-        return new BeginTableCascade(newTable);
+        return new TableCascade(newTable);
     }
 
-    public BeginTableCascade dropWhere(Predicate<RowWrapper> predicate) {
+    public TableCascade dropWhere(Predicate<RowWrapper> predicate) {
         return where(predicate.negate());
     }
 
-    public BeginTableCascade sort() {
+    public TableCascade sort() {
         return null;
     }
 
-    public BeginTableCascade sortDescending() {
+    public TableCascade sortDescending() {
         return null;
     }
 
 
-    public BeginTableCascade concatVertical(ITable ...others) {
+    public TableCascade concatVertical(ITable ...others) {
         // stacked on top of each other
 
         ITable newTable = new Table(table);
@@ -158,11 +158,11 @@ public class BeginTableCascade {
             }
         }
 
-        return new BeginTableCascade(newTable);
+        return new TableCascade(newTable);
     }
 
     // TODO: optimize O(C*R) -> O(C + R)
-    public BeginTableCascade concatHorizontal(ITable ...others) {
+    public TableCascade concatHorizontal(ITable ...others) {
         // side by side
 
         ITable newTable = new Table(table);
@@ -237,7 +237,7 @@ public class BeginTableCascade {
             }
         }
 
-        return new BeginTableCascade(newTable);
+        return new TableCascade(newTable);
     }
 
     public long count(String column) throws ColumnNotFoundException {

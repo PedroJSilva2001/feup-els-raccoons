@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.table;
 
-import pt.up.fe.els2023.operations.BeginTableCascade;
+import pt.up.fe.els2023.operations.TableCascade;
 import pt.up.fe.els2023.sources.TableSource;
 
 import java.util.*;
@@ -145,9 +145,10 @@ public class Table implements ITable {
     }
 
 
+    // btc = begin table cascade
     @Override
-    public BeginTableCascade btc() {
-        return new BeginTableCascade(this);
+    public TableCascade btc() {
+        return new TableCascade(this);
     }
 
     @Override
