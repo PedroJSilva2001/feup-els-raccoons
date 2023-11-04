@@ -59,32 +59,7 @@ public class Column implements Cloneable {
                 continue;
             }
 
-            assert currType != Value.Type.NULL && entry.getType() != Value.Type.NULL &&
-                    currType != Value.Type.BOOLEAN && entry.getType() != Value.Type.BOOLEAN &&
-                    currType != Value.Type.STRING && entry.getType() != Value.Type.STRING;
-
-            if (currType == entry.getType()) {
-                continue;
-            }
-
-            if ((currType == Value.Type.BIG_INTEGER && entry.getType() == Value.Type.LONG) ||
-                    (currType == Value.Type.LONG && entry.getType() == Value.Type.BIG_INTEGER)) {
-                currType = Value.Type.BIG_INTEGER;
-
-            } else if ((currType == Value.Type.BIG_DECIMAL && entry.getType() == Value.Type.DOUBLE) ||
-                    (currType == Value.Type.DOUBLE && entry.getType() == Value.Type.BIG_DECIMAL)) {
-                currType = Value.Type.BIG_DECIMAL;
-
-            } else {
-                // the following conversions:
-                //      big integer <-> big decimal
-                //      big integer <-> double
-                //      long <-> big decimal
-                //      long <-> double
-                // default to big decimal
-                currType = Value.Type.BIG_DECIMAL;
-            }
-
+            currType = Value.Type.mostGeneralNumberRep(currType, entry.getType());
         }
 
         return currType;

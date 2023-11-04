@@ -35,6 +35,10 @@ public class BeginTableCascade {
             columnsToKeep.add(table.getIndexOfColumn(column));
         }
 
+        if (columnsToKeep.isEmpty()) {
+            return new BeginTableCascade(newTable);
+        }
+
         for (var row : table.getRows()) {
             List<Value> values = new ArrayList<>();
 
@@ -98,11 +102,66 @@ public class BeginTableCascade {
         return null;
     }
 
+
     public BeginTableCascade concatVertical(ITable ...others) {
         // stacked on top of each other
-        return null;
+
+        ITable newTable = new Table(table);
+
+        for (var other : others) {
+            // ignores repeated columns
+            for (var column : other.getColumns()) {
+                var name = column.getName();
+                newTable.addColumn(name);
+            }
+        }
+
+        var tableRowIt = table.rowIterator();
+
+        while (tableRowIt.hasNext()) {
+            var row = new ArrayList<>(tableRowIt.next().getValues());
+
+            // the nulls are always added to the end of the row because the first table will produce
+            // the first n unique columns, where n is the number of columns of the first table
+            List<Value> nulls = Collections.nCopies(newTable.getColumnNumber() - table.getColumnNumber(), Value.ofNull());
+
+            row.addAll(nulls);
+
+            newTable.addRow(row);
+        }
+
+        for (var other : others) {
+            var otherRowIt = other.rowIterator();
+
+            var otherColumnNameIndexMapping = new HashMap<String, Integer>();
+
+            for (int i = 0; i < other.getColumnNumber(); i++) {
+                otherColumnNameIndexMapping.put(other.getColumn(i).getName(), i);
+            }
+
+            while (otherRowIt.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var otherRow = otherRowIt.next();
+
+                for (var newTableColumn : newTable.getColumns()) {
+                    var name = newTableColumn.getName();
+
+                    if (otherColumnNameIndexMapping.containsKey(name)) {
+                        row.add(otherRow.get(otherColumnNameIndexMapping.get(name)));
+                    } else {
+                        row.add(Value.ofNull());
+                    }
+                }
+
+                newTable.addRow(row);
+            }
+        }
+
+        return new BeginTableCascade(newTable);
     }
 
+    // TODO: optimize O(C*R) -> O(C + R)
     public BeginTableCascade concatHorizontal(ITable ...others) {
         // side by side
 
@@ -130,7 +189,7 @@ public class BeginTableCascade {
                     newTable.addColumn(suffixedName);
                     columnNameSuffixCount.put(suffixedName, 0);
                     columnNameSuffixCount.put(name,count);
-                }else{
+                } else{
                     newTable.addColumn(name);
                     columnNameSuffixCount.put(name, 0);
                 }
@@ -176,8 +235,8 @@ public class BeginTableCascade {
 
                 newTable.addRow(row);
             }
-
         }
+
         return new BeginTableCascade(newTable);
     }
 
@@ -193,6 +252,16 @@ public class BeginTableCascade {
         ).count();
     }
 
+    public Map<String, Long> count(String ...columns) throws ColumnNotFoundException {
+        Map<String, Long> counts = new HashMap<>();
+
+        for (var column : columns) {
+            counts.put(column, count(column));
+        }
+
+        return counts;
+    }
+
     public Optional<Value> max(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
 
@@ -203,6 +272,16 @@ public class BeginTableCascade {
         var commonNumberRep = colValues.get(0).getType();
 
         return colValues.stream().max(commonNumberRep.comparator());
+    }
+
+    public Map<String, Optional<Value>> max(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> maxes = new HashMap<>();
+
+        for (var column : columns) {
+            maxes.put(column, max(column));
+        }
+
+        return maxes;
     }
 
     public Optional<Value> min(String column) throws ColumnNotFoundException {
@@ -217,20 +296,93 @@ public class BeginTableCascade {
         return colValues.stream().min(commonNumberRep.comparator());
     }
 
+    public Map<String, Optional<Value>> min(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> mins = new HashMap<>();
+
+        for (var column : columns) {
+            mins.put(column, min(column));
+        }
+
+        return mins;
+    }
+
     public Optional<Value> sum(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
+
+        if (colValues.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var commonNumberRep = colValues.get(0).getType();
+
+        return Optional.of(colValues.stream().reduce(commonNumberRep.additiveIdentity(), (v1, v2) -> Value.add(v1, v2)));
+    }
+
+    public Map<String, Optional<Value>> sum(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> sums = new HashMap<>();
+
+        for (var column : columns) {
+            sums.put(column, sum(column));
+        }
+
+        return sums;
+    }
+
+
+    public Optional<Value> mean(String column) throws ColumnNotFoundException {
+        var colValues = getColumnWithCommonNumberRep(column);
+
+        if (colValues.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var sumOpt = sum(column);
+
+        if(sumOpt.isEmpty()){
+            return Optional.empty();
+        }
+
+        var sum = sumOpt.get();
+
+        return Optional.of(sum.divide(Value.of(colValues.size())));
+    }
+
+    public Map<String, Optional<Value>> mean(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> means = new HashMap<>();
+
+        for (var column : columns) {
+            means.put(column, mean(column));
+        }
+
+        return means;
+    }
+
+    public Optional<Value> std(String column) {
         return Optional.empty();
     }
 
-    public double mean(String column) {
-        return 0.0;
+    public Map<String, Optional<Value>> std(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> stds = new HashMap<>();
+
+        for (var column : columns) {
+            stds.put(column, mean(column));
+        }
+
+        return stds;
     }
 
-    public double std(String column) {
-        return 0.0;
+    public Optional<Value> var(String column) {
+        return Optional.empty();
     }
 
-    public double var(String column) {
-        return 0.0;
+    public Map<String, Optional<Value>> var(String ...columns) throws ColumnNotFoundException {
+        Map<String, Optional<Value>> vars = new HashMap<>();
+
+        for (var column : columns) {
+            vars.put(column, mean(column));
+        }
+
+        return vars;
     }
 
     private List<Value> getColumnWithCommonNumberRep(String column) throws ColumnNotFoundException {

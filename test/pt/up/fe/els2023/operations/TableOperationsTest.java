@@ -10,7 +10,10 @@ import pt.up.fe.els2023.table.Value;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +27,10 @@ public class TableOperationsTest {
     private ITable table3;
 
     private ITable table4;
+
+    private ITable table5;
+
+    private ITable table6;
 
     @BeforeEach
     public void setup() {
@@ -78,6 +85,24 @@ public class TableOperationsTest {
         table4.addRow(List.of(Value.of(""), Value.of(false), Value.of(true)));
         table4.addRow(List.of(Value.of(""), Value.of(true), Value.of(false)));
 
+
+
+        table5 = new Table(false);
+
+        table5.addColumn("ColA");
+        table5.addColumn("ColB");
+
+        table5.addRow(List.of(Value.of("ada"), Value.of(false)));
+        table5.addRow(List.of(Value.of(2L), Value.of(true)));
+
+
+        table6 = new Table(false);
+
+        table6.addColumn("Col1");
+        table6.addColumn("Col1_1");
+
+        table6.addRow(List.of(Value.of(false), Value.of(true)));
+        table6.addRow(List.of(Value.of(true), Value.of(false)));
     }
 
     @Test
@@ -155,7 +180,6 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, newTable);
 
 
-
         newTable = table1.btc().where(
                 (row) -> row.get("Col3") == null
         ).get();
@@ -168,6 +192,12 @@ public class TableOperationsTest {
         Assertions.assertEquals(12, table1.btc().count("Col1"));
         Assertions.assertEquals(10, table1.btc().count("Col2"));
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().count("Col3"));
+
+        var counts = new HashMap<String, Long>();
+        counts.put("Col1", 12L);
+        counts.put("Col2", 10L);
+
+        Assertions.assertEquals(counts, table1.btc().count("Col1", "Col2"));
     }
 
     @Test
@@ -179,6 +209,15 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(332L), table2.btc().max("Col1").get());
         Assertions.assertTrue(table2.btc().max("Col2").isEmpty());
         Assertions.assertEquals(Value.of(new BigInteger("1221")), table2.btc().max("Col3").get());
+
+
+        var maxes = new HashMap<String, Optional<Value>>();
+        maxes.put("Col1", Optional.of(Value.of(new BigDecimal("242"))));
+        maxes.put("Col2", Optional.of(Value.of(56L)));
+
+        Assertions.assertEquals(maxes, table1.btc().max("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().max("Col1", "Col2", "Col3"));
     }
 
     @Test
@@ -190,6 +229,14 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(0L), table2.btc().min("Col1").get());
         Assertions.assertTrue(table2.btc().min("Col2").isEmpty());
         Assertions.assertEquals(Value.of(new BigInteger("12")), table2.btc().min("Col3").get());
+
+        var maxes = new HashMap<String, Optional<Value>>();
+        maxes.put("Col1", Optional.of(Value.of(new BigDecimal("1"))));
+        maxes.put("Col2", Optional.of(Value.of(55L)));
+
+        Assertions.assertEquals(maxes, table1.btc().min("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().min("Col1", "Col2", "Col3"));
     }
 
     @Test
@@ -213,7 +260,7 @@ public class TableOperationsTest {
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
 
-        expectedTable = new Table();
+        expectedTable = new Table(false);
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
@@ -227,9 +274,10 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
 
 
-        expectedTable = new Table();
+        expectedTable = new Table(false);
 
         Assertions.assertEquals(expectedTable, table2.btc().select().get());
+
     }
 
     @Test
@@ -253,6 +301,75 @@ public class TableOperationsTest {
 
 
         Assertions.assertEquals(table2, table2.btc().reject().get());
+    }
+
+    @Test
+    public void testConcatVertical() {
+        var expectedTable = new Table(true);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col1_1");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.ofNull(), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.ofNull(), Value.of(false)));
+
+        Assertions.assertEquals(expectedTable, table3.btc().concatVertical(table4).get());
+
+
+        expectedTable = new Table(true);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.of(true), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.of(false), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.ofNull(), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.ofNull(), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
+
+
+
+        expectedTable = new Table(false);
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addColumn("ColA");
+        expectedTable.addColumn("ColB");
+
+
+        expectedTable.addRow(List.of(Value.of(false), Value.of(true), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(false), Value.ofNull(), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of("ada"), Value.of(false)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(2L), Value.of(true)));
+
+        Assertions.assertEquals(expectedTable, table6.btc().concatVertical(table5).get());
+
+
+
+        expectedTable = new Table(false);
+
+        expectedTable.addColumn("ColA");
+        expectedTable.addColumn("ColB");
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col1_1");
+
+
+        expectedTable.addRow(List.of(Value.of("ada"), Value.of(false), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of(true), Value.ofNull(), Value.ofNull()));
+
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(false), Value.of(true)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(true), Value.of(false)));
+
+        Assertions.assertEquals(expectedTable, table5.btc().concatVertical(table6).get());
     }
 
     @Test
@@ -292,7 +409,44 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.of(4L), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, table4.btc().concatHorizontal(table3).get());
+    }
 
+    @Test
+    public void testSum() throws ColumnNotFoundException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), table1.btc().sum("Col1").get());
+        Assertions.assertEquals(Value.of(222), table1.btc().sum("Col2").get());
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().sum("Col3"));
 
+        Assertions.assertEquals(Value.of(393L), table2.btc().sum("Col1").get());
+        Assertions.assertTrue(table2.btc().sum("Col2").isEmpty());
+        Assertions.assertEquals(Value.of(new BigInteger("1356")), table2.btc().sum("Col3").get());
+
+        var maxes = new HashMap<String, Optional<Value>>();
+        maxes.put("Col1", Optional.of(Value.of(new BigDecimal("478.12"))));
+        maxes.put("Col2", Optional.of(Value.of(222)));
+
+        Assertions.assertEquals(maxes, table1.btc().sum("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().sum("Col1", "Col2", "Col3"));
+    }
+
+    @Test
+    public void testMean() throws ColumnNotFoundException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))),
+                table1.btc().mean("Col1").get());
+        Assertions.assertEquals(Value.of(222/4), table1.btc().mean("Col2").get());
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col3"));
+
+        Assertions.assertEquals(Value.of(393L/6), table2.btc().mean("Col1").get());
+        Assertions.assertTrue(table2.btc().mean("Col2").isEmpty());
+        Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), table2.btc().mean("Col3").get());
+
+        var maxes = new HashMap<String, Optional<Value>>();
+        maxes.put("Col1", Optional.of(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000)))));
+        maxes.put("Col2", Optional.of(Value.of(222/4)));
+
+        Assertions.assertEquals(maxes, table1.btc().mean("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col1", "Col2", "Col3"));
     }
 }
