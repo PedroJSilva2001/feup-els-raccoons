@@ -147,6 +147,12 @@ public class ConfigReader {
             case "count" -> {
                 return new CountOperation((String) operationNode.get("columns"));
             }
+            case "mean" -> {
+                return new MeanOperation((String) operationNode.get("columns"));
+            }
+            case "sum" -> {
+                return new SumOperation((String) operationNode.get("columns"));
+            }
             default -> System.out.println("Unsupported operation");
         }
         return null;

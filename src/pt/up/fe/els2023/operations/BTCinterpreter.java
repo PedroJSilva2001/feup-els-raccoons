@@ -69,6 +69,14 @@ public class BTCinterpreter {
         valueResult = Value.of(operation.execute(btc));
     }
 
+    public void apply(SumOperation operation) throws ColumnNotFoundException {
+        operation.execute(btc).ifPresent(value -> valueResult = value);
+    }
+
+    public void apply(MeanOperation operation) throws ColumnNotFoundException {
+        operation.execute(btc).ifPresent(value -> valueResult = value);
+    }
+
     public Value getValueResult() {
         return valueResult;
     }

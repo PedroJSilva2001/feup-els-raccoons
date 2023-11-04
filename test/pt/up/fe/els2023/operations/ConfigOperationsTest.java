@@ -7,6 +7,8 @@ import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 import java.util.List;
 
@@ -322,5 +324,29 @@ public class ConfigOperationsTest {
         var result = btcInterpreter.getValueResult();
 
         Assertions.assertEquals(result, Value.of(3));
+    }
+
+    @Test
+    public void testSum() {
+        var sumPipeline = new Pipeline("table1", List.of(
+                new SumOperation("Col1")
+        ), "sum");
+
+        var btcInterpreter = sumPipeline.updateBTC(tables, null);
+        var result = btcInterpreter.getValueResult();
+
+        Assertions.assertEquals(result, Value.of(7.0));
+    }
+
+    @Test
+    public void testMean() {
+        var meanPipeline = new Pipeline("table1", List.of(
+                new MeanOperation("Col1")
+        ), "mean");
+
+        var btcInterpreter = meanPipeline.updateBTC(tables, null);
+        var result = btcInterpreter.getValueResult();
+
+        Assertions.assertEquals(result, Value.of(BigDecimal.valueOf(7).divide(BigDecimal.valueOf(3), new MathContext(1000))));
     }
 }
