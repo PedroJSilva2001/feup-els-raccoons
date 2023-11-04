@@ -6,6 +6,7 @@ import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class BTCinterpreter {
@@ -29,12 +30,11 @@ public class BTCinterpreter {
     }
 
     public void apply(ConcatHorizontalOperation operation) {
-        var additionalTableNames = operation.additionalTableNames();
-        var additionalTables = new ITable[additionalTableNames.size()];
-        for (int i = 0; i < additionalTableNames.size(); i++) {
-            additionalTables[i] = tables.get(additionalTableNames.get(i));
-        }
-        btc = operation.execute(btc, additionalTables);
+        btc = operation.execute(btc, getAdditionalTablesByName(operation.additionalTableNames()));
+    }
+
+    public void apply(ConcatVerticalOperation operation) {
+        btc = operation.execute(btc, getAdditionalTablesByName(operation.additionalTableNames()));
     }
 
     public void apply(SelectOperation operation) throws ColumnNotFoundException {
@@ -75,5 +75,13 @@ public class BTCinterpreter {
 
     public BeginTableCascade getBtc() {
         return btc;
+    }
+
+    private ITable[] getAdditionalTablesByName(List<String> additionalTableNames) {
+        var additionalTables = new ITable[additionalTableNames.size()];
+        for (int i = 0; i < additionalTableNames.size(); i++) {
+            additionalTables[i] = tables.get(additionalTableNames.get(i));
+        }
+        return additionalTables;
     }
 }

@@ -111,7 +111,7 @@ public class ConfigReader {
                 if (Objects.equals(operationNode.get("axis"), "horizontal")) {
                     return new ConcatHorizontalOperation(additionalTables);
                 } else if (Objects.equals(operationNode.get("axis"), "vertical")) {
-                    System.out.println("Unsupported operation");
+                    return new ConcatVerticalOperation(additionalTables);
                 }
             }
             case "select" -> {

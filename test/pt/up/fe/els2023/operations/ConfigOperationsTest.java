@@ -115,6 +115,32 @@ public class ConfigOperationsTest {
     }
 
     @Test
+    public void testConcatVertical() {
+        var concatPipeline = new Pipeline("table1", "table3", List.of(
+                new ConcatVerticalOperation(List.of("table2"))
+        ));
+
+        var btcInterpreter = concatPipeline.updateBTC(tables, null);
+        var resultingTable = btcInterpreter.getBtc().get();
+        tables.put(concatPipeline.getResult(), resultingTable);
+
+        Assertions.assertEquals(tables.size(), 3);
+
+        var expectedTable = new Table();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col1_1");
+        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(2.0), Value.of("no"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(4.0), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.ofNull(), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.ofNull(), Value.of(false)));
+
+        Assertions.assertEquals(tables.get("table3"), expectedTable);
+    }
+
+    @Test
     public void testArgMax() {
         var maxArgPipeline = new Pipeline("table1", "table3", List.of(
                 new ArgMaxOperation("Col1")
