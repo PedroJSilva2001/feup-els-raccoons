@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.table;
 
+
 import pt.up.fe.els2023.operations.TableCascade;
-import pt.up.fe.els2023.sources.TableSource;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,8 +12,6 @@ public interface ITable {
     List<Column> getColumns();
 
     List<Row> getRows();
-
-    TableSource getSource();
 
     boolean addColumn(String columnName);
 

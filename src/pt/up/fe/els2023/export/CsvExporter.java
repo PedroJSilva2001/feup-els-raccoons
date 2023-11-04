@@ -8,6 +8,7 @@ import pt.up.fe.els2023.table.Value;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Objects;
 
 public class CsvExporter extends TableExporter {
     private final String separator;
@@ -66,5 +67,18 @@ public class CsvExporter extends TableExporter {
 
     public String getSeparator() {
         return separator;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CsvExporter that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(separator, that.separator);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), separator);
     }
 }

@@ -10,12 +10,13 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class TableExporter {
     protected final String endOfLine;
-    private final String table;
-    private final String filename;
-    private final String path;
+    protected final String table;
+    protected final String filename;
+    protected final String path;
 
     public TableExporter(String table, String filename, String path, String endOfLine) {
         this.table = table;
@@ -53,5 +54,17 @@ public abstract class TableExporter {
 
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TableExporter that)) return false;
+        return Objects.equals(endOfLine, that.endOfLine) && Objects.equals(table, that.table) && Objects.equals(filename, that.filename) && Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(endOfLine, table, filename, path);
     }
 }

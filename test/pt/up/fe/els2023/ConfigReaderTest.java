@@ -2,13 +2,16 @@ package pt.up.fe.els2023;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.CsvExporter;
-import pt.up.fe.els2023.sources.JsonSource;
+import pt.up.fe.els2023.export.HtmlExporter;
+import pt.up.fe.els2023.export.TsvExporter;
+import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ConfigReaderTest {
 
@@ -19,20 +22,37 @@ public class ConfigReaderTest {
         var config = configReader.readConfig();
 
         var expectedTableSources = Map.of(
-                "file1", new JsonSource("file1", List.of("file1.json", "file2.json"))
+                "decision_tree", new YamlSource("decision_tree", List.of("files/yaml/decision_tree_*.yaml"))
         );
 
         var expectedTableSchemas = List.of(
-                new TableSchema("table")
-//                new TableSchema("table1", List.of(
-//                        new ColumnSchema("Zau", "prop1.prop2"),
-//                        new ColumnSchema("prop3", "prop3"), // empty name
-//                        new ColumnSchema("Zau 2", null) // empty from
-//                ), new JsonSource("file1", List.of("file1.json", "file2.json"))),
-//                new TableSchema("table2", List.of(
-//                        new ColumnSchema("Zau master", null),
-//                        new ColumnSchema(null, null)
-//                ), null) // source doesn't exist
+                new TableSchema("decision_tree")
+                        .source(expectedTableSources.get("decision_tree"))
+                        .nft(
+                                new FileNode("File"),
+                                new DirectoryNode(),
+                                new PropertyNode("params", new ListNode(
+                                        new PropertyNode("ccp_alpha", new ColumnNode("CCP Alpha")),
+                                        new PropertyNode("class_weight", new ColumnNode("Class weight")),
+                                        new PropertyNode("criterion", new ColumnNode("Criterion")),
+                                        new PropertyNode("min_samples_split", new NullNode())
+                                )),
+                                new PropertyNode("feature_importances",
+                                        new EachNode(new ColumnNode("Feature importances"))
+                                ),
+                                new PropertyNode("nodes",
+                                        new IndexNode(0, new ListNode(
+                                                new PropertyNode("$node[d]", new ColumnNode("Node 0")),
+                                                new IndexOfNode(1, "node", new ColumnNode("Node 1")),
+                                                new PropertyNode("\\$no\\$de[2]", new ColumnNode("Node 2"))
+                                        ))
+                                )
+                        ),
+                new TableSchema("Table 2")
+                        .source(null)
+                        .nft(
+                                new PropertyNode("params", new NullNode())
+                        )
         );
 
         var expectedExporters = List.of(
@@ -45,23 +65,7 @@ public class ConfigReaderTest {
             Assertions.assertEquals(expectedTableSource.getValue().getFiles(), resultTableSource.getFiles());
         }
 
-        for (int i = 0; i < expectedTableSchemas.size(); i++) {
-            var expectedTableSchema = expectedTableSchemas.get(i);
-            var resultTableSchema = config.tableSchemas().get(i);
-//            for (int j = 0; j < expectedTableSchema.columnSchemas().size(); j++) {
-//                var expectedColumnSchema = expectedTableSchema.columnSchemas().get(j);
-//                var resultColumnSchema = resultTableSchema.columnSchemas().get(j);
-//                Assertions.assertEquals(expectedColumnSchema.name(), resultColumnSchema.name());
-//                Assertions.assertEquals(expectedColumnSchema.from(), resultColumnSchema.from());
-//            }
-            Assertions.assertEquals(expectedTableSchema.name(), resultTableSchema.name());
-            if (expectedTableSchema.source() != null) {
-                Assertions.assertEquals(expectedTableSchema.source().getName(), resultTableSchema.source().getName());
-                Assertions.assertEquals(expectedTableSchema.source().getFiles(), resultTableSchema.source().getFiles());
-            } else {
-                Assertions.assertNull(resultTableSchema.source());
-            }
-        }
+        Assertions.assertEquals(expectedTableSchemas, config.tableSchemas());
 
         for (int i = 0; i < expectedExporters.size(); i++) {
             var expectedExporter = expectedExporters.get(i);
@@ -71,5 +75,144 @@ public class ConfigReaderTest {
             Assertions.assertEquals(expectedExporter.getPath(), resultExporter.getPath());
             Assertions.assertEquals(expectedExporter.getEndOfLine(), resultExporter.getEndOfLine());
         }
+    }
+
+    @Test
+    public void testReadConfigExcept() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_except.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new ExceptNode(Set.of("nodes", "feature_importances", "params")),
+                new ExceptNode(Set.of("nodes")),
+                new ExceptNode(Set.of("params"))
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigDirectory() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_directory.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new DirectoryNode(),
+                new DirectoryNode("Directory")
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigFile() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_file.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new FileNode(),
+                new FileNode("File")
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigPath() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_path.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new PathNode(),
+                new PathNode("Path")
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigAll() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_all.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new AllNode(),
+                new AllValueNode(),
+                new AllContainerNode()
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigEach() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_each.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new EachNode(new NullNode()),
+                new EachNode(new ColumnNode("Each")),
+                new EachNode(new ListNode(
+                        new PropertyNode("node", new ColumnNode("Node")),
+                        new PropertyNode("edge", new ColumnNode("Edge"))
+                ))
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
+    public void testReadConfigCsvExporter() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_csv.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedExporters = List.of(
+                new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","),
+                new CsvExporter("table2", "Table 2", "/dir1/dir2", "\r\n", ";"),
+                new TsvExporter("table3", "Table 3", "/dir1/dir2", "\n")
+        );
+
+        Assertions.assertEquals(expectedExporters, config.exporters());
+    }
+
+    @Test
+    public void testReadConfigHtmlExporter() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_html.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedExporters = List.of(
+                new HtmlExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), "table1", """
+                        table {
+                           border-collapse: collapse;
+                           width: 100%;
+                        }
+                        th, td {
+                           text-align: left;
+                           padding: 8px;
+                        }
+                        tr:nth-child(even){background-color: #f2f2f2}
+                        th {
+                           background-color: #4CAF50;
+                           color: white;
+                        }""", false),
+                new HtmlExporter("table2", "Table 2", "/dir1/dir2", System.lineSeparator(), "Table", """
+                        body {
+                            background-color: red;
+                        }
+                        * {
+                            font-family: 'Fira Code', 'serif';
+                        }
+                        """, true)
+        );
+
+        Assertions.assertEquals(expectedExporters, config.exporters());
     }
 }

@@ -1,0 +1,20 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_*.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    nft:
+      - $directory
+      - $directory: "Directory"
+
+operations:
+
+export:
+  - name: table1
+    path: "/dir1/dir2"
+    filename: "Table 1"
+    format: csv
