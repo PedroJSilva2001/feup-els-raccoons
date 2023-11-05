@@ -13,11 +13,11 @@ public class SumOperation implements TableOperation {
         this.columnName = columnName;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public Optional<Value> execute(BeginTableCascade btc) throws ColumnNotFoundException {
+    public Optional<Value> execute(TableCascade btc) throws ColumnNotFoundException {
         return btc.sum(columnName);
     }
 }

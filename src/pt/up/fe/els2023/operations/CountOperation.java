@@ -10,11 +10,11 @@ public class CountOperation implements TableOperation {
         this.columnName = columnName;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public long execute(BeginTableCascade btc) throws ColumnNotFoundException {
+    public long execute(TableCascade btc) throws ColumnNotFoundException {
         return btc.count(columnName);
     }
 }

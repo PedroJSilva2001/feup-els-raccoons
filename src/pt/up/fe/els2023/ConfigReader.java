@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
-import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.JsonSource;
@@ -16,6 +15,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings(value = "unchecked")
 public class ConfigReader {
@@ -165,12 +166,12 @@ public class ConfigReader {
         }
 
         Map<String, TableSource> configTableSources = new HashMap<>();
-        ArrayList<Map<String, Object>> tableSources = (ArrayList<Map<String, Object>>) yamlData.get("sources");
+        List<Map<String, Object>> tableSources = (ArrayList<Map<String, Object>>) yamlData.get("sources");
 
         for (Map<String, Object> tableSource : tableSources) {
             Object files = tableSource.get("path");
             String sourceName = (String) tableSource.get("name");
-            ArrayList<String> filesList = files instanceof String ? new ArrayList<>(List.of((String) files)) : (ArrayList<String>) files;
+            List<String> filesList = files instanceof String ? new ArrayList<>(List.of((String) files)) : (ArrayList<String>) files;
             switch ((String) tableSource.get("type")) {
                 // TODO
                 case "json" -> configTableSources.put(sourceName, new JsonSource(sourceName, filesList));
@@ -184,6 +185,140 @@ public class ConfigReader {
         return configTableSources;
     }
 
+    private String unescapeString(String string) {
+        // This unescapes the $ at the beginning of the keyName
+        Pattern escapePattern = Pattern.compile("^\\\\+\\$");
+        Matcher escapeMatcher = escapePattern.matcher(string);
+        if (escapeMatcher.find()) {
+            return string.replaceFirst("\\\\", "");
+        }
+
+        return string;
+    }
+
+    private SchemaNode parseValue(Object value) {
+        if (value instanceof List) {
+            List<Object> eachListNode = (List<Object>) value;
+            return parseListNode(eachListNode);
+        } else if (value instanceof Map) {
+            // This could cause ambiguity, for example
+            // nft:
+            //    - params:
+            //        min_split: min_split_value
+            // is min_split_value the name of the column, or is it a key in the min_split map?
+            // the only correct way is for min_split_value to be the name of the column, but this
+            // removes the ability of not having to specify the name of the column, and using the key as default
+            //
+            // TODO: for now, we will allow this, but we should probably change this in the future
+            Map<String, Object> eachMapNode = (Map<String, Object>) value;
+            return parseMapNode(eachMapNode);
+        } else if (value instanceof String columnName) {
+            return new ColumnNode(columnName);
+        } else {
+            return new NullNode();
+        }
+    }
+
+    private SchemaNode parseMapNode(Map<String, Object> mapNode) {
+        // Should only have one key
+        String keyName = mapNode.keySet().iterator().next();
+        Object value = mapNode.get(keyName);
+
+        if (Objects.equals(keyName, "$each")) {
+            return new EachNode(parseValue(value));
+        } else if (Objects.equals(keyName, "$except")) {
+            List<String> exceptList = new ArrayList<>();
+
+            if (value instanceof String) {
+                exceptList.add((String) value);
+            } else if (value instanceof List) {
+                List<Object> exceptListNode = (List<Object>) value;
+
+                for (Object except : exceptListNode) {
+                    if (except instanceof String) {
+                        exceptList.add((String) except);
+                    }
+                }
+            }
+
+            return new ExceptNode(new HashSet<>(exceptList));
+        } else if (Objects.equals(keyName, "$file")) {
+            String columnName = (String) value;
+            return new FileNode(columnName);
+        } else if (Objects.equals(keyName, "$directory")) {
+            String columnName = (String) value;
+            return new DirectoryNode(columnName);
+        } else if (Objects.equals(keyName, "$path")) {
+            String columnName = (String) value;
+            return new PathNode(columnName);
+        }
+
+        Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");
+        Matcher matcher = pattern.matcher(keyName);
+        if (matcher.matches()) {
+            String childName = matcher.group(1);
+            int index = Integer.parseInt(matcher.group(2));
+
+            if (childName == null || Objects.equals(childName, "")) {
+                return new IndexNode(index, parseValue(value));
+            }
+
+            return new IndexOfNode(index, childName, parseValue(value));
+        }
+
+        keyName = unescapeString(keyName);
+        return new PropertyNode(keyName, parseValue(value));
+    }
+
+    private ListNode parseListNode(List<Object> listNode) {
+        List<SchemaNode> schemaNodes = new ArrayList<>();
+
+        for (Object node : listNode) {
+            if (node instanceof String keyName) {
+                switch (keyName) {
+                    case "$all" -> {
+                        schemaNodes.add(new AllNode());
+                        continue;
+                    }
+                    case "$each" -> {
+                        schemaNodes.add(new EachNode(new NullNode()));
+                        continue;
+                    }
+                    case "$file" -> {
+                        schemaNodes.add(new FileNode());
+                        continue;
+                    }
+                    case "$path" -> {
+                        schemaNodes.add(new PathNode());
+                        continue;
+                    }
+                    case "$directory" -> {
+                        schemaNodes.add(new DirectoryNode());
+                        continue;
+                    }
+                    case "$all-value" -> {
+                        schemaNodes.add(new AllValueNode());
+                        continue;
+                    }
+                    case "$all-container" -> {
+                        schemaNodes.add(new AllContainerNode());
+                        continue;
+                    }
+                }
+
+                keyName = unescapeString(keyName);
+                schemaNodes.add(new PropertyNode(keyName, new NullNode()));
+            } else if (node instanceof Map) {
+                Map<String, Object> mapNode = (Map<String, Object>) node;
+                schemaNodes.add(parseMapNode(mapNode));
+            } else {
+                schemaNodes.add(new NullNode());
+            }
+        }
+
+        return new ListNode(schemaNodes);
+    }
+
     private List<TableSchema> parseTableSchemas(Map<String, Object> yamlData, Map<String, TableSource> configTableSources) {
         if (!yamlData.containsKey("tables")) {
             System.out.println("No tableSchemas found");
@@ -191,17 +326,32 @@ public class ConfigReader {
         }
 
         List<TableSchema> configTableSchemas = new ArrayList<>();
-        ArrayList<Map<String, Object>> tableSchemas = (ArrayList<Map<String, Object>>) yamlData.get("tables");
+        List<Map<String, Object>> tableSchemas = (ArrayList<Map<String, Object>>) yamlData.get("tables");
 
         for (Map<String, Object> tableSchema : tableSchemas) {
             String name = (String) tableSchema.get("name");
             TableSource source = configTableSources.get((String) tableSchema.get("source"));
-            ArrayList<Map<String, Object>> columns = (ArrayList<Map<String, Object>>) tableSchema.get("columns");
-            for (Map<String, Object> column : columns) {
-                String columnFrom = source != null ? (String) column.get("from") : null;
-                String columnName = column.get("name") != null ? (String) column.get("name") : columnFrom;
+            TableSchema table = new TableSchema(name);
+
+            if (source != null) {
+                table.source(source);
+            } else {
+                System.out.println("Source not found");
+                // TODO: SPECIFY LINE AND THROW EXCEPTION
             }
-            configTableSchemas.add(new TableSchema(name));
+
+            List<Object> nft = (ArrayList<Object>) tableSchema.get("nft");
+
+            if (nft == null) {
+                System.out.println("No nft found");
+                // TODO: SPECIFY LINE AND THROW EXCEPTION
+                throw new RuntimeException();
+            }
+
+            ListNode nftNode = parseListNode(nft);
+            table.nft(nftNode.list());
+
+            configTableSchemas.add(table);
         }
 
         return configTableSchemas;

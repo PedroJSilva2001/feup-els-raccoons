@@ -7,11 +7,11 @@ import java.util.List;
 
 public record ConcatVerticalOperation(List<String> additionalTableNames) implements TableOperation {
 
-    public void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public BeginTableCascade execute(BeginTableCascade initialBTC, ITable... additionalTables) {
+    public TableCascade execute(TableCascade initialBTC, ITable... additionalTables) {
         return initialBTC.concatVertical(additionalTables);
     }
 }

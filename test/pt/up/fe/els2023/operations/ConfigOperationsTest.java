@@ -24,18 +24,18 @@ public class ConfigOperationsTest {
         table1.addColumn("Col1");
         table1.addColumn("Col2");
 
-        table1.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes")));
-        table1.addRow(List.of(Value.of(""), Value.of(2.0), Value.of("no")));
-        table1.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe")));
-        table1.addRow(List.of(Value.of(""), Value.of(4.0), Value.ofNull()));
+        table1.addRow(List.of(Value.of(1.0), Value.of("yes")));
+        table1.addRow(List.of(Value.of(2.0), Value.of("no")));
+        table1.addRow(List.of(Value.ofNull(), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(4.0), Value.ofNull()));
 
         ITable table2 = new Table();
 
         table2.addColumn("Col1");
         table2.addColumn("Col1_1");
 
-        table2.addRow(List.of(Value.of(""), Value.of(false), Value.of(true)));
-        table2.addRow(List.of(Value.of(""), Value.of(true), Value.of(false)));
+        table2.addRow(List.of(Value.of(false), Value.of(true)));
+        table2.addRow(List.of(Value.of(true), Value.of(false)));
 
 
         tables = new HashMap<>();
@@ -55,7 +55,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table(false);
+        var expectedTable = new Table();
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of("yes")));
         expectedTable.addRow(List.of(Value.of("no")));
@@ -81,10 +81,10 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2.0)));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4.0)));
+        expectedTable.addRow(List.of(Value.of(1.0)));
+        expectedTable.addRow(List.of(Value.of(2.0)));
+        expectedTable.addRow(List.of(Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4.0)));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
@@ -105,13 +105,12 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addColumn("File_1");
         expectedTable.addColumn("Col1_1");
         expectedTable.addColumn("Col1_1_1");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes"), Value.of(""), Value.of(false), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2.0), Value.of("no"), Value.of(""), Value.of(true), Value.of(false)));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull(), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4.0), Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes"), Value.of(false), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(2.0), Value.of("no"), Value.of(true), Value.of(false)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull(), Value.ofNull(), Value.ofNull()));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
     }
@@ -132,12 +131,12 @@ public class ConfigOperationsTest {
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addColumn("Col1_1");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2.0), Value.of("no"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4.0), Value.ofNull(), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.ofNull(), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.ofNull(), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(2.0), Value.of("no"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(false), Value.ofNull(), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(true), Value.ofNull(), Value.of(false)));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
     }
@@ -157,7 +156,7 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4.0), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull()));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
     }
@@ -177,7 +176,7 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
     }
@@ -197,7 +196,7 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
@@ -251,7 +250,7 @@ public class ConfigOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 

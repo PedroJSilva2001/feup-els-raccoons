@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class BTCinterpreter {
-    private BeginTableCascade btc;
+public class TableCascadeInterpreter {
+    private TableCascade btc;
     private Value valueResult;
     private final Map<String, ITable> tables;
     private final Map<String, Value> resultVariables;
 
-    public BTCinterpreter(BeginTableCascade btc, Map<String, ITable> tables, Map<String, Value> resultVariables) {
+    public TableCascadeInterpreter(TableCascade btc, Map<String, ITable> tables, Map<String, Value> resultVariables) {
         this.btc = btc;
         this.tables = tables;
         this.resultVariables = resultVariables;
@@ -81,7 +81,7 @@ public class BTCinterpreter {
         return valueResult;
     }
 
-    public BeginTableCascade getBtc() {
+    public TableCascade getBtc() {
         return btc;
     }
 

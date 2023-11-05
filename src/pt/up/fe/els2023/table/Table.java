@@ -1,7 +1,6 @@
 package pt.up.fe.els2023.table;
 
-import pt.up.fe.els2023.operations.BeginTableCascade;
-import pt.up.fe.els2023.sources.TableSource;
+import pt.up.fe.els2023.operations.TableCascade;
 
 import java.util.*;
 
@@ -9,14 +8,11 @@ public class Table implements ITable {
     private final String name;
     private final List<Column> columns;
     private final List<Row> rows;
-    private final TableSource source;
 
     public Table() {
         this.name = null;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
-        this.source = null;
     }
 
     public Table(boolean withFileColumn) {
@@ -26,15 +22,12 @@ public class Table implements ITable {
             this.columns.add(new Column("File"));
         }
         this.rows = new ArrayList<>();
-        this.source = null;
     }
 
-    public Table(String name, TableSource source) {
+    public Table(String name) {
         this.name = name;
         this.columns = new ArrayList<>();
-        this.columns.add(new Column("File"));
         this.rows = new ArrayList<>();
-        this.source = source;
     }
 
 
@@ -47,8 +40,6 @@ public class Table implements ITable {
         for (var column : table.getColumns()) {
             this.columns.add(new Column(column.getName()));
         }
-
-        this.source = null;
     }
 
 
@@ -65,11 +56,6 @@ public class Table implements ITable {
     @Override
     public List<Row> getRows() {
         return Collections.unmodifiableList(rows);
-    }
-
-    @Override
-    public TableSource getSource() {
-        return source;
     }
 
     @Override
@@ -145,9 +131,10 @@ public class Table implements ITable {
     }
 
 
+    // btc = begin table cascade
     @Override
-    public BeginTableCascade btc() {
-        return new BeginTableCascade(this);
+    public TableCascade btc() {
+        return new TableCascade(this);
     }
 
     @Override

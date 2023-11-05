@@ -14,11 +14,11 @@ public class WhereOperation implements TableOperation {
         this.predicate = predicate;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) {
+    public void accept(TableCascadeInterpreter btcInterpreter) {
         btcInterpreter.apply(this);
     }
 
-    public BeginTableCascade execute(BeginTableCascade btc, Map<String, Value> resultVariables) {
+    public TableCascade execute(TableCascade btc, Map<String, Value> resultVariables) {
         return btc.where(parsePredicate(predicate, resultVariables));
     }
 

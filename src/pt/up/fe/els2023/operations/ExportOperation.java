@@ -15,11 +15,11 @@ public class ExportOperation implements TableOperation {
         this.exporter = exporter;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) throws IOException, TableNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws IOException, TableNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public void execute(BeginTableCascade btc) throws TableNotFoundException, IOException {
+    public void execute(TableCascade btc) throws TableNotFoundException, IOException {
         HashMap<String, ITable> map = new HashMap<>();
         map.put(exporter.getTable(), btc.get());
         exporter.export(map);

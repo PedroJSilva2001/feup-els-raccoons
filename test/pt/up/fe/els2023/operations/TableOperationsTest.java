@@ -38,31 +38,30 @@ public class TableOperationsTest {
         table1.addColumn("Col1");
         table1.addColumn("Col2");
 
-        table1.addRow(List.of(Value.of(""), Value.of(1L), Value.of("hello")));
-        table1.addRow(List.of(Value.of(""),  Value.of(2L),  Value.of("bye")));
-        table1.addRow(List.of(Value.of(""),  Value.of(3L), Value.of("")));
-        table1.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of(Value.of(""),  Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of(Value.of(""),  Value.of(242), Value.of("")));
-        table1.addRow(List.of(Value.of(""),  Value.of(221.12), Value.of("")));
-        table1.addRow(List.of(Value.of(""),  Value.of(false), Value.of("")));
-        table1.addRow(Stream.of(Value.of(""), Value.of(4L), Value.ofNull()).collect(Collectors.toList()));
-        table1.addRow(Stream.of(Value.of(6L), Value.of(5L), Value.ofNull()).collect(Collectors.toList()));
-
+        table1.addRow(List.of(Value.of(1L), Value.of("hello")));
+        table1.addRow(List.of( Value.of(2L),  Value.of("bye")));
+        table1.addRow(List.of( Value.of(3L), Value.of("")));
+        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of( Value.of(242), Value.of("")));
+        table1.addRow(List.of( Value.of(221.12), Value.of("")));
+        table1.addRow(List.of( Value.of(false), Value.of("")));
+        table1.addRow(List.of( Value.of(4L), Value.ofNull()));
+        table1.addRow(List.of( Value.of(5L), Value.ofNull()));
 
         table2 = new Table();
         table2.addColumn("Col1");
         table2.addColumn("Col2");
         table2.addColumn("Col3");
 
-        table2.addRow(List.of(Value.of(""), Value.of(25L), Value.of("hello"), Value.of(new BigInteger("123"))));
-        table2.addRow(List.of(Value.of(""), Value.of(0L), Value.of("hello"), Value.of(1221L)));
-        table2.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of("hey")));
-        table2.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of(false)));
-        table2.addRow(List.of(Value.of(""), Value.of(332), Value.of(true), Value.of(true)));
-        table2.addRow(List.of(Value.of(""), Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
+        table2.addRow(List.of(Value.of(25L), Value.of("hello"), Value.of(new BigInteger("123"))));
+        table2.addRow(List.of(Value.of(0L), Value.of("hello"), Value.of(1221L)));
+        table2.addRow(List.of(Value.of(12), Value.ofNull(), Value.of("hey")));
+        table2.addRow(List.of(Value.of(12), Value.ofNull(), Value.of(false)));
+        table2.addRow(List.of(Value.of(332), Value.of(true), Value.of(true)));
+        table2.addRow(List.of(Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
 
 
         table3 = new Table();
@@ -70,10 +69,10 @@ public class TableOperationsTest {
         table3.addColumn("Col1");
         table3.addColumn("Col2");
 
-        table3.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes")));
-        table3.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no")));
-        table3.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe")));
-        table3.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull()));
+        table3.addRow(List.of(Value.of(1L), Value.of("yes")));
+        table3.addRow(List.of(Value.of(2L), Value.of("no")));
+        table3.addRow(List.of(Value.ofNull(), Value.of("maybe")));
+        table3.addRow(List.of(Value.of(4L), Value.ofNull()));
 
 
 
@@ -82,12 +81,12 @@ public class TableOperationsTest {
         table4.addColumn("Col1");
         table4.addColumn("Col1_1");
 
-        table4.addRow(List.of(Value.of(""), Value.of(false), Value.of(true)));
-        table4.addRow(List.of(Value.of(""), Value.of(true), Value.of(false)));
+        table4.addRow(List.of(Value.of(false), Value.of(true)));
+        table4.addRow(List.of(Value.of(true), Value.of(false)));
 
 
 
-        table5 = new Table(false);
+        table5 = new Table();
 
         table5.addColumn("ColA");
         table5.addColumn("ColB");
@@ -96,7 +95,7 @@ public class TableOperationsTest {
         table5.addRow(List.of(Value.of(2L), Value.of(true)));
 
 
-        table6 = new Table(false);
+        table6 = new Table();
 
         table6.addColumn("Col1");
         table6.addColumn("Col1_1");
@@ -114,7 +113,7 @@ public class TableOperationsTest {
         var expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("bye")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
 
         Assertions.assertEquals(expectedTable, newTable);
 
@@ -128,7 +127,7 @@ public class TableOperationsTest {
         expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("bye")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
 
         Assertions.assertEquals(expectedTable, newTable);
 
@@ -141,10 +140,10 @@ public class TableOperationsTest {
         expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(56)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(56)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(56)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(56)));
 
         Assertions.assertEquals(expectedTable, newTable);
 
@@ -158,8 +157,8 @@ public class TableOperationsTest {
         expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
+        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
 
         Assertions.assertEquals(expectedTable, newTable);
 
@@ -172,10 +171,10 @@ public class TableOperationsTest {
         expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
-        expectedTable.addRow(List.of(Value.of(""),  Value.of(221.12), Value.of("")));
-        expectedTable.addRow(List.of(Value.of(""),  Value.of(false), Value.of("")));
-        expectedTable.addRow(Stream.of(Value.of(""), Value.of(4L), Value.ofNull()).collect(Collectors.toList()));
-        expectedTable.addRow(Stream.of(Value.of(6L), Value.of(5L), Value.ofNull()).collect(Collectors.toList()));
+        expectedTable.addRow(List.of(Value.of(221.12), Value.of("")));
+        expectedTable.addRow(List.of(Value.of(false), Value.of("")));
+        expectedTable.addRow(List.of(Value.of(4L), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(5L), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, newTable);
 
@@ -247,20 +246,22 @@ public class TableOperationsTest {
         expectedTable.addColumn("Col2");
         expectedTable.addColumn("Col3");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(25L), Value.of("hello"), Value.of(new BigInteger("123"))));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(0L), Value.of("hello"), Value.of(1221L)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of("hey")));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.ofNull(), Value.of(false)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(332), Value.of(true), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
+        expectedTable.addRow(List.of(Value.of(25L), Value.of("hello"), Value.of(new BigInteger("123"))));
+        expectedTable.addRow(List.of(Value.of(0L), Value.of("hello"), Value.of(1221L)));
+        expectedTable.addRow(List.of(Value.of(12), Value.ofNull(), Value.of("hey")));
+        expectedTable.addRow(List.of(Value.of(12), Value.ofNull(), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(332), Value.of(true), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
 
 
-        Assertions.assertEquals(expectedTable, table2.btc().select("File", "Col1", "Col2", "Col3").get());
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col2", "Col3").get());
 
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
 
-        expectedTable = new Table(false);
+
+
+        expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
@@ -274,10 +275,25 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
 
 
-        expectedTable = new Table(false);
+
+        expectedTable = new Table();
 
         Assertions.assertEquals(expectedTable, table2.btc().select().get());
 
+
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col3");
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of(new BigInteger("123")), Value.of(25L)));
+        expectedTable.addRow(List.of(Value.of(1221L), Value.of(0L)));
+        expectedTable.addRow(List.of(Value.of("hey"), Value.of(12)));
+        expectedTable.addRow(List.of(Value.of(false), Value.of(12)));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(332)));
+        expectedTable.addRow(List.of(Value.of(new BigInteger("12")), Value.of(12)));
+
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col3", "Col1").get());
     }
 
     @Test
@@ -287,12 +303,12 @@ public class TableOperationsTest {
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(25L), Value.of(new BigInteger("123"))));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(0L), Value.of(1221L)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of("hey")));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(false)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(332), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(12), Value.of(new BigInteger("12"))));
+        expectedTable.addRow(List.of(Value.of(25L), Value.of(new BigInteger("123"))));
+        expectedTable.addRow(List.of(Value.of(0L), Value.of(1221L)));
+        expectedTable.addRow(List.of(Value.of(12), Value.of("hey")));
+        expectedTable.addRow(List.of(Value.of(12), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(332), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(12), Value.of(new BigInteger("12"))));
 
         Assertions.assertEquals(expectedTable, table2.btc().reject("Col2").get());
 
@@ -305,39 +321,39 @@ public class TableOperationsTest {
 
     @Test
     public void testConcatVertical() {
-        var expectedTable = new Table(true);
+        var expectedTable = new Table();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addColumn("Col1_1");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.ofNull(), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.ofNull(), Value.of(false)));
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("yes"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("no"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe"), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4L), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(false), Value.ofNull(), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(true), Value.ofNull(), Value.of(false)));
 
         Assertions.assertEquals(expectedTable, table3.btc().concatVertical(table4).get());
 
 
-        expectedTable = new Table(true);
+        expectedTable = new Table();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
         expectedTable.addColumn("Col2");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.of(true), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.of(false), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(false), Value.of(true), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(false), Value.ofNull()));
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.ofNull(), Value.of("yes")));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.ofNull(), Value.of("no")));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.ofNull(), Value.of("maybe")));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(1L), Value.ofNull(), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.ofNull(), Value.of("no")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(4L), Value.ofNull(), Value.ofNull()));
 
 
 
-        expectedTable = new Table(false);
+        expectedTable = new Table();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
@@ -374,39 +390,35 @@ public class TableOperationsTest {
 
     @Test
     public void testConcatHorizontal() {
-        var expectedTable = new Table(false);
+        var expectedTable = new Table();
 
-        expectedTable.addColumn("File");
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
 
-        expectedTable.addColumn("File_1");
         expectedTable.addColumn("Col1_1");
         expectedTable.addColumn("Col1_1_1");
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(1L), Value.of("yes"), Value.of(""), Value.of(false), Value.of(true)));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(2L), Value.of("no"), Value.of(""), Value.of(true), Value.of(false)));
-        expectedTable.addRow(List.of(Value.of(""), Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull(), Value.ofNull()));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(4L), Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("yes"), Value.of(false), Value.of(true)));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("no"), Value.of(true), Value.of(false)));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(4L), Value.ofNull(), Value.ofNull(), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, table3.btc().concatHorizontal(table4).get());
 
 
 
-        expectedTable = new Table(false);
-        expectedTable.addColumn("File");
+        expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
 
-        expectedTable.addColumn("File_1");
         expectedTable.addColumn("Col1_2");
         expectedTable.addColumn("Col2");
 
 
-        expectedTable.addRow(List.of(Value.of(""), Value.of(false), Value.of(true), Value.of(""), Value.of(1L), Value.of("yes")));
-        expectedTable.addRow(List.of(Value.of(""), Value.of(true), Value.of(false), Value.of(""), Value.of(2L), Value.of("no")));
-        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.ofNull(), Value.of("maybe")));
-        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of(""), Value.of(4L), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(false), Value.of(true), Value.of(1L), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(false), Value.of(2L), Value.of("no")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(4L), Value.ofNull()));
 
         Assertions.assertEquals(expectedTable, table4.btc().concatHorizontal(table3).get());
     }

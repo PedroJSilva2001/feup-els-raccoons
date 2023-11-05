@@ -12,11 +12,11 @@ public class RejectOperation implements TableOperation {
         this.columnsList = columnsList;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public BeginTableCascade execute(BeginTableCascade btc) throws ColumnNotFoundException {
+    public TableCascade execute(TableCascade btc) throws ColumnNotFoundException {
         return btc.reject(columnsList.toArray(String[]::new));
     }
 }

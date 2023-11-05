@@ -1,25 +1,31 @@
 sources:
-  - name: file1
-    type: json
+  - name: decision_tree
+    type: yaml
     path:
-      - "file1.json"
-      - "file2.json"
+      - "files/yaml/decision_tree_*.yaml"
 
 tables:
-  - name: table1
-    source: "file1"
-    columns:
-      - name: Zau
-        from: "prop1.prop2"
-      - from: "prop3"
-      - name: Zau 2
-
-  - name: table2
-    source: "file2"
-    columns:
-      - name: Zau master
-        from: "prop1.prop2"
-      - from: "prop3"
+  - name: decision_tree
+    source: "decision_tree"
+    nft:
+      - $file: "File"
+      - $directory
+      - params:
+          - ccp_alpha: "CCP Alpha"
+          - class_weight: "Class weight"
+          - criterion: "Criterion"
+          - min_samples_split
+      - feature_importances:
+          $each: "Feature importances"
+      - nodes:
+          $[0]:
+            - $node[d]: "Node 0"
+            - $node[1]: "Node 1"
+            - \\$no\$de[2]: "Node 2"
+  - name: "Table 2"
+    source: "file"
+    nft:
+      - params
 
 operations:
 

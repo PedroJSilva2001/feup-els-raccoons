@@ -11,18 +11,18 @@ public class ArgMaxOperation implements TableOperation {
         this.columnName = columnName;
     }
 
-    public void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException {
+    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
         btcInterpreter.apply(this);
     }
 
-    public BeginTableCascade execute(BeginTableCascade btc) throws ColumnNotFoundException {
+    public TableCascade execute(TableCascade btc) throws ColumnNotFoundException {
         var maxValue = btc.max(columnName);
 
         if (maxValue.isEmpty()) {
             var table = new Table();
             var firstRow = btc.get().getRows().get(0);
             table.addRow(firstRow.getValues());
-            return new BeginTableCascade(table);
+            return new TableCascade(table);
         } else {
             return btc.where(rowWrapper -> rowWrapper.get(columnName).equals(maxValue.get()));
         }

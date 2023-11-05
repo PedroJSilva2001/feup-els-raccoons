@@ -36,9 +36,9 @@ public class Pipeline {
         this.resultVariable = resultVariable;
     }
 
-    public BTCinterpreter updateBTC(Map<String, ITable> tables, Map<String, Value> resultVariables) {
-        var btc = new BeginTableCascade(tables.get(initialTable));
-        var btcInterpreter = new BTCinterpreter(btc, tables, resultVariables);
+    public TableCascadeInterpreter updateBTC(Map<String, ITable> tables, Map<String, Value> resultVariables) {
+        var btc = new TableCascade(tables.get(initialTable));
+        var btcInterpreter = new TableCascadeInterpreter(btc, tables, resultVariables);
         for (var operation : operations) {
             try {
                 operation.accept(btcInterpreter);

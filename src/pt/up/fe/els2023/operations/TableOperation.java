@@ -6,5 +6,5 @@ import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import java.io.IOException;
 
 public interface TableOperation {
-    void accept(BTCinterpreter btcInterpreter) throws ColumnNotFoundException, TableNotFoundException, IOException;
+    void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException, TableNotFoundException, IOException;
 }
