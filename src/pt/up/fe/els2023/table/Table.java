@@ -1,8 +1,8 @@
 package pt.up.fe.els2023.table;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import pt.up.fe.els2023.operations.TableCascade;
+
+import java.util.*;
 
 public class Table implements ITable {
     private final String name;
@@ -15,11 +15,33 @@ public class Table implements ITable {
         this.rows = new ArrayList<>();
     }
 
+    public Table(boolean withFileColumn) {
+        this.name = null;
+        this.columns = new ArrayList<>();
+        if (withFileColumn) {
+            this.columns.add(new Column("File"));
+        }
+        this.rows = new ArrayList<>();
+    }
+
     public Table(String name) {
         this.name = name;
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
     }
+
+
+    // Empty table, just with column names
+    public Table(ITable table) {
+        this.name = String.valueOf(table.getName());
+        this.columns = new ArrayList<>();
+        this.rows = new ArrayList<>();
+
+        for (var column : table.getColumns()) {
+            this.columns.add(new Column(column.getName()));
+        }
+    }
+
 
     @Override
     public String getName() {
@@ -109,6 +131,12 @@ public class Table implements ITable {
     }
 
 
+    // btc = begin table cascade
+    @Override
+    public TableCascade btc() {
+        return new TableCascade(this);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -137,5 +165,44 @@ public class Table implements ITable {
         }
 
         return true;
+    }
+
+    @Override
+    public int getIndexOfColumn(String name) {
+        for (int i = 0; i < getColumnNumber(); i++) {
+            if (getColumn(i).getName().equals(name)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    @Override
+    public boolean containsColumn(String name) {
+        return getIndexOfColumn(name) != -1;
+    }
+
+    @Override
+    public Iterator<Row> rowIterator() {
+        return new RowIterator();
+    }
+
+    private class RowIterator implements Iterator<Row> {
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < getRowNumber();
+        }
+
+        @Override
+        public Row next() {
+            if (!hasNext()) {
+                return null;
+            }
+
+            return getRow(currentIndex++);
+        }
     }
 }

@@ -16,6 +16,13 @@ public class Row {
         this.values = new ArrayList<>();
     }
 
+    public Row(Row row) {
+        this.values = new ArrayList<>();
+
+        values.addAll(row.values);
+    }
+
+
     public void addValue(Value value) {
         this.values.add(value);
     }
@@ -31,7 +38,6 @@ public class Row {
 
         return values.get(index);
     }
-
 
     @Override
     public boolean equals(Object obj) {

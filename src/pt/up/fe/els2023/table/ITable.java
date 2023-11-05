@@ -1,5 +1,9 @@
 package pt.up.fe.els2023.table;
 
+
+import pt.up.fe.els2023.operations.TableCascade;
+
+import java.util.Iterator;
 import java.util.List;
 
 public interface ITable {
@@ -23,4 +27,11 @@ public interface ITable {
 
     Row getRow(int index);
 
+    TableCascade btc();
+
+    boolean containsColumn(String name);
+
+    int getIndexOfColumn(String name);
+
+    Iterator<Row> rowIterator();
 }

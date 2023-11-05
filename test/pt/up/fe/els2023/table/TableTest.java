@@ -80,15 +80,15 @@ public class TableTest {
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addColumn("Column3");
-        table1.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
-        table1.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
+        table1.addRow(List.of(Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
+        table1.addRow(List.of(Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
         var table2 = new Table();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
-        table2.addRow(List.of(Value.of(""), Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
-        table2.addRow(List.of(Value.of(""), Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
+        table2.addRow(List.of(Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
+        table2.addRow(List.of(Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
         Assertions.assertEquals(table1, table2);
     }
