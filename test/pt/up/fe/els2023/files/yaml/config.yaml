@@ -28,6 +28,32 @@ tables:
       - params
 
 operations:
+  - operation: argMax
+    table: decision_tree
+    columns: "min_samples_split"
+    result: maxRow
+  - operation: select
+    table: decision_tree
+    columns: "File"
+    result: selectResult
+  - pipeline:
+      table: decision_tree
+      result: test
+      operations:
+        - operation: argMin
+          columns: "min_samples_split"
+        - operation: concat
+          additionalTables: maxRow
+          axis: vertical
+  - operation: where
+    table: decision_tree
+    condition: "Criterion == gini"
+    result: table1
+  - operation: export
+    table: table1
+    result: "Table 1"
+    path: "/dir1/dir2"
+    format: csv
 
 export:
   - name: table1
