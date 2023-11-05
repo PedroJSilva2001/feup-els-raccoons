@@ -21,9 +21,9 @@ public class TableCascade {
     }
 
     public TableCascade select(String ...columns) throws ColumnNotFoundException {
-        ITable newTable = new Table(false);
+        ITable newTable = new Table();
 
-        var columnsToKeep = new TreeSet<Integer>();
+        var columnsToKeep = new ArrayList<Integer>();
 
         for (var column : columns) {
             if (!table.containsColumn(column)) {

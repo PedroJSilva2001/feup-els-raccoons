@@ -259,7 +259,9 @@ public class TableOperationsTest {
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
 
-        expectedTable = new Table(false);
+
+
+        expectedTable = new Table();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
@@ -273,10 +275,25 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
 
 
-        expectedTable = new Table(false);
+
+        expectedTable = new Table();
 
         Assertions.assertEquals(expectedTable, table2.btc().select().get());
 
+
+
+        expectedTable = new Table();
+        expectedTable.addColumn("Col3");
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of(new BigInteger("123")), Value.of(25L)));
+        expectedTable.addRow(List.of(Value.of(1221L), Value.of(0L)));
+        expectedTable.addRow(List.of(Value.of("hey"), Value.of(12)));
+        expectedTable.addRow(List.of(Value.of(false), Value.of(12)));
+        expectedTable.addRow(List.of(Value.of(true), Value.of(332)));
+        expectedTable.addRow(List.of(Value.of(new BigInteger("12")), Value.of(12)));
+
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col3", "Col1").get());
     }
 
     @Test

@@ -335,7 +335,6 @@ public class Value {
         return this.value.equals(other.value);
     }
 
-    // TODO refactor ops
     public static Value add(Value v1, Value v2) throws IllegalArgumentException {
         if (!v1.isNumber() || !v2.isNumber()) {
             throw new IllegalArgumentException("Cannot add non-numbers");
