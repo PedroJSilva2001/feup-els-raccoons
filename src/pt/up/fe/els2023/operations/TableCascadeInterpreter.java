@@ -69,6 +69,10 @@ public class TableCascadeInterpreter {
         btc = operation.execute(btc, resultVariables);
     }
 
+    public void apply(RenameOperation operation) {
+        btc = operation.execute(btc);
+    }
+
     public void apply(MaxOperation operation) throws ColumnNotFoundException {
         operation.execute(btc).ifPresent(value -> valueResult = value);
     }

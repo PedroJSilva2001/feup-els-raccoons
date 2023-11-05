@@ -179,6 +179,27 @@ public class ConfigOperationsTest {
     }
 
     @Test
+    public void testRename() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var renamePipeline = new CompositeOperationBuilder("table1", List.of(
+                new RenameOperation(List.of("Col1"), List.of("Col3"))
+        )).setResult("table3").build();
+
+        btcInterpreter.execute(renamePipeline);
+
+        Assertions.assertEquals(tables.size(), 3);
+
+        var expectedTable = new Table();
+        expectedTable.addColumn("Col3");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2.0), Value.of("no")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull()));
+
+        Assertions.assertEquals(tables.get("table3"), expectedTable);
+    }
+
+    @Test
     public void testWhere() throws TableNotFoundException, ColumnNotFoundException, IOException {
         var wherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new WhereOperation("Col2 == yes")

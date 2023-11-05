@@ -133,6 +133,13 @@ public class ConfigReader {
                     return new ExportOperation(exporterBuilder.build());
                 }
             }
+            case "rename" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                Object newColumnsObject = operationNode.get("newColumns");
+                List<String> newColumns = newColumnsObject instanceof String ? new ArrayList<>(List.of((String) newColumnsObject)) : (ArrayList<String>) newColumnsObject;
+                return new RenameOperation(columns, newColumns);
+            }
             case "where" -> {
                 return new WhereOperation((String) operationNode.get("condition"));
             }

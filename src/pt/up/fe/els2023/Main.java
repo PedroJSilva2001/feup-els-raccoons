@@ -38,7 +38,7 @@ public class Main {
                 try {
                     btcInterpreter.execute(cascade);
                 } catch (TableNotFoundException | IOException | ColumnNotFoundException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
             }
 

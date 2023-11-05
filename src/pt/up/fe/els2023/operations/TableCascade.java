@@ -240,6 +240,21 @@ public class TableCascade {
         return new TableCascade(newTable);
     }
 
+    public TableCascade rename(Map<String, String> columnMapping) {
+        ITable newTable = new Table();
+
+        for (var column : table.getColumns()) {
+            var name = column.getName();
+            newTable.addColumn(columnMapping.getOrDefault(name, name));
+        }
+
+        for (var row : table.getRows()) {
+            newTable.addRow(row.getValues());
+        }
+
+        return new TableCascade(newTable);
+    }
+
     public long count(String column) throws ColumnNotFoundException {
         var col = table.getColumn(column);
 
