@@ -15,10 +15,22 @@ public class TableCascadeInterpreter {
     private final Map<String, ITable> tables;
     private final Map<String, Value> resultVariables;
 
-    public TableCascadeInterpreter(TableCascade btc, Map<String, ITable> tables, Map<String, Value> resultVariables) {
-        this.btc = btc;
+    public TableCascadeInterpreter(Map<String, ITable> tables, Map<String, Value> resultVariables) {
         this.tables = tables;
         this.resultVariables = resultVariables;
+    }
+
+    public void execute(CompositeOperation compositeOperation) throws TableNotFoundException, ColumnNotFoundException, IOException {
+        btc = new TableCascade(tables.get(compositeOperation.initialTable()));
+        for (var operation : compositeOperation.operations()) {
+            operation.accept(this);
+        }
+        if (compositeOperation.result() != null) {
+            tables.put(compositeOperation.result(), btc.get());
+        }
+        if (compositeOperation.resultVariable() != null) {
+            resultVariables.put(compositeOperation.resultVariable(), valueResult);
+        }
     }
 
     public void apply(ArgMaxOperation operation) throws ColumnNotFoundException {
@@ -75,10 +87,6 @@ public class TableCascadeInterpreter {
 
     public void apply(MeanOperation operation) throws ColumnNotFoundException {
         operation.execute(btc).ifPresent(value -> valueResult = value);
-    }
-
-    public Value getValueResult() {
-        return valueResult;
     }
 
     public TableCascade getBtc() {

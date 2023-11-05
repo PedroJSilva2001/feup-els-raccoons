@@ -41,19 +41,19 @@ public class ConfigReader {
 
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
         List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
-        List<Pipeline> configOperations = parseOperations(yamlData);
+        List<CompositeOperation> configOperations = parseOperations(yamlData);
         List<TableExporter> configExporter = parseExporters(yamlData);
 
         return new Config(configTableSources, configTableSchemas, configOperations, configExporter);
     }
 
-    private List<Pipeline> parseOperations(Map<String, Object> yamlData) {
+    private List<CompositeOperation> parseOperations(Map<String, Object> yamlData) {
         if (!yamlData.containsKey("operations")) {
             System.out.println("No operations found");
             return null;
         }
 
-        List<Pipeline> configOperations = new ArrayList<>();
+        List<CompositeOperation> configOperations = new ArrayList<>();
         List<Map<String, Object>> operations = (ArrayList<Map<String, Object>>) yamlData.get("operations");
 
         if (operations == null) {
@@ -66,8 +66,8 @@ public class ConfigReader {
             String result = null;
             String resultVariable = null;
             List<TableOperation> ops = new ArrayList<>();
-            if (operation.containsKey("pipeline")) {
-                Map<String, Object> pipeline = (Map<String, Object>) operation.get("pipeline");
+            if (operation.containsKey("cascade")) {
+                Map<String, Object> pipeline = (Map<String, Object>) operation.get("cascade");
                 initialTable = (String) pipeline.get("table");
                 result = (String) pipeline.get("result");
                 resultVariable = (String) pipeline.get("resultVar");
@@ -90,8 +90,8 @@ public class ConfigReader {
             }
 
             if (!ops.isEmpty() && initialTable != null && (result != null || resultVariable != null)) {
-                Pipeline pipeline = new Pipeline(initialTable, result, ops, resultVariable);
-                configOperations.add(pipeline);
+                CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResult(result).setResultVariable(resultVariable);
+                configOperations.add(builder.build());
             }
         }
 

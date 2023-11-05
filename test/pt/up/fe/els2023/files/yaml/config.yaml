@@ -36,7 +36,7 @@ operations:
     table: decision_tree
     columns: "File"
     result: selectResult
-  - pipeline:
+  - cascade:
       table: decision_tree
       result: test
       operations:

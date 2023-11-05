@@ -3,10 +3,13 @@ package pt.up.fe.els2023.operations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashMap;
@@ -16,6 +19,8 @@ import java.util.List;
 public class ConfigOperationsTest {
 
     private HashMap<String, ITable> tables;
+    private HashMap<String, Value> resultVariables;
+    private TableCascadeInterpreter btcInterpreter;
 
     @BeforeEach
     public void setup() {
@@ -41,17 +46,19 @@ public class ConfigOperationsTest {
         tables = new HashMap<>();
         tables.put("table1", table1);
         tables.put("table2", table2);
+
+        resultVariables = new HashMap<>();
+
+        btcInterpreter = new TableCascadeInterpreter(tables, resultVariables);
     }
 
     @Test
-    public void testSelect() {
-        var selectPipeline = new Pipeline("table1", "table3", List.of(
+    public void testSelect() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var selectPipeline = new CompositeOperationBuilder("table1", List.of(
                 new SelectOperation(List.of("Col2"))
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = selectPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(selectPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(selectPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -67,14 +74,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testReject() {
-        var rejectPipeline = new Pipeline("table1", "table3", List.of(
+    public void testReject() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var rejectPipeline = new CompositeOperationBuilder("table1", List.of(
                 new RejectOperation(List.of("Col2"))
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = rejectPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(rejectPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(rejectPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -91,14 +96,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testConcatHorizontal() {
-        var concatPipeline = new Pipeline("table1", "table3", List.of(
+    public void testConcatHorizontal() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var concatPipeline = new CompositeOperationBuilder("table1", List.of(
                 new ConcatHorizontalOperation(List.of("table2"))
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = concatPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(concatPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(concatPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -116,14 +119,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testConcatVertical() {
-        var concatPipeline = new Pipeline("table1", "table3", List.of(
+    public void testConcatVertical() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var concatPipeline = new CompositeOperationBuilder("table1", List.of(
                 new ConcatVerticalOperation(List.of("table2"))
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = concatPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(concatPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(concatPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -142,14 +143,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testArgMax() {
-        var maxArgPipeline = new Pipeline("table1", "table3", List.of(
+    public void testArgMax() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var maxArgPipeline = new CompositeOperationBuilder("table1", List.of(
                 new ArgMaxOperation("Col1")
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = maxArgPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(maxArgPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(maxArgPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -162,14 +161,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testArgMin() {
-        var minArgPipeline = new Pipeline("table1", "table3", List.of(
+    public void testArgMin() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var minArgPipeline = new CompositeOperationBuilder("table1", List.of(
                 new ArgMinOperation("Col1")
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = minArgPipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(minArgPipeline.getResult(), resultingTable);
+        btcInterpreter.execute(minArgPipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -182,14 +179,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testWhere() {
-        var wherePipeline = new Pipeline("table1", "table3", List.of(
+    public void testWhere() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var wherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new WhereOperation("Col2 == yes")
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = wherePipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(wherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(wherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -200,35 +195,27 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        wherePipeline = new Pipeline("table1", "table3", List.of(
+        wherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new WhereOperation("Col1 < 2")
-        ));
+        )).setResult("table3").build();
 
-        btcInterpreter = wherePipeline.updateBTC(tables, null);
-        resultingTable = btcInterpreter.getBtc().get();
-        tables.put(wherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(wherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        var minPipeline = new Pipeline("table1", List.of(
+        var minPipeline = new CompositeOperationBuilder("table1", List.of(
                 new MinOperation("Col1")
-        ), "min");
+        )).setResultVariable("min").build();
 
-        btcInterpreter = minPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(minPipeline);
 
-        var map = new HashMap<String, Value>();
-        map.put("min", result);
-
-        wherePipeline = new Pipeline("table1", "table3", List.of(
+        wherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new WhereOperation("Col1 <= $min")
-        ));
+        )).setResult("table3").build();
 
-        btcInterpreter = wherePipeline.updateBTC(tables, map);
-        resultingTable = btcInterpreter.getBtc().get();
-        tables.put(wherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(wherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -236,14 +223,12 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testDropWhere() {
-        var dropWherePipeline = new Pipeline("table1", "table3", List.of(
+    public void testDropWhere() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new DropWhereOperation("Col2 != yes")
-        ));
+        )).setResult("table3").build();
 
-        var btcInterpreter = dropWherePipeline.updateBTC(tables, null);
-        var resultingTable = btcInterpreter.getBtc().get();
-        tables.put(dropWherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(dropWherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -254,35 +239,27 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        dropWherePipeline = new Pipeline("table1", "table3", List.of(
+        dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new DropWhereOperation("Col1 >= 2 OR Col2 == maybe")
-        ));
+        )).setResult("table3").build();
 
-        btcInterpreter = dropWherePipeline.updateBTC(tables, null);
-        resultingTable = btcInterpreter.getBtc().get();
-        tables.put(dropWherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(dropWherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        var minPipeline = new Pipeline("table1", List.of(
+        var minPipeline = new CompositeOperationBuilder("table1", List.of(
                 new MinOperation("Col1")
-        ), "min");
+        )).setResultVariable("min").build();
 
-        btcInterpreter = minPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(minPipeline);
 
-        var map = new HashMap<String, Value>();
-        map.put("min", result);
-
-        dropWherePipeline = new Pipeline("table1", "table3", List.of(
+        dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
                 new DropWhereOperation("Col1 > $min || Col2 == maybe")
-        ));
+        )).setResult("table3").build();
 
-        btcInterpreter = dropWherePipeline.updateBTC(tables, map);
-        resultingTable = btcInterpreter.getBtc().get();
-        tables.put(dropWherePipeline.getResult(), resultingTable);
+        btcInterpreter.execute(dropWherePipeline);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -290,62 +267,57 @@ public class ConfigOperationsTest {
     }
 
     @Test
-    public void testMax() {
-        var maxPipeline = new Pipeline("table1", List.of(
+    public void testMax() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var maxPipeline = new CompositeOperationBuilder("table1", List.of(
                 new MaxOperation("Col1")
-        ), "max");
+        )).setResultVariable("max").build();
 
-        var btcInterpreter = maxPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(maxPipeline);
 
-        Assertions.assertEquals(result, Value.of(4.0));
+        Assertions.assertEquals(resultVariables.get(maxPipeline.resultVariable()), Value.of(4.0));
     }
 
     @Test
-    public void testMin() {
-        var minPipeline = new Pipeline("table1", List.of(
+    public void testMin() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var minPipeline = new CompositeOperationBuilder("table1", List.of(
                 new MinOperation("Col1")
-        ), "min");
+        )).setResultVariable("min").build();
 
-        var btcInterpreter = minPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(minPipeline);
 
-        Assertions.assertEquals(result, Value.of(1.0));
+        Assertions.assertEquals(resultVariables.get(minPipeline.resultVariable()), Value.of(1.0));
     }
 
     @Test
-    public void testCount() {
-        var countPipeline = new Pipeline("table1", List.of(
+    public void testCount() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var countPipeline = new CompositeOperationBuilder("table1", List.of(
                 new CountOperation("Col1")
-        ), "count");
+        )).setResultVariable("count").build();
 
-        var btcInterpreter = countPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(countPipeline);
 
-        Assertions.assertEquals(result, Value.of(3));
+        Assertions.assertEquals(resultVariables.get(countPipeline.resultVariable()), Value.of(3));
     }
 
     @Test
-    public void testSum() {
-        var sumPipeline = new Pipeline("table1", List.of(
+    public void testSum() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var sumPipeline = new CompositeOperationBuilder("table1", List.of(
                 new SumOperation("Col1")
-        ), "sum");
+        )).setResultVariable("sum").build();
 
-        var btcInterpreter = sumPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(sumPipeline);
 
-        Assertions.assertEquals(result, Value.of(7.0));
+        Assertions.assertEquals(resultVariables.get(sumPipeline.resultVariable()), Value.of(7.0));
     }
 
     @Test
-    public void testMean() {
-        var meanPipeline = new Pipeline("table1", List.of(
+    public void testMean() throws TableNotFoundException, ColumnNotFoundException, IOException {
+        var meanPipeline = new CompositeOperationBuilder("table1", List.of(
                 new MeanOperation("Col1")
-        ), "mean");
+        )).setResultVariable("mean").build();
 
-        var btcInterpreter = meanPipeline.updateBTC(tables, null);
-        var result = btcInterpreter.getValueResult();
+        btcInterpreter.execute(meanPipeline);
 
-        Assertions.assertEquals(result, Value.of(BigDecimal.valueOf(7).divide(BigDecimal.valueOf(3), new MathContext(1000))));
+        Assertions.assertEquals(resultVariables.get(meanPipeline.resultVariable()), Value.of(BigDecimal.valueOf(7).divide(BigDecimal.valueOf(3), new MathContext(1000))));
     }
 }
