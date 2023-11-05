@@ -284,6 +284,18 @@ public class TableCascade {
         return maxes;
     }
 
+    public TableCascade argMax(String column) throws ColumnNotFoundException {
+        var maxValue = max(column);
+
+        if (maxValue.isEmpty()) {
+            var table = new Table();
+            table.addRow(this.table.getRows().get(0).getValues());
+            return new TableCascade(table);
+        } else {
+            return where(rowWrapper -> rowWrapper.get(column).equals(maxValue.get()));
+        }
+    }
+
     public Optional<Value> min(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
 
@@ -304,6 +316,18 @@ public class TableCascade {
         }
 
         return mins;
+    }
+
+    public TableCascade argMin(String column) throws ColumnNotFoundException {
+        var minValue = min(column);
+
+        if (minValue.isEmpty()) {
+            var table = new Table();
+            table.addRow(this.table.getRows().get(0).getValues());
+            return new TableCascade(table);
+        } else {
+            return where(rowWrapper -> rowWrapper.get(column).equals(minValue.get()));
+        }
     }
 
     public Optional<Value> sum(String column) throws ColumnNotFoundException {
