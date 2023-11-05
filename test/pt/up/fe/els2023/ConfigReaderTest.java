@@ -6,6 +6,7 @@ import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.CsvExporter;
 import pt.up.fe.els2023.export.HtmlExporter;
 import pt.up.fe.els2023.export.TsvExporter;
+import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.IOException;
@@ -54,6 +55,45 @@ public class ConfigReaderTest {
                                 new PropertyNode("params", new NullNode())
                         )
         );
+
+        var expectedOperations = List.of(
+            new CompositeOperationBuilder(
+                    "decision_tree", List.of(
+                    new ArgMaxOperation("min_samples_split")
+                )
+            ).setResult("maxRow").build(),
+            new CompositeOperationBuilder(
+                    "decision_tree", List.of(
+                    new SelectOperation(List.of("File"))
+                )
+            ).setResult("selectResult").build(),
+            new CompositeOperationBuilder(
+                    "decision_tree", List.of(
+                    new ArgMinOperation("min_samples_split"),
+                    new ConcatVerticalOperation(List.of("maxRow"))
+                )
+            ).setResult("test").build(),
+            new CompositeOperationBuilder(
+                    "decision_tree", List.of(
+                    new WhereOperation("Criterion == gini")
+                )
+            ).setResult("table1").build(),
+            new CompositeOperationBuilder(
+                    "table1", List.of(
+                    new ExportOperation(new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
+                )
+            ).setResult("Table 1").build()
+        );
+
+        Assertions.assertEquals(expectedOperations.size(), config.operations().size());
+
+        for (int i = 0; i < expectedOperations.size(); i++) {
+            var expectedOperation = expectedOperations.get(i);
+            var resultOperation = config.operations().get(i);
+            Assertions.assertEquals(expectedOperation.result(), resultOperation.result());
+            Assertions.assertEquals(expectedOperation.resultVariable(), resultOperation.resultVariable());
+            Assertions.assertEquals(expectedOperation.getClass(), resultOperation.getClass());
+        }
 
         var expectedExporters = List.of(
                 new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ",")

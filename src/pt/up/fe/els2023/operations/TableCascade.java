@@ -240,6 +240,21 @@ public class TableCascade {
         return new TableCascade(newTable);
     }
 
+    public TableCascade rename(Map<String, String> columnMapping) {
+        ITable newTable = new Table();
+
+        for (var column : table.getColumns()) {
+            var name = column.getName();
+            newTable.addColumn(columnMapping.getOrDefault(name, name));
+        }
+
+        for (var row : table.getRows()) {
+            newTable.addRow(row.getValues());
+        }
+
+        return new TableCascade(newTable);
+    }
+
     public long count(String column) throws ColumnNotFoundException {
         var col = table.getColumn(column);
 
@@ -284,6 +299,18 @@ public class TableCascade {
         return maxes;
     }
 
+    public TableCascade argMax(String column) throws ColumnNotFoundException {
+        var maxValue = max(column);
+
+        if (maxValue.isEmpty()) {
+            var table = new Table();
+            table.addRow(this.table.getRows().get(0).getValues());
+            return new TableCascade(table);
+        } else {
+            return where(rowWrapper -> rowWrapper.get(column).equals(maxValue.get()));
+        }
+    }
+
     public Optional<Value> min(String column) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(column);
 
@@ -304,6 +331,18 @@ public class TableCascade {
         }
 
         return mins;
+    }
+
+    public TableCascade argMin(String column) throws ColumnNotFoundException {
+        var minValue = min(column);
+
+        if (minValue.isEmpty()) {
+            var table = new Table();
+            table.addRow(this.table.getRows().get(0).getValues());
+            return new TableCascade(table);
+        } else {
+            return where(rowWrapper -> rowWrapper.get(column).equals(minValue.get()));
+        }
     }
 
     public Optional<Value> sum(String column) throws ColumnNotFoundException {
