@@ -9,8 +9,21 @@ import java.util.*;
 public class JsonNode implements ResourceNode {
     private final com.fasterxml.jackson.databind.JsonNode node;
 
+    private final String name;
+
     protected JsonNode(com.fasterxml.jackson.databind.JsonNode node) {
         this.node = node;
+        this.name = null;
+    }
+
+    protected JsonNode(com.fasterxml.jackson.databind.JsonNode node, String name) {
+        this.node = node;
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -31,7 +44,7 @@ public class JsonNode implements ResourceNode {
             return null;
         }
 
-        return new JsonNode(value);
+        return new JsonNode(value, property);
     }
 
     @Override
@@ -42,7 +55,7 @@ public class JsonNode implements ResourceNode {
             return null;
         }
 
-        return new JsonNode(value);
+        return new JsonNode(value, name);
     }
 
     @Override
@@ -50,25 +63,25 @@ public class JsonNode implements ResourceNode {
         Collection<ResourceNode> collection = new ArrayList<>();
 
         for (Iterator<com.fasterxml.jackson.databind.JsonNode> it = node.elements(); it.hasNext(); ) {
-            collection.add(new JsonNode(it.next()));
+            collection.add(new JsonNode(it.next(), name));
         }
 
         return collection.iterator();
     }
 
     @Override
-    public Map<String, ResourceNode> getChildren() {
+    public List<ResourceNode> getChildren() {
         if (isArray()) {
             return null;
         } else if (isValue()) {
             return null;
         }
 
-        var children = new HashMap<String, ResourceNode>();
+        var children = new ArrayList<ResourceNode>();
 
         for (Iterator<Map.Entry<String, com.fasterxml.jackson.databind.JsonNode>> it = node.fields(); it.hasNext(); ) {
             var field = it.next();
-            children.put(field.getKey(), new JsonNode(field.getValue()));
+            children.add(new JsonNode(field.getValue(), field.getKey()));
         }
 
         return children;
@@ -77,7 +90,7 @@ public class JsonNode implements ResourceNode {
     public String getNested(String propertyPath) {
         String[] properties = propertyPath.split("\\.");
 
-        var currentNode = new JsonNode(node);
+        var currentNode = new JsonNode(node, name);
 
         for (var prop : properties) {
             if (currentNode.isArray()) {
