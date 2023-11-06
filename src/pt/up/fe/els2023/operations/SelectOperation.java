@@ -1,7 +1,11 @@
 package pt.up.fe.els2023.operations;
 
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
+import pt.up.fe.els2023.exceptions.TableNotFoundException;
+import pt.up.fe.els2023.interpreter.VariablesTable;
 
+import java.io.IOException;
 import java.util.List;
 
 public class SelectOperation implements TableOperation {
@@ -12,11 +16,23 @@ public class SelectOperation implements TableOperation {
         this.columnsList = columnsList;
     }
 
-    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
-        btcInterpreter.apply(this);
+    @Override
+    public String name() {
+        return "Select( " + String.join(", ", columnsList) + " )";
     }
 
-    public TableCascade execute(TableCascade btc) throws ColumnNotFoundException {
-        return btc.select(columnsList.toArray(String[]::new));
+    @Override
+    public boolean isTerminal() {
+        return false;
+    }
+
+    @Override
+    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(previousResult.getTableCascade().select(columnsList.toArray(String[]::new)));
+    }
+
+    @Override
+    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return null;
     }
 }

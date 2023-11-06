@@ -63,13 +63,11 @@ public class ConfigReader {
         for (Map<String, Object> operation : operations) {
             String initialTable = null;
             String result = null;
-            String resultVariable = null;
             List<TableOperation> ops = new ArrayList<>();
             if (operation.containsKey("cascade")) {
                 Map<String, Object> pipeline = (Map<String, Object>) operation.get("cascade");
                 initialTable = (String) pipeline.get("table");
                 result = (String) pipeline.get("result");
-                resultVariable = (String) pipeline.get("resultVar");
                 for (Map<String, Object> pipelineOperation : (ArrayList<Map<String, Object>>) pipeline.get("operations")) {
                     TableOperation op = parseOperationNode(pipelineOperation);
                     if (op != null) {
@@ -81,15 +79,14 @@ public class ConfigReader {
                 if (op != null) {
                     initialTable = (String) operation.get("table");
                     result = (String) operation.get("result");
-                    resultVariable = (String) operation.get("resultVar");
                     ops.add(op);
                 }
             } else {
                 System.out.println("No operation found");
             }
 
-            if (!ops.isEmpty() && initialTable != null && (result != null || resultVariable != null)) {
-                CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResult(result).setResultVariable(resultVariable);
+            if (!ops.isEmpty() && initialTable != null && result != null) {
+                CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
                 configOperations.add(builder.build());
             }
         }

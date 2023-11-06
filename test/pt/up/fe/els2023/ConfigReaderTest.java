@@ -61,28 +61,28 @@ public class ConfigReaderTest {
                     "decision_tree", List.of(
                     new ArgMaxOperation("min_samples_split")
                 )
-            ).setResult("maxRow").build(),
+            ).setResultVariableName("maxRow").build(),
             new CompositeOperationBuilder(
                     "decision_tree", List.of(
                     new SelectOperation(List.of("File"))
                 )
-            ).setResult("selectResult").build(),
+            ).setResultVariableName("selectResult").build(),
             new CompositeOperationBuilder(
                     "decision_tree", List.of(
                     new ArgMinOperation("min_samples_split"),
                     new ConcatVerticalOperation(List.of("maxRow"))
                 )
-            ).setResult("test").build(),
+            ).setResultVariableName("test").build(),
             new CompositeOperationBuilder(
                     "decision_tree", List.of(
                     new WhereOperation("Criterion == gini")
                 )
-            ).setResult("table1").build(),
+            ).setResultVariableName("table1").build(),
             new CompositeOperationBuilder(
                     "table1", List.of(
                     new ExportOperation(new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
                 )
-            ).setResult("Table 1").build()
+            ).setResultVariableName("Table 1").build()
         );
 
         Assertions.assertEquals(expectedOperations.size(), config.operations().size());
@@ -90,8 +90,7 @@ public class ConfigReaderTest {
         for (int i = 0; i < expectedOperations.size(); i++) {
             var expectedOperation = expectedOperations.get(i);
             var resultOperation = config.operations().get(i);
-            Assertions.assertEquals(expectedOperation.result(), resultOperation.result());
-            Assertions.assertEquals(expectedOperation.resultVariable(), resultOperation.resultVariable());
+            Assertions.assertEquals(expectedOperation.resultVariableName(), resultOperation.resultVariableName());
             Assertions.assertEquals(expectedOperation.getClass(), resultOperation.getClass());
         }
 

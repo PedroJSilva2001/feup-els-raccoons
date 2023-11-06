@@ -1,7 +1,12 @@
 package pt.up.fe.els2023.operations;
 
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
+import pt.up.fe.els2023.exceptions.TableNotFoundException;
+import pt.up.fe.els2023.interpreter.VariablesTable;
 import pt.up.fe.els2023.table.Value;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class DropWhereOperation extends WhereOperation {
@@ -10,11 +15,15 @@ public class DropWhereOperation extends WhereOperation {
         super(predicate);
     }
 
-    public void accept(TableCascadeInterpreter btcInterpreter) {
-        btcInterpreter.apply(this);
+    @Override
+    public String name() {
+        return "DropWhere( " + predicate + " )";
     }
 
-    public TableCascade execute(TableCascade btc, Map<String, Value> resultVariables) {
-        return btc.dropWhere(parsePredicate(predicate, resultVariables));
+    @Override
+    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        var pred = parsePredicate(predicate, variablesTable.getVariables());
+
+        return new OperationResult(previousResult.getTableCascade().dropWhere(pred));
     }
 }

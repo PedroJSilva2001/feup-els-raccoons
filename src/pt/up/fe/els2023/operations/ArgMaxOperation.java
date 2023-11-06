@@ -1,6 +1,11 @@
 package pt.up.fe.els2023.operations;
 
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
+import pt.up.fe.els2023.exceptions.TableNotFoundException;
+import pt.up.fe.els2023.interpreter.VariablesTable;
+
+import java.io.IOException;
 
 public class ArgMaxOperation implements TableOperation {
 
@@ -10,11 +15,23 @@ public class ArgMaxOperation implements TableOperation {
         this.columnName = columnName;
     }
 
-    public void accept(TableCascadeInterpreter btcInterpreter) throws ColumnNotFoundException {
-        btcInterpreter.apply(this);
+    @Override
+    public String name() {
+        return "argmax(" + columnName + ")";
     }
 
-    public TableCascade execute(TableCascade btc) throws ColumnNotFoundException {
-        return btc.argMax(columnName);
+    @Override
+    public boolean isTerminal() {
+        return false;
+    }
+
+    @Override
+    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(previousResult.getTableCascade().argMax(columnName));
+    }
+
+    @Override
+    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return null;
     }
 }
