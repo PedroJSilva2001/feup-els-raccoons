@@ -42,9 +42,8 @@ public class ConfigReader {
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
         List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
         List<CompositeOperation> configOperations = parseOperations(yamlData);
-        List<TableExporter> configExporter = parseExporters(yamlData);
 
-        return new Config(configTableSources, configTableSchemas, configOperations, configExporter);
+        return new Config(configTableSources, configTableSchemas, configOperations);
     }
 
     private List<CompositeOperation> parseOperations(Map<String, Object> yamlData) {

@@ -1,0 +1,29 @@
+sources:
+  - name: students
+    type: yaml
+    path:
+      - "./files/yaml/students*.yaml"
+
+
+tables:
+  - name: student-table
+    source: students
+    nft:
+      - $file
+      - course: "Course"
+      - students:
+        - $each:
+          - studID: "Student ID"
+          - grades:
+            - $each: "Grades"
+          - friends:
+            - $each: "Friends"
+
+operations:
+  - operation: export
+    table: student-table
+    path: "files/out/"
+    result: "students.html"
+    title: "Students"
+    exportFullHtml: true
+    format: html

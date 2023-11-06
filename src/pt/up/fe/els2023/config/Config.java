@@ -18,7 +18,6 @@ import java.util.Map;
 public record Config(
         Map<String, TableSource> tableSources,
         List<TableSchema> tableSchemas,
-        List<CompositeOperation> operations,
-        List<TableExporter> exporters
+        List<CompositeOperation> operations
 ) {
 }

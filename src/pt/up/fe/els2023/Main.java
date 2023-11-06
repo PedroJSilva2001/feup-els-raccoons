@@ -42,15 +42,6 @@ public class Main {
                 }
             }
 
-            config.exporters().forEach((exporter) -> {
-                try {
-                    exporter.export(tables);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (TableNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
