@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import pt.up.fe.els2023.table.Column;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Row;
 import pt.up.fe.els2023.table.Value;
 
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ExporterTest {
-    ITable table;
+    Table table;
 
 
     @BeforeEach
     public void init() {
-        table = Mockito.mock(ITable.class);
+        table = Mockito.mock(Table.class);
         Mockito.when(table.getName()).thenReturn("table1");
 
         Column column = new Column("data");

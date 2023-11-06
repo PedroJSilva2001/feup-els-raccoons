@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.operations;
 
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.RacoonTable;
 
 public interface TableOperation {
-    Table execute();
+    RacoonTable execute();
 }

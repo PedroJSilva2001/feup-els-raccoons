@@ -2,7 +2,7 @@ package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class Main {
         try {
             Config config = configReader.readConfig();
 
-            Map<String, ITable> tables = new HashMap<>();
+            Map<String, Table> tables = new HashMap<>();
 
             for (var tableSchema : config.tableSchemas()) {
                 tables.put(tableSchema.name(), tableSchema.collect());

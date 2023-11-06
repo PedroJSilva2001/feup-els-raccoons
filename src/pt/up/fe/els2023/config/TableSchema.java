@@ -3,7 +3,7 @@ package pt.up.fe.els2023.config;
 import pt.up.fe.els2023.imports.NodeOrderVisitor;
 import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.TableSource;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
 import pt.up.fe.els2023.utils.GlobFinder;
 
@@ -128,8 +128,8 @@ public final class TableSchema {
         }
     }
 
-    private Table mapToTable(Map<String, List<Value>> columnMap, List<String> columnOrder) {
-        Table table = new Table(this.name);
+    private RacoonTable mapToTable(Map<String, List<Value>> columnMap, List<String> columnOrder) {
+        RacoonTable table = new RacoonTable(this.name);
 
         for (String columnName : columnOrder) {
             table.addColumn(columnName);
@@ -150,7 +150,7 @@ public final class TableSchema {
         return table;
     }
 
-    public Table collect() {
+    public RacoonTable collect() {
         var orderVisitor = new NodeOrderVisitor();
 
         var nodeOrder = orderVisitor.getNodeOrder(this.nft);

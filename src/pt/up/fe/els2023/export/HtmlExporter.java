@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.export;
 
 import org.apache.commons.text.StringEscapeUtils;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -41,7 +41,7 @@ public class HtmlExporter extends TableExporter {
     }
 
     @Override
-    void export(Writer writer, ITable table) throws IOException {
+    void export(Writer writer, Table table) throws IOException {
         StringBuilder body = new StringBuilder(String.join(this.endOfLine,
                 "<table style=\"white-space: pre-line;\">",
                 "   <thead>",
