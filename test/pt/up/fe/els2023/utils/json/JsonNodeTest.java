@@ -174,9 +174,6 @@ public class JsonNodeTest {
 
         JsonNode listNode = jsonNode("[\"item1\", \"item2\"]");
         Assertions.assertFalse(listNode.isBigDecimal());
-
-        System.out.println(BigDecimal.valueOf(Double.MAX_VALUE).toPlainString());
-        JsonNode bigDecimalNode = jsonNode("111111111111" + BigDecimal.valueOf(Double.MAX_VALUE).toPlainString());
     }
 
     @Test
