@@ -4,26 +4,20 @@ import java.util.List;
 
 public class CompositeOperationBuilder {
     private final String initialTable;
-    private String result;
+    private String resultVariableName;
     private final List<TableOperation> operations;
-    private String resultVariable;
 
     public CompositeOperationBuilder(String initialTable, List<TableOperation> operations) {
         this.initialTable = initialTable;
         this.operations = operations;
     }
 
-    public CompositeOperationBuilder setResult(String result) {
-        this.result = result;
-        return this;
-    }
-
-    public CompositeOperationBuilder setResultVariable(String resultVariable) {
-        this.resultVariable = resultVariable;
+    public CompositeOperationBuilder setResultVariableName(String resultVariableName) {
+        this.resultVariableName = resultVariableName;
         return this;
     }
 
     public CompositeOperation build() {
-        return new CompositeOperation(this.initialTable, this.result, this.operations, this.resultVariable);
+        return new CompositeOperation(this.initialTable, this.resultVariableName, this.operations);
     }
 }

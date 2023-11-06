@@ -1,7 +1,10 @@
 package pt.up.fe.els2023.operations;
 
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.export.TableExporter;
+import pt.up.fe.els2023.interpreter.VariablesTable;
 import pt.up.fe.els2023.table.ITable;
 
 import java.io.IOException;
@@ -15,13 +18,32 @@ public class ExportOperation implements TableOperation {
         this.exporter = exporter;
     }
 
-    public void accept(TableCascadeInterpreter btcInterpreter) throws IOException, TableNotFoundException {
-        btcInterpreter.apply(this);
+    @Override
+    public String name() {
+        return "Export( " + exporter.toString() + " )";
     }
 
-    public void execute(TableCascade btc) throws TableNotFoundException, IOException {
-        HashMap<String, ITable> map = new HashMap<>();
-        map.put(exporter.getTable(), btc.get());
-        exporter.export(map);
+    @Override
+    public boolean isTerminal() {
+        return true;
+    }
+
+    @Override
+    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+
+        var table = previousResult.getTableCascade().get();
+
+        HashMap<String, ITable> tables = new HashMap<>();
+
+        tables.put(exporter.getTable(), table);
+
+        exporter.export(tables);
+
+        return null;
+    }
+
+    @Override
+    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return null;
     }
 }

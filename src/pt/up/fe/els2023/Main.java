@@ -1,9 +1,8 @@
 package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.operations.TableCascadeInterpreter;
+import pt.up.fe.els2023.interpreter.VariablesTable;
+import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
 import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Value;
 
@@ -31,19 +30,24 @@ public class Main {
                 tables.put(tableSchema.name(), tableSchema.collect());
             }
 
-            var resultVariables = new HashMap<String, Value>();
+            var values = new HashMap<String, Value>();
+
             var operations = config.operations();
-            var btcInterpreter = new TableCascadeInterpreter(tables, resultVariables);
+
+            var variablesTable = new VariablesTable(tables, values);
+
+            var btcInterpreter = new TableCascadeInterpreter(variablesTable);
+
             for (var cascade : operations) {
                 try {
                     btcInterpreter.execute(cascade);
-                } catch (TableNotFoundException | IOException | ColumnNotFoundException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
             }
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

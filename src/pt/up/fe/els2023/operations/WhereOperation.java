@@ -1,7 +1,12 @@
 package pt.up.fe.els2023.operations;
 
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
+import pt.up.fe.els2023.exceptions.TableNotFoundException;
+import pt.up.fe.els2023.interpreter.VariablesTable;
 import pt.up.fe.els2023.table.Value;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -14,13 +19,29 @@ public class WhereOperation implements TableOperation {
         this.predicate = predicate;
     }
 
-    public void accept(TableCascadeInterpreter btcInterpreter) {
-        btcInterpreter.apply(this);
+    @Override
+    public String name() {
+        return "Where( " + predicate + " )";
     }
 
-    public TableCascade execute(TableCascade btc, Map<String, Value> resultVariables) {
-        return btc.where(parsePredicate(predicate, resultVariables));
+    @Override
+    public boolean isTerminal() {
+        return false;
     }
+
+    @Override
+    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        var pred = parsePredicate(predicate, variablesTable.getVariables());
+
+        return new OperationResult(previousResult.getTableCascade().where(pred));
+    }
+
+    // TODO
+    @Override
+    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException {
+        return null;
+    }
+
 
     protected Predicate<RowWrapper> parsePredicate(String predicate, Map<String, Value> resultVariables) {
         String[] parts = predicate.split(" ");
