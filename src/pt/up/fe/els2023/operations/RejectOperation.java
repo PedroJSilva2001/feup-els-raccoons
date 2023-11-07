@@ -10,16 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RejectOperation implements TableOperation {
+public class RejectOperation extends TableOperation {
 
     private final List<String> columnsList;
 
-    public RejectOperation(List<String> columnsList) {
+    public RejectOperation(String initialTable, String resultVariableName, List<String> columnsList) {
+        super(initialTable, resultVariableName);
         this.columnsList = columnsList;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Reject( " + String.join(", ", columnsList) + " )";
     }
 
@@ -29,12 +30,7 @@ public class RejectOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return new OperationResult(previousResult.getTableCascade().reject(columnsList.toArray(String[]::new)));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(tableCascade.reject(columnsList.toArray(String[]::new)));
     }
 }

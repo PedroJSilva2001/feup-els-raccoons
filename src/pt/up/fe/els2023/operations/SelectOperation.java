@@ -8,16 +8,17 @@ import pt.up.fe.els2023.interpreter.VariablesTable;
 import java.io.IOException;
 import java.util.List;
 
-public class SelectOperation implements TableOperation {
+public class SelectOperation extends TableOperation {
 
     private final List<String> columnsList;
 
-    public SelectOperation(List<String> columnsList) {
+    public SelectOperation(String initialTable, String resultVariableName, List<String> columnsList) {
+        super(initialTable, resultVariableName);
         this.columnsList = columnsList;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Select( " + String.join(", ", columnsList) + " )";
     }
 
@@ -27,12 +28,7 @@ public class SelectOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return new OperationResult(previousResult.getTableCascade().select(columnsList.toArray(String[]::new)));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(tableCascade.select(columnsList.toArray(String[]::new)));
     }
 }

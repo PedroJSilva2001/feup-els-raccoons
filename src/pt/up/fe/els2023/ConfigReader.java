@@ -41,18 +41,18 @@ public class ConfigReader {
 
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
         List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
-        List<CompositeOperation> configOperations = parseOperations(yamlData);
+        List<TableOperation> configOperations = parseOperations(yamlData);
 
         return new Config(configTableSources, configTableSchemas, configOperations);
     }
 
-    private List<CompositeOperation> parseOperations(Map<String, Object> yamlData) {
+    private List<TableOperation> parseOperations(Map<String, Object> yamlData) {
         if (!yamlData.containsKey("operations")) {
             System.out.println("No operations found");
             return null;
         }
 
-        List<CompositeOperation> configOperations = new ArrayList<>();
+        List<TableOperation> configOperations = new ArrayList<>();
         List<Map<String, Object>> operations = (ArrayList<Map<String, Object>>) yamlData.get("operations");
 
         if (operations == null) {
@@ -69,64 +69,69 @@ public class ConfigReader {
                 initialTable = (String) pipeline.get("table");
                 result = (String) pipeline.get("result");
                 for (Map<String, Object> pipelineOperation : (ArrayList<Map<String, Object>>) pipeline.get("operations")) {
-                    TableOperation op = parseOperationNode(pipelineOperation);
+                    TableOperation op = parseOperationNode(initialTable, result, pipelineOperation);
                     if (op != null) {
                         ops.add(op);
                     }
                 }
-            } else if (operation.containsKey("operation")) {
-                TableOperation op = parseOperationNode(operation);
-                if (op != null) {
-                    initialTable = (String) operation.get("table");
-                    result = (String) operation.get("result");
-                    ops.add(op);
+
+                if (!ops.isEmpty() && initialTable != null && result != null) {
+                    CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
+                    configOperations.add(builder.build());
                 }
+            } else if (operation.containsKey("operation")) {
+                result = (String) operation.get("result");
+                initialTable = (String) operation.get("table");
+
+                if (initialTable != null && result != null) {
+                    TableOperation op = parseOperationNode(initialTable, result, operation);
+
+                    if (op != null) {
+                        configOperations.add(op);
+                    }
+                }
+
             } else {
                 System.out.println("No operation found");
-            }
-
-            if (!ops.isEmpty() && initialTable != null && result != null) {
-                CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
-                configOperations.add(builder.build());
             }
         }
 
         return configOperations;
     }
 
-    private TableOperation parseOperationNode(Map<String, Object> operationNode) {
+    private TableOperation parseOperationNode(String initialTable, String resultVariableName, Map<String, Object> operationNode) {
         switch ((String) operationNode.get("operation")) {
             case "argMax" -> {
-                return new ArgMaxOperation((String) operationNode.get("columns"));
+                return new ArgMaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "argMin" -> {
-                return new ArgMinOperation((String) operationNode.get("columns"));
+                return new ArgMinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "concat" -> {
                 Object additionalTablesObject = operationNode.get("additionalTables");
                 List<String> additionalTables = additionalTablesObject instanceof String ? new ArrayList<>(List.of((String) additionalTablesObject)) : (ArrayList<String>) additionalTablesObject;
                 if (Objects.equals(operationNode.get("axis"), "horizontal")) {
-                    return new ConcatHorizontalOperation(additionalTables);
+                    return new ConcatHorizontalOperation(initialTable, resultVariableName, additionalTables);
                 } else if (Objects.equals(operationNode.get("axis"), "vertical")) {
-                    return new ConcatVerticalOperation(additionalTables);
+                    return new ConcatVerticalOperation(initialTable, resultVariableName, additionalTables);
                 }
             }
             case "select" -> {
                 Object columnsObject = operationNode.get("columns");
                 List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
-                return new SelectOperation(columns);
+                return new SelectOperation(initialTable, resultVariableName, columns);
             }
             case "reject" -> {
                 Object columnsObject = operationNode.get("columns");
                 List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
-                return new RejectOperation(columns);
+                return new RejectOperation(initialTable, resultVariableName, columns);
             }
             case "export" -> {
                 operationNode.put("name", operationNode.get("table"));
                 operationNode.put("filename", operationNode.get("result"));
                 var exporterBuilder = parseExportNode(operationNode);
                 if (exporterBuilder != null) {
-                    return new ExportOperation(exporterBuilder.build());
+                    return new ExportOperation(initialTable, resultVariableName, exporterBuilder.build());
                 }
             }
             case "rename" -> {
@@ -134,28 +139,28 @@ public class ConfigReader {
                 List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
                 Object newColumnsObject = operationNode.get("newColumns");
                 List<String> newColumns = newColumnsObject instanceof String ? new ArrayList<>(List.of((String) newColumnsObject)) : (ArrayList<String>) newColumnsObject;
-                return new RenameOperation(columns, newColumns);
+                return new RenameOperation(initialTable, resultVariableName, columns, newColumns);
             }
             case "where" -> {
-                return new WhereOperation((String) operationNode.get("condition"));
+                return new WhereOperation(initialTable, resultVariableName, (String) operationNode.get("condition"));
             }
             case "dropWhere" -> {
-                return new DropWhereOperation((String) operationNode.get("condition"));
+                return new DropWhereOperation(initialTable, resultVariableName, (String) operationNode.get("condition"));
             }
             case "max" -> {
-                return new MaxOperation((String) operationNode.get("columns"));
+                return new MaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "min" -> {
-                return new MinOperation((String) operationNode.get("columns"));
+                return new MinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "count" -> {
-                return new CountOperation((String) operationNode.get("columns"));
+                return new CountOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "mean" -> {
-                return new MeanOperation((String) operationNode.get("columns"));
+                return new MeanOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             case "sum" -> {
-                return new SumOperation((String) operationNode.get("columns"));
+                return new SumOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             default -> System.out.println("Unsupported operation");
         }

@@ -7,16 +7,17 @@ import pt.up.fe.els2023.interpreter.VariablesTable;
 
 import java.io.IOException;
 
-public class ArgMinOperation implements TableOperation {
+public class ArgMinOperation extends TableOperation {
 
     private final String columnName;
 
-    public ArgMinOperation(String columnName) {
+    public ArgMinOperation(String initialTable, String resultVariableName, String columnName) {
+        super(initialTable, resultVariableName);
         this.columnName = columnName;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "ArgMin( " + columnName + " )";
     }
 
@@ -26,12 +27,8 @@ public class ArgMinOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return new OperationResult(previousResult.getTableCascade().argMin(columnName));
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(tableCascade.argMin(columnName));
     }
 
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
-    }
 }

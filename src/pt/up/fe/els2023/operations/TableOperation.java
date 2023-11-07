@@ -6,14 +6,30 @@ import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.interpreter.VariablesTable;
 
 import java.io.IOException;
+import java.util.List;
 
-public interface TableOperation {
+public abstract class TableOperation {
 
-    String name();
+    protected String initialTable;
 
-    boolean isTerminal();
+    protected String resultVariableName;
 
-    OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException;
+    public TableOperation(String initialTable, String resultVariableName) {
+        this.initialTable = initialTable;
+        this.resultVariableName = resultVariableName;
+    }
 
-    OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException;
+    public String getInitialTable() {
+        return initialTable;
+    }
+
+    public String getResultVariableName() {
+        return resultVariableName;
+    }
+
+    public abstract String getName();
+
+    public abstract boolean isTerminal();
+
+    public abstract OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException;
 }

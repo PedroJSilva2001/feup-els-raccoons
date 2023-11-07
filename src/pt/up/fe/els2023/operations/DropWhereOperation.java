@@ -10,20 +10,19 @@ import java.io.IOException;
 import java.util.Map;
 
 public class DropWhereOperation extends WhereOperation {
-
-    public DropWhereOperation(String predicate) {
-        super(predicate);
+    public DropWhereOperation(String initialTable, String resultVariableName, String predicate) {
+        super(initialTable, resultVariableName, predicate);
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "DropWhere( " + predicate + " )";
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
         var pred = parsePredicate(predicate, variablesTable.getVariables());
 
-        return new OperationResult(previousResult.getTableCascade().dropWhere(pred));
+        return new OperationResult(tableCascade.dropWhere(pred));
     }
 }

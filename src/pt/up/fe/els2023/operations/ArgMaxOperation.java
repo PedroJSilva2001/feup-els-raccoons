@@ -7,17 +7,17 @@ import pt.up.fe.els2023.interpreter.VariablesTable;
 
 import java.io.IOException;
 
-public class ArgMaxOperation implements TableOperation {
-
+public class ArgMaxOperation extends TableOperation {
     private final String columnName;
 
-    public ArgMaxOperation(String columnName) {
+    public ArgMaxOperation(String initialTable, String resultVariableName, String columnName) {
+        super(initialTable, resultVariableName);
         this.columnName = columnName;
     }
 
     @Override
-    public String name() {
-        return "argmax(" + columnName + ")";
+    public String getName() {
+        return "ArgMax(" + columnName + ")";
     }
 
     @Override
@@ -26,12 +26,7 @@ public class ArgMaxOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return new OperationResult(previousResult.getTableCascade().argMax(columnName));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        return new OperationResult(tableCascade.argMax(columnName));
     }
 }

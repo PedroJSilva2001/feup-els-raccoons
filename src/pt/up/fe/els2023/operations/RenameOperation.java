@@ -10,18 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RenameOperation implements TableOperation {
+public class RenameOperation extends TableOperation {
 
     private final List<String> columnNames;
     private final List<String> newColumnNames;
 
-    public RenameOperation(List<String> columnNames, List<String> newColumnNames) {
+    public RenameOperation(String initialTable, String resultVariableName, List<String> columnNames, List<String> newColumnNames) {
+        super(initialTable, resultVariableName);
         this.columnNames = columnNames;
         this.newColumnNames = newColumnNames;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Rename( " + String.join(", ", columnNames) + " ->" + String.join(", ", newColumnNames) + " )";
     }
 
@@ -31,16 +32,11 @@ public class RenameOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
         Map<String, String> columnsMapping = new HashMap<>();
         for (int i = 0; i < columnNames.size(); i++) {
             columnsMapping.put(columnNames.get(i), newColumnNames.get(i));
         }
-        return new OperationResult(previousResult.getTableCascade().rename(columnsMapping));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
+        return new OperationResult(tableCascade.rename(columnsMapping));
     }
 }

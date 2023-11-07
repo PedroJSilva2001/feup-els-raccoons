@@ -8,16 +8,17 @@ import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
 
-public class CountOperation implements TableOperation {
+public class CountOperation extends TableOperation {
 
     private final String columnName;
 
-    public CountOperation(String columnName) {
+    public CountOperation(String initialTable, String resultVariableName, String columnName) {
+        super(initialTable, resultVariableName);
         this.columnName = columnName;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Count( " + columnName + " )";
     }
 
@@ -27,14 +28,9 @@ public class CountOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        var result = previousResult.getTableCascade().count(columnName);
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        var result = tableCascade.count(columnName);
 
         return new OperationResult(Value.of(result));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
     }
 }

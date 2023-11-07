@@ -9,16 +9,17 @@ import pt.up.fe.els2023.table.Value;
 import java.io.IOException;
 import java.util.Optional;
 
-public class MaxOperation implements TableOperation {
+public class MaxOperation extends TableOperation {
 
     private final String columnName;
 
-    public MaxOperation(String columnName) {
+    public MaxOperation(String initialTable, String resultVariableName, String columnName) {
+        super(initialTable, resultVariableName);
         this.columnName = columnName;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Max( " + columnName + " )";
     }
 
@@ -28,14 +29,9 @@ public class MaxOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        var result = previousResult.getTableCascade().max(columnName);
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        var result = tableCascade.max(columnName);
 
         return new OperationResult(result.orElse(null));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
     }
 }

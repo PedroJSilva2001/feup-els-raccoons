@@ -9,17 +9,17 @@ import pt.up.fe.els2023.table.Value;
 import java.io.IOException;
 import java.util.Optional;
 
-public class MinOperation implements TableOperation {
+public class MinOperation extends TableOperation {
 
     private final String columnName;
 
-    public MinOperation(String columnName) {
+    public MinOperation(String initialTable, String resultVariableName, String columnName) {
+        super(initialTable, resultVariableName);
         this.columnName = columnName;
     }
 
-
     @Override
-    public String name() {
+    public String getName() {
         return "Min( " + columnName + " )";
     }
 
@@ -29,14 +29,9 @@ public class MinOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        var result = previousResult.getTableCascade().min(columnName);
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+        var result = tableCascade.min(columnName);
 
         return new OperationResult(result.orElse(null));
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
     }
 }

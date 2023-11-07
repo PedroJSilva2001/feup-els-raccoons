@@ -57,46 +57,31 @@ public class ConfigReaderTest {
         );
 
         var expectedOperations = List.of(
-            new CompositeOperationBuilder(
+                new ArgMaxOperation("decision_tree", "maxRow","min_samples_split"),
+
+                new SelectOperation("decision_tree", "selectResult", List.of("File")),
+
+                new CompositeOperationBuilder(
                     "decision_tree", List.of(
-                    new ArgMaxOperation("min_samples_split")
-                )
-            ).setResultVariableName("maxRow").build(),
-            new CompositeOperationBuilder(
-                    "decision_tree", List.of(
-                    new SelectOperation(List.of("File"))
-                )
-            ).setResultVariableName("selectResult").build(),
-            new CompositeOperationBuilder(
-                    "decision_tree", List.of(
-                    new ArgMinOperation("min_samples_split"),
-                    new ConcatVerticalOperation(List.of("maxRow"))
-                )
-            ).setResultVariableName("test").build(),
-            new CompositeOperationBuilder(
-                    "decision_tree", List.of(
-                    new WhereOperation("Criterion == gini")
-                )
-            ).setResultVariableName("table1").build(),
-            new CompositeOperationBuilder(
-                    "table1", List.of(
-                    new ExportOperation(new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
-                )
-            ).setResultVariableName("Table 1").build()
+                    new ArgMinOperation(null,null,  "min_samples_split"),
+                    new ConcatVerticalOperation(null, null, List.of("maxRow"))
+                )).setResultVariableName("test").build(),
+
+                new WhereOperation("decision_tree", "table1", "Criterion == gini"),
+
+                new ExportOperation("table1", "Table 1",
+                        new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
         );
+
 
         Assertions.assertEquals(expectedOperations.size(), config.operations().size());
 
         for (int i = 0; i < expectedOperations.size(); i++) {
             var expectedOperation = expectedOperations.get(i);
             var resultOperation = config.operations().get(i);
-            Assertions.assertEquals(expectedOperation.resultVariableName(), resultOperation.resultVariableName());
+            Assertions.assertEquals(expectedOperation.getResultVariableName(), resultOperation.getResultVariableName());
             Assertions.assertEquals(expectedOperation.getClass(), resultOperation.getClass());
         }
-
-        var expectedExporters = List.of(
-                new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ",")
-        );
 
         for (var expectedTableSource : expectedTableSources.entrySet()) {
             var resultTableSource = config.tableSources().get(expectedTableSource.getKey());

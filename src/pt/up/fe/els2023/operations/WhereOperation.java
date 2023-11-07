@@ -11,16 +11,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class WhereOperation implements TableOperation {
+public class WhereOperation extends TableOperation {
 
     protected final String predicate;
 
-    public WhereOperation(String predicate) {
+    public WhereOperation(String initialTable, String resultVariableName, String predicate) {
+        super(initialTable, resultVariableName);
         this.predicate = predicate;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Where( " + predicate + " )";
     }
 
@@ -30,17 +31,12 @@ public class WhereOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
         var pred = parsePredicate(predicate, variablesTable.getVariables());
 
-        return new OperationResult(previousResult.getTableCascade().where(pred));
+        return new OperationResult(tableCascade.where(pred));
     }
 
-    // TODO
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException {
-        return null;
-    }
 
 
     protected Predicate<RowWrapper> parsePredicate(String predicate, Map<String, Value> resultVariables) {

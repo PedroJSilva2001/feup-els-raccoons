@@ -10,16 +10,17 @@ import pt.up.fe.els2023.table.ITable;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class ExportOperation implements TableOperation {
+public class ExportOperation extends TableOperation {
 
     private final TableExporter exporter;
 
-    public ExportOperation(TableExporter exporter) {
+    public ExportOperation(String initialTable, String resultVariableName, TableExporter exporter) {
+        super(initialTable, resultVariableName);
         this.exporter = exporter;
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "Export( " + exporter.toString() + " )";
     }
 
@@ -29,9 +30,9 @@ public class ExportOperation implements TableOperation {
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
 
-        var table = previousResult.getTableCascade().get();
+        var table = tableCascade.get();
 
         HashMap<String, ITable> tables = new HashMap<>();
 
@@ -39,11 +40,6 @@ public class ExportOperation implements TableOperation {
 
         exporter.export(tables);
 
-        return null;
-    }
-
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
         return null;
     }
 }

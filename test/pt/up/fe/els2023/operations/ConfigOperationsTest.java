@@ -57,11 +57,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testSelect() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var selectPipeline = new CompositeOperationBuilder("table1", List.of(
-                new SelectOperation(List.of("Col2"))
-        )).setResultVariableName("table3").build();
+        var select = new SelectOperation("table1", "table3", List.of("Col2"));
 
-        btcInterpreter.execute(selectPipeline);
+        btcInterpreter.execute(select);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -78,11 +76,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testReject() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var rejectPipeline = new CompositeOperationBuilder("table1", List.of(
-                new RejectOperation(List.of("Col2"))
-        )).setResultVariableName("table3").build();
+        var reject = new RejectOperation("table1", "table3", List.of("Col2"));
 
-        btcInterpreter.execute(rejectPipeline);
+        btcInterpreter.execute(reject);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -100,11 +96,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testConcatHorizontal() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var concatPipeline = new CompositeOperationBuilder("table1", List.of(
-                new ConcatHorizontalOperation(List.of("table2"))
-        )).setResultVariableName("table3").build();
+        var concat = new ConcatHorizontalOperation("table1", "table3", List.of("table2"));
 
-        btcInterpreter.execute(concatPipeline);
+        btcInterpreter.execute(concat);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -123,11 +117,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testConcatVertical() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var concatPipeline = new CompositeOperationBuilder("table1", List.of(
-                new ConcatVerticalOperation(List.of("table2"))
-        )).setResultVariableName("table3").build();
+        var concat = new ConcatVerticalOperation("table1", "table3", List.of("table2"));
 
-        btcInterpreter.execute(concatPipeline);
+        btcInterpreter.execute(concat);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -147,11 +139,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testArgMax() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var maxArgPipeline = new CompositeOperationBuilder("table1", List.of(
-                new ArgMaxOperation("Col1")
-        )).setResultVariableName("table3").build();
+        var maxArg = new ArgMaxOperation("table1", "table3", "Col1");
 
-        btcInterpreter.execute(maxArgPipeline);
+        btcInterpreter.execute(maxArg);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -165,11 +155,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testArgMin() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var minArgPipeline = new CompositeOperationBuilder("table1", List.of(
-                new ArgMinOperation("Col1")
-        )).setResultVariableName("table3").build();
+        var minArg = new ArgMinOperation("table1", "table3", "Col1");
 
-        btcInterpreter.execute(minArgPipeline);
+        btcInterpreter.execute(minArg);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -183,11 +171,10 @@ public class ConfigOperationsTest {
 
     @Test
     public void testRename() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var renamePipeline = new CompositeOperationBuilder("table1", List.of(
-                new RenameOperation(List.of("Col1"), List.of("Col3"))
-        )).setResultVariableName("table3").build();
 
-        btcInterpreter.execute(renamePipeline);
+        var rename = new RenameOperation("table1", "table3", List.of("Col1"), List.of("Col3"));
+
+        btcInterpreter.execute(rename);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -204,11 +191,8 @@ public class ConfigOperationsTest {
 
     @Test
     public void testWhere() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var wherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new WhereOperation("Col2 == yes")
-        )).setResultVariableName("table3").build();
-
-        btcInterpreter.execute(wherePipeline);
+        var where = new WhereOperation("table1", "table3", "Col2 == yes");
+        btcInterpreter.execute(where);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -219,27 +203,21 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        wherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new WhereOperation("Col1 < 2")
-        )).setResultVariableName("table3").build();
+        where = new WhereOperation("table1", "table3", "Col1 < 2");
 
-        btcInterpreter.execute(wherePipeline);
+        btcInterpreter.execute(where);
 
         Assertions.assertEquals(tables.size(), 3);
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        var minPipeline = new CompositeOperationBuilder("table1", List.of(
-                new MinOperation("Col1")
-        )).setResultVariableName("min").build();
+        var min = new MinOperation("table1", "min", "Col1");
 
-        btcInterpreter.execute(minPipeline);
+        btcInterpreter.execute(min);
 
-        wherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new WhereOperation("Col1 <= $min")
-        )).setResultVariableName("table3").build();
+        where = new WhereOperation("table1", "table3", "Col1 <= $min");
 
-        btcInterpreter.execute(wherePipeline);
+        btcInterpreter.execute(where);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -248,11 +226,9 @@ public class ConfigOperationsTest {
 
     @Test
     public void testDropWhere() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new DropWhereOperation("Col2 != yes")
-        )).setResultVariableName("table3").build();
+        var dropWhere = new DropWhereOperation("table1", "table3", "Col2 != yes");
 
-        btcInterpreter.execute(dropWherePipeline);
+        btcInterpreter.execute(dropWhere);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -263,27 +239,21 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new DropWhereOperation("Col1 >= 2 OR Col2 == maybe")
-        )).setResultVariableName("table3").build();
+        dropWhere = new DropWhereOperation("table1", "table3", "Col1 >= 2 OR Col2 == maybe");
 
-        btcInterpreter.execute(dropWherePipeline);
+        btcInterpreter.execute(dropWhere);
 
         Assertions.assertEquals(tables.size(), 3);
 
         Assertions.assertEquals(tables.get("table3"), expectedTable);
 
-        var minPipeline = new CompositeOperationBuilder("table1", List.of(
-                new MinOperation("Col1")
-        )).setResultVariableName("min").build();
+        var min = new MinOperation("table1", "min", "Col1");
 
-        btcInterpreter.execute(minPipeline);
+        btcInterpreter.execute(min);
 
-        dropWherePipeline = new CompositeOperationBuilder("table1", List.of(
-                new DropWhereOperation("Col1 > $min || Col2 == maybe")
-        )).setResultVariableName("table3").build();
+        dropWhere = new DropWhereOperation("table1", "table3", "Col1 > $min || Col2 == maybe");
 
-        btcInterpreter.execute(dropWherePipeline);
+        btcInterpreter.execute(dropWhere);
 
         Assertions.assertEquals(tables.size(), 3);
 
@@ -292,56 +262,46 @@ public class ConfigOperationsTest {
 
     @Test
     public void testMax() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var maxPipeline = new CompositeOperationBuilder("table1", List.of(
-                new MaxOperation("Col1")
-        )).setResultVariableName("max").build();
+        var max = new MaxOperation("table1", "max", "Col1");
 
-        btcInterpreter.execute(maxPipeline);
+        btcInterpreter.execute(max);
 
-        Assertions.assertEquals(resultVariables.get(maxPipeline.resultVariableName()), Value.of(4.0));
+        Assertions.assertEquals(resultVariables.get(max.getResultVariableName()), Value.of(4.0));
     }
 
     @Test
     public void testMin() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var minPipeline = new CompositeOperationBuilder("table1", List.of(
-                new MinOperation("Col1")
-        )).setResultVariableName("min").build();
+        var min = new MinOperation("table1", "min", "Col1");
 
-        btcInterpreter.execute(minPipeline);
+        btcInterpreter.execute(min);
 
-        Assertions.assertEquals(resultVariables.get(minPipeline.resultVariableName()), Value.of(1.0));
+        Assertions.assertEquals(resultVariables.get(min.getResultVariableName()), Value.of(1.0));
     }
 
     @Test
     public void testCount() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var countPipeline = new CompositeOperationBuilder("table1", List.of(
-                new CountOperation("Col1")
-        )).setResultVariableName("count").build();
+        var count = new CountOperation("table1", "count", "Col1");
 
-        btcInterpreter.execute(countPipeline);
+        btcInterpreter.execute(count);
 
-        Assertions.assertEquals(resultVariables.get(countPipeline.resultVariableName()), Value.of(3));
+        Assertions.assertEquals(resultVariables.get(count.getResultVariableName()), Value.of(3));
     }
 
     @Test
     public void testSum() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var sumPipeline = new CompositeOperationBuilder("table1", List.of(
-                new SumOperation("Col1")
-        )).setResultVariableName("sum").build();
+        var sum = new SumOperation("table1", "sum", "Col1");
 
-        btcInterpreter.execute(sumPipeline);
+        btcInterpreter.execute(sum);
 
-        Assertions.assertEquals(resultVariables.get(sumPipeline.resultVariableName()), Value.of(7.0));
+        Assertions.assertEquals(resultVariables.get(sum.getResultVariableName()), Value.of(7.0));
     }
 
     @Test
     public void testMean() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var meanPipeline = new CompositeOperationBuilder("table1", List.of(
-                new MeanOperation("Col1")
-        )).setResultVariableName("mean").build();
+        var mean = new MeanOperation("table1", "mean", "Col1");
 
-        btcInterpreter.execute(meanPipeline);
+        btcInterpreter.execute(mean);
 
-        Assertions.assertEquals(resultVariables.get(meanPipeline.resultVariableName()), Value.of(BigDecimal.valueOf(7).divide(BigDecimal.valueOf(3), new MathContext(1000))));
+        Assertions.assertEquals(resultVariables.get(mean.getResultVariableName()), Value.of(BigDecimal.valueOf(7).divide(BigDecimal.valueOf(3), new MathContext(1000))));
     }
 }

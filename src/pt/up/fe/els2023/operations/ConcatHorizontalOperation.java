@@ -10,10 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public record ConcatHorizontalOperation(List<String> additionalTableNames) implements TableOperation {
+public class ConcatHorizontalOperation extends TableOperation {
+
+    private final List<String> additionalTableNames;
+
+    public ConcatHorizontalOperation(String initialTable, String resultVariableName, List<String> additionalTableNames) {
+        super(initialTable, resultVariableName);
+        this.additionalTableNames = additionalTableNames;
+    }
 
     @Override
-    public String name() {
+    public String getName() {
         return "ConcatHorizontal( " + String.join(", ", additionalTableNames) + " )";
     }
 
@@ -23,7 +30,7 @@ public record ConcatHorizontalOperation(List<String> additionalTableNames) imple
     }
 
     @Override
-    public OperationResult execute(OperationResult previousResult, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
+    public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
         var tables = new ArrayList<ITable>();
 
         for (String tableName : additionalTableNames) {
@@ -34,11 +41,7 @@ public record ConcatHorizontalOperation(List<String> additionalTableNames) imple
             tables.add(variablesTable.getTable(tableName));
         }
 
-        return new OperationResult(previousResult.getTableCascade().concatHorizontal(tables.toArray(ITable[]::new)));
-    }
+        return new OperationResult(tableCascade.concatHorizontal(tables.toArray(ITable[]::new)));
 
-    @Override
-    public OperationResult execute(VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        return null;
     }
 }
