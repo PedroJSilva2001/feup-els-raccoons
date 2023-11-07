@@ -50,13 +50,11 @@ operations:
       - max-function
     axis: horizontal
     result: final-table
-
-        
-export:
-  - name: final-table
+  - operation: export
+    table: final-table
+    result: "output.html"
     path: "files/check2/out/"
-    filename: "output.html"
+    format: html
     title: "Vitis Report"
     exportFullHtml: true
-    format: html
 

@@ -15,25 +15,96 @@ We took inspiration from the pandas package for Python and from SQL. Especially 
 - Column deletion.
 
 ### Table Creation
-- We created the concept of "source" which is a batch of structured files of the same type (i.e JSON, YAML, XML, CSV and TSV).
+- We created the concept of "source" which is a batch of semi-structured files of the same type (i.e JSON, YAML, XML, CSV and TSV).
+    - While not mandatory, the files should have a similar "schema".
 - A table can be populated with only one source.
-    - In the future the source will be optional (the user might want just an empty table).
-- The user can specify one or more sources in a single configuration file. 
+    - The source is optional (table is empty).
+- The user can specify zero or more sources in a single configuration file. 
     - They are declared in the corresponding "sources" section at the beginning of the config file.
-    - This way multiple tables can be populated.
+    - This way a single source can populate more than one table.
+- Users can declare sources by using wildcard operators for the path of their files:
+    - wildcard for all files of a given type (i.e path/to/files/*.json);
+    - wildcard for sub-paths (i.e path/to/experiments/exp*/data.json).
 - The user specifies the schemas of all tables he wants to use.
-    - A table schema corresponds to the schema of each column it is composed of.
-    - Specifying a column schema involves declaring the column name and the property of the source files where to get the values for that column.
-    - If the column name is not specified, we adopt the source property's name.
-    - If the source property is not specified in a column schema, we create an empty column.
-    - A source file missing the property specified in the column schema results in a null value for the corresponding column.
-    - The first column of a table contains the filenames of which the entries originated.
-- The declaration order of column schemas determines column order in the table.
-- Exports have their own section on the configuration file.
-    - In the future they will be an operation to allow exporting at any given time, not just in the end.
-    - The user can export to HTML, LaTeX, CSV, TSV, and Markdown.
-    - Exports have optional parameters based on the format type. For example, all formats have an optional line ending parameter, and the CSV format has a separator parameter.
+- Our first design didn't allow for a single source file to yield multiple rows in a table (suppose each source file is a JSON file with an array property).
+    - For each desired column the user needed to map the property in the source file to a column name.
+    - This could be tiresome in the case of nested fields where the user needed to write the property path to those nested fields multiple times.
+    - We decided to trade off the simplicity of the initial table schema for a more complex one that allows for more flexibility.
+- The source files we are working with all have similar foundations:
+    - All support nesting;
+    - All support some form of fields: properties in YAML and JSON  or attributes in XML.
+- As such, we integrated these concepts into a feature we call Nested Field Traversal (NFT for short).
+    - The user traverses the tree of a source file and maps those fields to the desired columns.
+
+### Nested Field Traversal
+- NFT is a tree structure that represents the location of specific properties from the source files, and maps them to columns in the table.
+- The order of columns in the resulting table is determined by a depth-first traversal of this tree. However, the user is free to alter the position of nodes to change this ordering.
+- It allows the usage of multiple useful keywords such as:
+    - “$all”: selects all properties of a node. This keyword, and others like it, is resistant to missing properties. This means that if a property is missing in the first source file, but is found on the next, that property is added to the table, maintaining the column order, and the previous rows are filled with null values on that column.
+    - “$all-value”: selects all properties of a node that are values (not composite).
+    - “$all-container”: selects all properties of a node that are containers.
+    - “$except”: selects all properties of a node except ones specified by this node.
+    - “$[n]”: selects the n’th element of an array.
+    - “$file”: maps the file name of the source file into a value in the table.
+    - “$path”: maps the path to the source file into a value in the table.
+    - “$directory”: maps the directory of the source file into a value in the table.
+- The stand-out feature in NFT is the “$each” node, used in the context of arrays in JSON or elements in XML.
+    - It’s functionality lies in unraveling these arrays. It breaks them down into individual rows within the table, where each array element corresponds to a row.
+    - “$each” nodes are also tree structures, which allow for further selection of properties and even allow nested “$each” nodes. This allows for further unravelling of arrays, making it possible to deal with complex multidimensional arrays.
+    - It is important to note how “$each” interacts with single-row values. Single values that are not part of arrays are repeated for each row generated by the “$each” node. This repetition occurs at every level of depth generated by the nested “$each” nodes.
+    - In essence, “$each” can be seen as creating an intermediate table or a new context within the main table, that is then merged.
+    - There are of course some edge cases, like two “$each” nodes at the same “$each” depth level, with different array sizes, where the smaller one will be padded with null values.
+
+### Table Operations
+- Our operations take a table and, without mutating it, yield a:
+    - new table (i.e with select or concat ops);
+    - value (i.e with max or sum).
+- The user can store these results in variables for future use (with where operation for example).
+    - Variables can be re-assigned (but we might drop this if we want to have a language completely without mutation).
+- We introduced the concept of a Table Cascade, which consists of a set of operations executed in a linear manner, akin to a pipeline.
+    - The operator BTC stands for Begin Table Cascade and will be used in the future to start a table cascade.
+- The user specifies “loose” operations or table cascades in the “operations” section.
+- The user can do diverse operations such as:
+    - ArgMax: Returns the row(s) with the maximum value in a specified column;
+    - ArgMin: Returns the row(s) with the minimum value in a specified column;
+    - Horizontal Concat: Combines two or more tables by appending columns side by side;
+    - Vertical Concat: Combines two or more tables by stacking rows on top of each other;
+    - Count: Calculates the number of non-null values in a specified column;
+    - Drop Where: Removes rows from a table that meet a given condition;
+    - Export: Saves the table to an external file;
+    - Max: Returns the maximum value in a specified column;
+    - Min: Returns the minimum value in a specified column; 
+    - Mean: Calculates the average (mean) of values in a specified column;
+    - Reject: Removes specified columns from a table;
+    - Rename: Renames specified columns in a table with new names;
+    - Select: Retains specified columns in a table and discards the rest;
+    - Sum: Calculates the sum of values in a specified column;
+    - Where: Filters and returns rows that meet a specified condition.
 - Operation order is taken into account.
+- The export is now also an operation that can be executed at any time.
+
+### Values
+- In the last milestone our values were all strings.
+- Now we support a wide range of data types:
+    - strings;
+    - numbers (longs, doubles, arbitrary precision integers and decimals);
+    - booleans.
+- A column is not limited to a single type.
+    - We designed for flexibility but the user should be careful (i.e a column can have values that are strings and others that are longs).
+- Some operations ignore data types which don’t really make sense for them.
+    - For example, max only applies to numbers and strings are ignored.
+- In the future we will warn the user of this.
+- Binary operations between two numbers of different types apply type coercion to the most general data type, one that doesn't result in loss of precision:
+    - long + double -> big decimal;
+    - long + big integer -> big integer;
+    - long + big decimal -> big decimal;
+    - double + big integer -> big decimal;
+    - double + big decimal -> big decimal;
+    - big integer + big decimal -> big decimal.
+- The design decision was to have a more permissive API that also removes the chance of loss of precision.
+- However, the user is not advised to have columns with different types.
+    - Suppose a column has one double and the rest are longs. We will need to implicitly cast all values to big decimals and operate on them, which is slower.
+- As it stands we are not satisfied with this feature. We will rethink it and maybe let the user configure the behaviour: choose between strong typing (always explicit cast) and weak typing (coercion).
 
 ## Semantic Model
 ### Table Modelling
@@ -62,77 +133,108 @@ tables:
 
 operations:
       ...
-
-exports:
-      ...
 ```
 
 ### Sources
 ```yaml
 sources:
+  - name: vitis
+    type: xml
+    path: "files/check2/run*/vitis-report.xml"
   - name: decision_tree
     type: yaml
-    path:
-      - "files/yaml/decision_tree_1.yaml"
-      - "files/yaml/decision_tree_2.yaml"
-      - "files/yaml/decision_tree_3.yaml"
+    path: "files/check2/run*/decision_tree.yaml"
+  - name: profiling
+    type: json
+    path: "files/check2/run*/profiling.json"
+
 ```
 
 ### Tables
 ```yaml
 tables:
-  - name: decision_tree
-    source: "decision_tree"
-    columns:
-      - name: Criterion
-        from: params.criterion
-      - from: "params.min_samples_split"
-      - name: "Zau 2"
-  - name: table2
-    source: "file2"
-    columns:
-      - name: "Zau master"
-        from: "prop1.prop2"
-      - from: "prop3"
+  - name: profiling
+    source: "profiling"
+    nft:
+      - $directory
+      - functions:
+          - $each:
+              - name: "Function Name"
+              - time%: "Function Time Percentage"
 ```
 
 ### Operations
 ```yaml
 operations:
-  - operation: dropColumns
-    table: table1
-    columns:
-      - "Zau"
+  - operation: argMax
+    table: profiling
+    columns: "Function Time Percentage"
+    result: maxRow
+  - operation: export
+    table: maxRow
+    result: "Higher Percentage"
+    path: "/dir1/dir2"
+    format: csv
 ```
 
-### Exports
-```yaml
-export:
-  - name: decision_tree
-    path: "files/"
-    filename: "decision_tree.html"
-    exportFullHtml: true
-    format: html
+## Internal DSL
+### Source Definition
+```java
+var decisionTreeSource = new YamlSource(
+       "decision_tree",
+       List.of(
+           "files/check2/run*/decision_tree.yaml"
+       )
+);
+
+var profilingSource = new JsonSource(
+       "profiling",
+       List.of(
+           "files/check2/run*/profiling.json"
+       )
+);
+```
+
+### Table Creation
+```java
+var profilingFunctionsTable = new TableSchema("profiling-functions")
+        .source(profilingSource)
+        .nft(
+            directory()
+            property("functions", each(
+                property(“name”, “Function Name”),
+                property(“time%”, “Function Time Percentage”)
+            ))
+        )
+        .collect();
+```
+
+### Operations
+```java
+decisionTreeTable
+        .btc()
+        .dropWhere((row)->row.get("Criterion").equals(Value.of("gini")))
+        .count("CCP Alpha");
+
+profilingTable.btc().select("time%", "name").get();
+
+decisionTreeTable.btc().concatHorizontal(profilingTable).get();
 ```
 
 ## What's Next
-- Implementing the operations.
-    - Table joins (i.e inner join).
-    - Table mutation (i.e adding and deleting columns/rows).
-    - Table selection, grouping, and sorting.
-    - Apply (arbitrary) functions to a column (i.e multiplication, or division by a scalar).
-- Aggregate statistics (i.e max, sum, count, ...).
-- Tracking and specifying the data types in the columns.
-- The user will be able to specify the name of the File column using a special keyword.
-- Finishing the sources (CSV and XML).
-- Add more customization to exporters.
-- We want to replace Yaml config files with a syntax of our own.
-    - Introduce specific keywords (i.e "join", "deleteCol", etc).
-    - Introduce the pipeline operator |> for easier table processing.
-- Continuing with a declarative paradigm (SQL inspiration), and even possibly a functional one.
-- Pattern matching for source files, such as using wildcard operators or even RegEx.
-- Specify folders instead of specific files when declaring a source.
-- Possibly creating a runtime.
+- Finishing the operations
+    - groupby
+      - joins
+      - std, var,...
+- Wrap up the  NFT (mainly for XML)
+- Lazy evaluation for table cascades
+- Improved error and warning reporting
+- Create our language with our own syntax
+- Documenting the language
+- Syntax highlighting
+- Linting
+- Code auto-completion
+- A runtime for simple REPL
 
 ## Project Instructions
 
