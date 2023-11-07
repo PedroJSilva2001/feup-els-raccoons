@@ -2,14 +2,14 @@ package pt.up.fe.els2023.imports;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.config.SchemaNode;
+import pt.up.fe.els2023.table.schema.SchemaNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static pt.up.fe.els2023.config.AllNode.all;
-import static pt.up.fe.els2023.config.ColumnNode.column;
-import static pt.up.fe.els2023.config.NullNode.nullNode;
+import static pt.up.fe.els2023.table.schema.AllNode.all;
+import static pt.up.fe.els2023.table.schema.ColumnNode.column;
+import static pt.up.fe.els2023.table.schema.NullNode.nullNode;
 
 public class NodeColumnTest {
     @Test

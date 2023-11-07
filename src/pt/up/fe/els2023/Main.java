@@ -1,6 +1,7 @@
 package pt.up.fe.els2023;
 
-import pt.up.fe.els2023.config.Config;
+import pt.up.fe.els2023.interpreter.InterpreterData;
+import pt.up.fe.els2023.interpreter.ConfigReader;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.interpreter.VariablesTable;
 import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
@@ -22,17 +23,17 @@ public class Main {
 
         ConfigReader configReader = new ConfigReader(configFile);
         try {
-            Config config = configReader.readConfig();
+            InterpreterData interpreterData = configReader.readConfig();
 
             Map<String, Table> tables = new HashMap<>();
 
-            for (var tableSchema : config.tableSchemas()) {
+            for (var tableSchema : interpreterData.tableSchemas()) {
                 tables.put(tableSchema.name(), tableSchema.collect());
             }
 
             var values = new HashMap<String, Value>();
 
-            var operations = config.operations();
+            var operations = interpreterData.operations();
 
             var variablesTable = new VariablesTable(tables, values);
 

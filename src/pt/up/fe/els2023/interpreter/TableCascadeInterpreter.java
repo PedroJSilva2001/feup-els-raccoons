@@ -4,7 +4,7 @@ import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.operations.TableCascade;
-import pt.up.fe.els2023.operations.TableOperation;
+import pt.up.fe.els2023.interpreter.operations.TableOperation;
 import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;

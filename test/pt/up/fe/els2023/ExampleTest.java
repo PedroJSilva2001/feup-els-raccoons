@@ -1,8 +1,7 @@
 package pt.up.fe.els2023;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.config.TableSchema;
+import pt.up.fe.els2023.table.schema.TableSchema;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.export.HtmlExporterBuilder;
@@ -11,17 +10,15 @@ import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.XmlSource;
 import pt.up.fe.els2023.sources.YamlSource;
 import pt.up.fe.els2023.table.Table;
-import pt.up.fe.specs.util.SpecsIo;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
-import static pt.up.fe.els2023.config.AllNode.all;
-import static pt.up.fe.els2023.config.AllValueNode.allValue;
-import static pt.up.fe.els2023.config.DirectoryNode.directory;
-import static pt.up.fe.els2023.config.EachNode.each;
-import static pt.up.fe.els2023.config.PropertyNode.property;
+import static pt.up.fe.els2023.table.schema.AllNode.all;
+import static pt.up.fe.els2023.table.schema.AllValueNode.allValue;
+import static pt.up.fe.els2023.table.schema.DirectoryNode.directory;
+import static pt.up.fe.els2023.table.schema.EachNode.each;
+import static pt.up.fe.els2023.table.schema.PropertyNode.property;
 
 
 public class ExampleTest {
