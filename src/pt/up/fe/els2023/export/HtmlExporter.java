@@ -12,8 +12,8 @@ public class HtmlExporter extends TableExporter {
     private final String style;
     private final boolean exportFullHtml;
 
-    public HtmlExporter(String table, String filename, String path, String endOfLine, String title, String style, boolean exportFullHtml) {
-        super(table, filename, path, endOfLine);
+    public HtmlExporter(String filename, String path, String endOfLine, String title, String style, boolean exportFullHtml) {
+        super(filename, path, endOfLine);
         this.title = title;
         this.style = style.replaceAll("\\r\\n|\\n\\r|\\r|\\n", this.endOfLine);
         this.exportFullHtml = exportFullHtml;

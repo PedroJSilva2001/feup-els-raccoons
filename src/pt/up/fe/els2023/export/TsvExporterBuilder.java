@@ -1,12 +1,14 @@
 package pt.up.fe.els2023.export;
 
+import pt.up.fe.els2023.table.Table;
+
 public class TsvExporterBuilder extends TableExporterBuilder<TsvExporter> {
-    public TsvExporterBuilder(String table, String filename, String path) {
-        super(table, filename, path);
+    public TsvExporterBuilder(String filename, String path) {
+        super(filename, path);
     }
 
     @Override
     public TsvExporter build() {
-        return new TsvExporter(this.table, this.filename, this.path, this.endOfLine);
+        return new TsvExporter(this.filename, this.path, this.endOfLine);
     }
 }

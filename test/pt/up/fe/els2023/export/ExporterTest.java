@@ -71,7 +71,7 @@ public class ExporterTest {
 
     @Test
     public void exportCsv() throws IOException {
-        CsvExporter exporter = new CsvExporter("table1", "", "", "\r\n", ";");
+        CsvExporter exporter = new CsvExporter("", "", "\r\n", ";");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
@@ -93,7 +93,7 @@ public class ExporterTest {
 
     @Test
     public void exportTsv() throws IOException {
-        TsvExporter exporter = new TsvExporter("table1", "", "", "\r\n");
+        TsvExporter exporter = new TsvExporter("", "", "\r\n");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
@@ -115,7 +115,7 @@ public class ExporterTest {
 
     @Test
     public void exportHtml() {
-        HtmlExporter exporter = new HtmlExporter("table1", "", "", "\n\r", "Table", """
+        HtmlExporter exporter = new HtmlExporter("", "", "\n\r", "Table", """
                 table {
                    border-collapse: collapse;
                    width: 100%;
@@ -194,7 +194,7 @@ public class ExporterTest {
 
     @Test
     public void exportTableHtml() {
-        HtmlExporter exporter = new HtmlExporter("table1", "", "", "\n", "Table",
+        HtmlExporter exporter = new HtmlExporter("", "", "\n", "Table",
                 "", false);
 
         StringWriter writer = new StringWriter();
@@ -256,7 +256,7 @@ public class ExporterTest {
 
     @Test
     public void exportLatex() {
-        LatexExporter exporter = new LatexExporter("table1", "", "", "\n");
+        LatexExporter exporter = new LatexExporter("", "", "\n");
 
         StringWriter writer = new StringWriter();
         Assertions.assertDoesNotThrow(() -> exporter.export(writer, table));
@@ -293,7 +293,7 @@ public class ExporterTest {
 
     @Test
     public void exportMarkdown() {
-        MarkdownExporter markdownExporter = new MarkdownExporter("table1", "", "", "\n");
+        MarkdownExporter markdownExporter = new MarkdownExporter("", "", "\n");
 
         StringWriter writer = new StringWriter();
         Assertions.assertDoesNotThrow(() -> markdownExporter.export(writer, table));

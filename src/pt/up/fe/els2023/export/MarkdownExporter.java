@@ -8,8 +8,8 @@ import java.io.Writer;
 import java.util.List;
 
 public class MarkdownExporter extends TableExporter {
-    public MarkdownExporter(String table, String filename, String path, String endOfLine) {
-        super(table, filename, path, endOfLine);
+    public MarkdownExporter(String filename, String path, String endOfLine) {
+        super(filename, path, endOfLine);
     }
 
     private String escapeMarkdown(String string) {

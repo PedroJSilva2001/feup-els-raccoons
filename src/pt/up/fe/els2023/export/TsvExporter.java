@@ -1,7 +1,9 @@
 package pt.up.fe.els2023.export;
 
+import pt.up.fe.els2023.table.Table;
+
 public class TsvExporter extends CsvExporter {
-    public TsvExporter(String table, String filename, String path, String endOfLine) {
-        super(table, filename, path, endOfLine, "\t");
+    public TsvExporter(String filename, String path, String endOfLine) {
+        super(filename, path, endOfLine, "\t");
     }
 }

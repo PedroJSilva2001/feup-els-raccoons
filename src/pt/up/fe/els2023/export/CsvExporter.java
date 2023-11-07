@@ -13,8 +13,8 @@ import java.util.Objects;
 public class CsvExporter extends TableExporter {
     private final String separator;
 
-    public CsvExporter(String table, String filename, String path, String endOfLine, String separator) {
-        super(table, filename, path, endOfLine);
+    public CsvExporter(String filename, String path, String endOfLine, String separator) {
+        super(filename, path, endOfLine);
         this.separator = separator;
     }
 

@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class LatexExporter extends TableExporter {
-    public LatexExporter(String table, String filename, String path, String endOfLine) {
-        super(table, filename, path, endOfLine);
+    public LatexExporter(String filename, String path, String endOfLine) {
+        super(filename, path, endOfLine);
     }
 
     private String escapeLatex(String string) {

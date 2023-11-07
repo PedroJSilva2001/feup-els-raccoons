@@ -1,13 +1,15 @@
 package pt.up.fe.els2023.export;
 
+import pt.up.fe.els2023.table.Table;
+
 public class HtmlExporterBuilder extends TableExporterBuilder<HtmlExporter> {
     private String title;
     private String style;
     private boolean exportFullHtml = false;
 
-    public HtmlExporterBuilder(String table, String filename, String path) {
-        super(table, filename, path);
-        this.title = table;
+    public HtmlExporterBuilder(String filename, String path) {
+        super(filename, path);
+        this.title = filename;
         this.style = """
                 table {
                    border-collapse: collapse;
@@ -41,6 +43,6 @@ public class HtmlExporterBuilder extends TableExporterBuilder<HtmlExporter> {
 
     @Override
     public HtmlExporter build() {
-        return new HtmlExporter(this.table, this.filename, this.path, this.endOfLine, this.title, this.style, this.exportFullHtml);
+        return new HtmlExporter(this.filename, this.path, this.endOfLine, this.title, this.style, this.exportFullHtml);
     }
 }

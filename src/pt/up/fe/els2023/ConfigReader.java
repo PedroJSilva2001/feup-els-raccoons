@@ -391,7 +391,7 @@ public class ConfigReader {
         // TODO: VALIDATE
         switch ((String) export.get("format")) {
             case "csv" -> {
-                CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("filename"), (String) export.get("path"));
                 if (export.containsKey("separator")) {
                     csvExporterBuilder.setSeparator((String) export.get("separator"));
                 }
@@ -399,9 +399,9 @@ public class ConfigReader {
                 configExporterBuilder = csvExporterBuilder;
             }
             case "tsv" ->
-                    configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                    configExporterBuilder = new TsvExporterBuilder((String) export.get("filename"), (String) export.get("path"));
             case "html" -> {
-                HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("filename"), (String) export.get("path"));
                 if (export.containsKey("title")) {
                     htmlExporterBuilder.setTitle((String) export.get("title"));
                 }
@@ -415,9 +415,9 @@ public class ConfigReader {
                 configExporterBuilder = htmlExporterBuilder;
             }
             case "latex" ->
-                    configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                    configExporterBuilder = new LatexExporterBuilder((String) export.get("filename"), (String) export.get("path"));
             case "markdown", "md" ->
-                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("filename"), (String) export.get("path"));
             default -> {
                 //TODO: SPECIFY FORMAT AND LINE
                 System.out.println("Unsupported format");

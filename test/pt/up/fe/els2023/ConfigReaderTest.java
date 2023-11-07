@@ -70,7 +70,7 @@ public class ConfigReaderTest {
                 new WhereOperation("decision_tree", "table1", "Criterion == gini"),
 
                 new ExportOperation("table1", "Table 1",
-                        new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
+                        new CsvExporter("Table 1", "/dir1/dir2", System.lineSeparator(), ","))
         );
 
 
@@ -190,9 +190,9 @@ public class ConfigReaderTest {
         var config = configReader.readConfig();
 
         var expectedExporters = List.of(
-                new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","),
-                new CsvExporter("table2", "Table 2", "/dir1/dir2", "\r\n", ";"),
-                new TsvExporter("table3", "Table 3", "/dir1/dir2", "\n")
+                new CsvExporter("Table 1", "/dir1/dir2", System.lineSeparator(), ","),
+                new CsvExporter("Table 2", "/dir1/dir2", "\r\n", ";"),
+                new TsvExporter("Table 3", "/dir1/dir2", "\n")
         );
     }
 
@@ -203,7 +203,7 @@ public class ConfigReaderTest {
         var config = configReader.readConfig();
 
         var expectedExporters = List.of(
-                new HtmlExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), "table1", """
+                new HtmlExporter("Table 1", "/dir1/dir2", System.lineSeparator(), "table1", """
                         table {
                            border-collapse: collapse;
                            width: 100%;
@@ -217,7 +217,7 @@ public class ConfigReaderTest {
                            background-color: #4CAF50;
                            color: white;
                         }""", false),
-                new HtmlExporter("table2", "Table 2", "/dir1/dir2", System.lineSeparator(), "Table", """
+                new HtmlExporter("Table 2", "/dir1/dir2", System.lineSeparator(), "Table", """
                         body {
                             background-color: red;
                         }

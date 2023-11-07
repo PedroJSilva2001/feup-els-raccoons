@@ -31,14 +31,8 @@ public class ExportOperation extends TableOperation {
 
     @Override
     public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-
         var table = tableCascade.get();
-
-        HashMap<String, Table> tables = new HashMap<>();
-
-        tables.put(exporter.getTable(), table);
-
-        exporter.export(tables);
+        exporter.export(table);
 
         return null;
     }

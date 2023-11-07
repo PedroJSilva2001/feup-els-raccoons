@@ -86,14 +86,11 @@ public class ExampleTest {
                 profilingFunctionsTable.btc().argMax("Function Time Percentage").get()
         ).get();
 
-        TableExporter exporter = new HtmlExporterBuilder("final-table", "output.html", "./test/pt/up/fe/els2023/files/check2/out/")
+        TableExporter exporter = new HtmlExporterBuilder("output.html", "./test/pt/up/fe/els2023/files/check2/out/")
                 .setTitle("Vitis Report")
                 .setExportFullHtml(true)
                 .build();
 
-        HashMap<String, Table> tables = new HashMap<>();
-        tables.put("final-table", finalTable);
-
-        exporter.export(tables);
+        exporter.export(finalTable);
     }
 }
