@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,7 +18,7 @@ public class LatexExporter extends TableExporter {
     }
 
     @Override
-    void export(Writer writer, ITable table) throws IOException {
+    void export(Writer writer, Table table) throws IOException {
         StringBuilder sb = new StringBuilder(String.join(endOfLine,
                 "\\begin{center}",
                 "\\begin{tabular}{ |" + " l |".repeat(table.getColumns().size()) + " }",

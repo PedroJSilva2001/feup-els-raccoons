@@ -1,13 +1,13 @@
 package pt.up.fe.els2023.interpreter;
 
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class VariablesTable {
-    private final Map<String, ITable> tables;
+    private final Map<String, Table> tables;
     private final Map<String, Value> values;
 
     public VariablesTable() {
@@ -15,12 +15,12 @@ public class VariablesTable {
         this.values = new HashMap<>();
     }
 
-    public VariablesTable(Map<String, ITable> tables, Map<String, Value> values) {
+    public VariablesTable(Map<String, Table> tables, Map<String, Value> values) {
         this.tables = tables;
         this.values = values;
     }
 
-    public boolean putTable(String name, ITable table) {
+    public boolean putTable(String name, Table table) {
         if (tables.containsKey(name)) {
             return false;
         }
@@ -48,7 +48,7 @@ public class VariablesTable {
         return values.containsKey(name);
     }
 
-    public ITable getTable(String name) {
+    public Table getTable(String name) {
         return tables.get(name);
     }
 

@@ -4,7 +4,7 @@ import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class ConcatHorizontalOperation extends TableOperation {
 
     @Override
     public OperationResult execute(TableCascade tableCascade, VariablesTable variablesTable) throws ColumnNotFoundException, TableNotFoundException, IOException, ImproperTerminalOperationException {
-        var tables = new ArrayList<ITable>();
+        var tables = new ArrayList<Table>();
 
         for (String tableName : additionalTableNames) {
             if (!variablesTable.hasTable(tableName)) {
@@ -41,7 +41,7 @@ public class ConcatHorizontalOperation extends TableOperation {
             tables.add(variablesTable.getTable(tableName));
         }
 
-        return new OperationResult(tableCascade.concatHorizontal(tables.toArray(ITable[]::new)));
+        return new OperationResult(tableCascade.concatHorizontal(tables.toArray(Table[]::new)));
 
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 public class TableTest {
     @Test
     public void testEqualsWithSameReference() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
 
         var table2 = table1;
 
@@ -18,9 +18,9 @@ public class TableTest {
 
     @Test
     public void testEqualsWithNull() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
 
-        Table table2 = null;
+        RacoonTable table2 = null;
 
         Assertions.assertNotEquals(table1, table2);
     }
@@ -28,21 +28,21 @@ public class TableTest {
 
     @Test
     public void testEqualsWithSameDefaultTable() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
 
-        var table2 = new Table();
+        var table2 = new RacoonTable();
 
         Assertions.assertEquals(table1, table2);
     }
 
     @Test
     public void testEqualsWithSameEmptyColumns() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addColumn("Column3");
 
-        var table2 = new Table();
+        var table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
@@ -52,11 +52,11 @@ public class TableTest {
 
     @Test
     public void testEqualsWithDifferentEmptyColumns() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
 
-        var table2 = new Table();
+        var table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
@@ -64,9 +64,9 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-        table1 = new Table();
+        table1 = new RacoonTable();
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
@@ -76,14 +76,14 @@ public class TableTest {
 
     @Test
     public void testEqualsWithSamePopulatedColumns() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addColumn("Column3");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1"), Value.ofNull()));
         table1.addRow(List.of(Value.of("foo2"), Value.of("bar2"), Value.ofNull()));
 
-        var table2 = new Table();
+        var table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addColumn("Column3");
@@ -95,13 +95,13 @@ public class TableTest {
 
     @Test
     public void testEqualsWithDifferentPopulatedColumns() {
-        var table1 = new Table();
+        var table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
         table1.addRow(List.of(Value.of("foo2"), Value.of("bar2")));
 
-        var table2 = new Table();
+        var table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addRow(List.of(Value.of("differentfoo1"), Value.of("differentbar1")));
@@ -110,13 +110,13 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-        table1 = new Table();
+        table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
         table1.addRow(List.of(Value.of("foo2"), Value.of("bar2")));
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addRow(List.of(Value.of("differentfoo1"), Value.of("differentbar1")));
@@ -125,13 +125,13 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-        table1 = new Table();
+        table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
         table1.addRow(List.of(Value.of("foo2"), Value.of("bar2")));
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addRow(List.of(Value.of("differentfoo1"), Value.of("differentbar1")));
@@ -139,12 +139,12 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-        table1 = new Table();
+        table1 = new RacoonTable();
         table1.addColumn("Column1");
         table1.addColumn("Column2");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addRow(List.of(Value.of(1212L), Value.of(false)));
@@ -152,13 +152,13 @@ public class TableTest {
         Assertions.assertNotEquals(table1, table2);
 
 
-        table1 = new Table();
+        table1 = new RacoonTable();
         table1.addColumn("Column2");
         table1.addColumn("Column1");
         table1.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
         table1.addRow(List.of(Value.of("foo2"), Value.of("bar2")));
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Column1");
         table2.addColumn("Column2");
         table2.addRow(List.of(Value.of("foo1"), Value.of("bar1")));
@@ -168,7 +168,7 @@ public class TableTest {
 
     @Test
     public void testAddColumnWithoutEntries() {
-        var table = new Table();
+        var table = new RacoonTable();
 
         boolean columnWasAdded = table.addColumn("Column1");
 
@@ -207,7 +207,7 @@ public class TableTest {
 
     @Test
     public void testAddColumnWithEntries() {
-        var table = new Table();
+        var table = new RacoonTable();
 
         table.addColumn("Column1");
         table.addColumn("Column2");
@@ -223,7 +223,7 @@ public class TableTest {
         Assertions.assertEquals(3, table.getColumnNumber());
         Assertions.assertEquals(2, table.getRowNumber());
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Column1");
         expectedTable.addColumn("Column2");
@@ -236,7 +236,7 @@ public class TableTest {
 
     @Test
     public void testAddRow() {
-        var table = new Table();
+        var table = new RacoonTable();
 
         table.addColumn("Column1");
         table.addColumn("Column2");
@@ -254,7 +254,7 @@ public class TableTest {
         Assertions.assertFalse(rowWasAdded);
 
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Column1");
         expectedTable.addColumn("Column2");
@@ -265,7 +265,7 @@ public class TableTest {
 
     @Test
     public void testGetColumn() {
-        var table = new Table();
+        var table = new RacoonTable();
 
         table.addColumn("Column1");
         var col = table.getColumn(0);
@@ -284,7 +284,7 @@ public class TableTest {
 
     @Test
     public void testGetColumnByName() {
-        var table = new Table();
+        var table = new RacoonTable();
 
         table.addColumn("Column1");
 

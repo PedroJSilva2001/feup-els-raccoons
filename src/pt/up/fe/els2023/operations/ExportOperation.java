@@ -5,7 +5,7 @@ import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class ExportOperation extends TableOperation {
 
         var table = tableCascade.get();
 
-        HashMap<String, ITable> tables = new HashMap<>();
+        HashMap<String, Table> tables = new HashMap<>();
 
         tables.put(exporter.getTable(), table);
 

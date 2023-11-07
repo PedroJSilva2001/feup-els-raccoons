@@ -3,7 +3,7 @@ package pt.up.fe.els2023.config;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class TableSchemaTest {
         Assertions.assertEquals(7, table.getRowNumber());
         Assertions.assertEquals(6, table.getColumnNumber());
 
-        Table expected = new Table("students");
+        RacoonTable expected = new RacoonTable("students");
         expected.addColumn("File");
         expected.addColumn("Directory");
         expected.addColumn("Course");
@@ -126,7 +126,7 @@ public class TableSchemaTest {
 
         Assertions.assertEquals(1, table.getRowNumber());
 
-        Table expected = new Table("missing_table");
+        RacoonTable expected = new RacoonTable("missing_table");
 
         expected.addColumn("First");
         expected.addColumn("Second");
@@ -159,7 +159,7 @@ public class TableSchemaTest {
 
         Assertions.assertEquals(2, table.getRowNumber());
 
-        Table expected = new Table("missing_table");
+        RacoonTable expected = new RacoonTable("missing_table");
 
         expected.addColumn("$file");
         expected.addColumn("test");
@@ -206,7 +206,7 @@ public class TableSchemaTest {
 
         Assertions.assertEquals(2, table.getRowNumber());
 
-        Table expected = new Table("missing_table");
+        RacoonTable expected = new RacoonTable("missing_table");
 
         expected.addColumn("outside");
         expected.addColumn("airst");

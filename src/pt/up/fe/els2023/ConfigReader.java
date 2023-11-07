@@ -9,6 +9,7 @@ import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
+import pt.up.fe.els2023.sources.XmlSource;
 import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.File;
@@ -184,8 +185,7 @@ public class ConfigReader {
                 // TODO
                 case "json" -> configTableSources.put(sourceName, new JsonSource(sourceName, filesList));
                 case "yaml" -> configTableSources.put(sourceName, new YamlSource(sourceName, filesList));
-                case "xml" -> System.out.println("TODO: xmlSource");
-                case "csv" -> System.out.println("TODO: csvSource");
+                case "xml" -> configTableSources.put(sourceName, new XmlSource(sourceName, filesList));
                 default -> System.out.println("Unsupported source type");
             }
         }

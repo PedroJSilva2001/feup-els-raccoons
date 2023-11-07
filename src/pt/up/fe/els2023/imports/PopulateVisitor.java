@@ -148,15 +148,15 @@ public class PopulateVisitor implements NodeVisitor {
         var children = info.node.getChildren();
         Set<String> properties = new HashSet<>();
 
-        for (var child : children.entrySet()) {
-            if (child.getValue().isContainer()) {
-                String propertyName = child.getKey();
+        for (var child : children) {
+            if (child.isContainer()) {
+                String propertyName = child.getName();
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, getValueFromNode(child.getValue()));
+                rowValues.put(columnName, getValueFromNode(child));
             }
         }
     }
@@ -172,14 +172,14 @@ public class PopulateVisitor implements NodeVisitor {
         var children = info.node.getChildren();
         Set<String> properties = new HashSet<>();
 
-        for (var child : children.entrySet()) {
-            String propertyName = child.getKey();
+        for (var child : children) {
+            String propertyName = child.getName();
             String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
             properties.add(columnName);
             columnName = nodeColumnMap.add(node, columnName);
 
-            rowValues.put(columnName, getValueFromNode(child.getValue()));
+            rowValues.put(columnName, getValueFromNode(child));
         }
     }
 
@@ -194,15 +194,15 @@ public class PopulateVisitor implements NodeVisitor {
         var children = info.node.getChildren();
         Set<String> properties = new HashSet<>();
 
-        for (var child : children.entrySet()) {
-            if (child.getValue().isValue()) {
-                String propertyName = child.getKey();
+        for (var child : children) {
+            if (child.isValue()) {
+                String propertyName = child.getName();
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, getValueFromNode(child.getValue()));
+                rowValues.put(columnName, getValueFromNode(child));
             }
         }
     }
@@ -271,15 +271,15 @@ public class PopulateVisitor implements NodeVisitor {
         var children = info.node.getChildren();
         Set<String> properties = new HashSet<>();
 
-        for (var child : children.entrySet()) {
-            if (!node.except().contains(child.getKey())) {
-                String propertyName = child.getKey();
+        for (var child : children) {
+            if (!node.except().contains(child.getName())) {
+                String propertyName = child.getName();
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
-                rowValues.put(columnName, getValueFromNode(child.getValue()));
+                rowValues.put(columnName, getValueFromNode(child));
             }
         }
     }

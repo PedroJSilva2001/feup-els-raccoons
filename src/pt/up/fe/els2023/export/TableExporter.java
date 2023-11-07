@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.export;
 
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,9 +25,9 @@ public abstract class TableExporter {
         this.endOfLine = endOfLine;
     }
 
-    public void export(Map<String, ITable> tables) throws IOException, TableNotFoundException {
+    public void export(Map<String, Table> tables) throws IOException, TableNotFoundException {
         Path fullPath = Paths.get(path, filename);
-        ITable exportTable = tables.get(table);
+        Table exportTable = tables.get(table);
 
         if (exportTable == null) {
             throw new TableNotFoundException(table);
@@ -38,7 +38,7 @@ public abstract class TableExporter {
         }
     }
 
-    abstract void export(Writer writer, ITable table) throws IOException;
+    abstract void export(Writer writer, Table table) throws IOException;
 
     public String getEndOfLine() {
         return endOfLine;

@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.operations;
 
 import pt.up.fe.els2023.operations.TableCascade;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
 public class OperationResult {
@@ -35,7 +35,7 @@ public class OperationResult {
         return btc;
     }
 
-    public ITable getTable() {
+    public Table getTable() {
         return btc.get();
     }
 

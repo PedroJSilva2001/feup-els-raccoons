@@ -6,7 +6,6 @@ import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.interpreter.VariablesTable;
 
 import java.io.IOException;
-import java.util.List;
 
 public abstract class TableOperation {
 

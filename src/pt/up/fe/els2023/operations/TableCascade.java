@@ -1,8 +1,8 @@
 package pt.up.fe.els2023.operations;
 
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
 
 import java.util.*;
@@ -10,18 +10,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TableCascade {
-    private final ITable table;
+    private final Table table;
 
-    public TableCascade(ITable table) {
+    public TableCascade(Table table) {
         this.table = table;
     }
 
-    public ITable get() {
+    public Table get() {
         return table;
     }
 
     public TableCascade select(String ...columns) throws ColumnNotFoundException {
-        ITable newTable = new Table();
+        Table newTable = new RacoonTable();
 
         var columnsToKeep = new ArrayList<Integer>();
 
@@ -71,7 +71,7 @@ public class TableCascade {
     }
 
     public TableCascade where(Predicate<RowWrapper> predicate) {
-        ITable newTable = new Table(table);
+        Table newTable = new RacoonTable(table);
 
         for (var row : table.getRows()) {
             Map<String, Value> mapping = new HashMap<>();
@@ -103,10 +103,10 @@ public class TableCascade {
     }
 
 
-    public TableCascade concatVertical(ITable ...others) {
+    public TableCascade concatVertical(Table...others) {
         // stacked on top of each other
 
-        ITable newTable = new Table(table);
+        Table newTable = new RacoonTable(table);
 
         for (var other : others) {
             // ignores repeated columns
@@ -162,10 +162,10 @@ public class TableCascade {
     }
 
     // TODO: optimize O(C*R) -> O(C + R)
-    public TableCascade concatHorizontal(ITable ...others) {
+    public TableCascade concatHorizontal(Table...others) {
         // side by side
 
-        ITable newTable = new Table(table);
+        Table newTable = new RacoonTable(table);
 
         Map<String, Integer> columnNameSuffixCount = new HashMap<>();
 
@@ -241,7 +241,7 @@ public class TableCascade {
     }
 
     public TableCascade rename(Map<String, String> columnMapping) {
-        ITable newTable = new Table();
+        Table newTable = new RacoonTable();
 
         for (var column : table.getColumns()) {
             var name = column.getName();
@@ -303,7 +303,7 @@ public class TableCascade {
         var maxValue = max(column);
 
         if (maxValue.isEmpty()) {
-            var table = new Table();
+            var table = new RacoonTable();
             table.addRow(this.table.getRows().get(0).getValues());
             return new TableCascade(table);
         } else {
@@ -337,7 +337,7 @@ public class TableCascade {
         var minValue = min(column);
 
         if (minValue.isEmpty()) {
-            var table = new Table();
+            var table = new RacoonTable();
             table.addRow(this.table.getRows().get(0).getValues());
             return new TableCascade(table);
         } else {

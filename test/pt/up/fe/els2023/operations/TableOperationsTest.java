@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.table.ITable;
 import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
 
 import java.math.BigDecimal;
@@ -14,27 +14,25 @@ import java.math.MathContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class TableOperationsTest {
 
-    private ITable table1;
+    private Table table1;
 
-    private ITable table2;
+    private Table table2;
 
-    private ITable table3;
+    private Table table3;
 
-    private ITable table4;
+    private Table table4;
 
-    private ITable table5;
+    private Table table5;
 
-    private ITable table6;
+    private Table table6;
 
     @BeforeEach
     public void setup() {
-        table1 = new Table();
+        table1 = new RacoonTable();
         table1.addColumn("Col1");
         table1.addColumn("Col2");
 
@@ -51,7 +49,7 @@ public class TableOperationsTest {
         table1.addRow(List.of( Value.of(4L), Value.ofNull()));
         table1.addRow(List.of( Value.of(5L), Value.ofNull()));
 
-        table2 = new Table();
+        table2 = new RacoonTable();
         table2.addColumn("Col1");
         table2.addColumn("Col2");
         table2.addColumn("Col3");
@@ -64,7 +62,7 @@ public class TableOperationsTest {
         table2.addRow(List.of(Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
 
 
-        table3 = new Table();
+        table3 = new RacoonTable();
 
         table3.addColumn("Col1");
         table3.addColumn("Col2");
@@ -76,7 +74,7 @@ public class TableOperationsTest {
 
 
 
-        table4 = new Table();
+        table4 = new RacoonTable();
 
         table4.addColumn("Col1");
         table4.addColumn("Col1_1");
@@ -86,7 +84,7 @@ public class TableOperationsTest {
 
 
 
-        table5 = new Table();
+        table5 = new RacoonTable();
 
         table5.addColumn("ColA");
         table5.addColumn("ColB");
@@ -95,7 +93,7 @@ public class TableOperationsTest {
         table5.addRow(List.of(Value.of(2L), Value.of(true)));
 
 
-        table6 = new Table();
+        table6 = new RacoonTable();
 
         table6.addColumn("Col1");
         table6.addColumn("Col1_1");
@@ -110,7 +108,7 @@ public class TableOperationsTest {
                 (row) -> row.getObject("Col1").equals(2L)
         ).get();
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
@@ -124,7 +122,7 @@ public class TableOperationsTest {
                         (row.getObject("Col2") != null && row.getObject("Col2").equals("bye"))
         ).get();
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
@@ -137,7 +135,7 @@ public class TableOperationsTest {
                 (row) -> row.getObject("Col1").equals("not int")
         ).get();
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
@@ -154,7 +152,7 @@ public class TableOperationsTest {
                         row.getObject("Col2").equals(55L) // TODO remove integer overload ?
         ).get();
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
@@ -168,7 +166,7 @@ public class TableOperationsTest {
                 (row) -> row.get("Col2").isNull() || row.get("Col1").isBoolean() || row.get("Col1").isDouble()
         ).get();
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(221.12), Value.of("")));
@@ -240,7 +238,7 @@ public class TableOperationsTest {
 
     @Test
     public void testSelect() throws ColumnNotFoundException {
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
@@ -261,7 +259,7 @@ public class TableOperationsTest {
 
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
 
@@ -276,13 +274,13 @@ public class TableOperationsTest {
 
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
 
         Assertions.assertEquals(expectedTable, table2.btc().select().get());
 
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col3");
         expectedTable.addColumn("Col1");
 
@@ -298,7 +296,7 @@ public class TableOperationsTest {
 
     @Test
     public void testReject() throws ColumnNotFoundException {
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col3");
@@ -321,7 +319,7 @@ public class TableOperationsTest {
 
     @Test
     public void testConcatVertical() {
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
@@ -337,7 +335,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, table3.btc().concatVertical(table4).get());
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
@@ -353,7 +351,7 @@ public class TableOperationsTest {
 
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
@@ -371,7 +369,7 @@ public class TableOperationsTest {
 
 
 
-        expectedTable = new Table(false);
+        expectedTable = new RacoonTable(false);
 
         expectedTable.addColumn("ColA");
         expectedTable.addColumn("ColB");
@@ -390,7 +388,7 @@ public class TableOperationsTest {
 
     @Test
     public void testConcatHorizontal() {
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
@@ -407,7 +405,7 @@ public class TableOperationsTest {
 
 
 
-        expectedTable = new Table();
+        expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col1_1");
 

@@ -4,10 +4,8 @@ import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.table.ITable;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RejectOperation extends TableOperation {

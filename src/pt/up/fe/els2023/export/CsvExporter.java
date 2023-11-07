@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.export;
 
 import pt.up.fe.els2023.table.Column;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Row;
 import pt.up.fe.els2023.table.Value;
 
@@ -31,7 +31,7 @@ public class CsvExporter extends TableExporter {
     }
 
     @Override
-    void export(Writer writer, ITable table) throws IOException {
+    void export(Writer writer, Table table) throws IOException {
         List<Column> columns = table.getColumns();
 
         if (columns.isEmpty()) {
