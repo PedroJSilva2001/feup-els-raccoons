@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.*;
+import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.sources.XmlSource;
@@ -41,10 +42,130 @@ public class ConfigReader {
 
         Map<String, TableSource> configTableSources = parseTableSources(yamlData);
         List<TableSchema> configTableSchemas = parseTableSchemas(yamlData, configTableSources);
-        // TODO: operations
-        List<TableExporter> configExporter = parseExporters(yamlData);
+        List<TableOperation> configOperations = parseOperations(yamlData);
 
-        return new Config(configTableSources, configTableSchemas, null, configExporter);
+        return new Config(configTableSources, configTableSchemas, configOperations);
+    }
+
+    private List<TableOperation> parseOperations(Map<String, Object> yamlData) {
+        if (!yamlData.containsKey("operations")) {
+            System.out.println("No operations found");
+            return null;
+        }
+
+        List<TableOperation> configOperations = new ArrayList<>();
+        List<Map<String, Object>> operations = (ArrayList<Map<String, Object>>) yamlData.get("operations");
+
+        if (operations == null) {
+            System.out.println("No operations found");
+            return null;
+        }
+
+        for (Map<String, Object> operation : operations) {
+            String initialTable = null;
+            String result = null;
+            List<TableOperation> ops = new ArrayList<>();
+            if (operation.containsKey("cascade")) {
+                Map<String, Object> pipeline = (Map<String, Object>) operation.get("cascade");
+                initialTable = (String) pipeline.get("table");
+                result = (String) pipeline.get("result");
+                for (Map<String, Object> pipelineOperation : (ArrayList<Map<String, Object>>) pipeline.get("operations")) {
+                    TableOperation op = parseOperationNode(initialTable, result, pipelineOperation);
+                    if (op != null) {
+                        ops.add(op);
+                    }
+                }
+
+                if (!ops.isEmpty() && initialTable != null && result != null) {
+                    CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
+                    configOperations.add(builder.build());
+                }
+            } else if (operation.containsKey("operation")) {
+                result = (String) operation.get("result");
+                initialTable = (String) operation.get("table");
+
+                if (initialTable != null && result != null) {
+                    TableOperation op = parseOperationNode(initialTable, result, operation);
+
+                    if (op != null) {
+                        configOperations.add(op);
+                    }
+                }
+
+            } else {
+                System.out.println("No operation found");
+            }
+        }
+
+        return configOperations;
+    }
+
+    private TableOperation parseOperationNode(String initialTable, String resultVariableName, Map<String, Object> operationNode) {
+        switch ((String) operationNode.get("operation")) {
+            case "argMax" -> {
+                return new ArgMaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "argMin" -> {
+                return new ArgMinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "concat" -> {
+                Object additionalTablesObject = operationNode.get("additionalTables");
+                List<String> additionalTables = additionalTablesObject instanceof String ? new ArrayList<>(List.of((String) additionalTablesObject)) : (ArrayList<String>) additionalTablesObject;
+                if (Objects.equals(operationNode.get("axis"), "horizontal")) {
+                    return new ConcatHorizontalOperation(initialTable, resultVariableName, additionalTables);
+                } else if (Objects.equals(operationNode.get("axis"), "vertical")) {
+                    return new ConcatVerticalOperation(initialTable, resultVariableName, additionalTables);
+                }
+            }
+            case "select" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                return new SelectOperation(initialTable, resultVariableName, columns);
+            }
+            case "reject" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                return new RejectOperation(initialTable, resultVariableName, columns);
+            }
+            case "export" -> {
+                operationNode.put("name", operationNode.get("table"));
+                operationNode.put("filename", operationNode.get("result"));
+                var exporterBuilder = parseExportNode(operationNode);
+                if (exporterBuilder != null) {
+                    return new ExportOperation(initialTable, resultVariableName, exporterBuilder.build());
+                }
+            }
+            case "rename" -> {
+                Object columnsObject = operationNode.get("columns");
+                List<String> columns = columnsObject instanceof String ? new ArrayList<>(List.of((String) columnsObject)) : (ArrayList<String>) columnsObject;
+                Object newColumnsObject = operationNode.get("newColumns");
+                List<String> newColumns = newColumnsObject instanceof String ? new ArrayList<>(List.of((String) newColumnsObject)) : (ArrayList<String>) newColumnsObject;
+                return new RenameOperation(initialTable, resultVariableName, columns, newColumns);
+            }
+            case "where" -> {
+                return new WhereOperation(initialTable, resultVariableName, (String) operationNode.get("condition"));
+            }
+            case "dropWhere" -> {
+                return new DropWhereOperation(initialTable, resultVariableName, (String) operationNode.get("condition"));
+            }
+            case "max" -> {
+                return new MaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "min" -> {
+                return new MinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "count" -> {
+                return new CountOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "mean" -> {
+                return new MeanOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            case "sum" -> {
+                return new SumOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
+            }
+            default -> System.out.println("Unsupported operation");
+        }
+        return null;
     }
 
     private Map<String, TableSource> parseTableSources(Map<String, Object> yamlData) {
@@ -254,51 +375,61 @@ public class ConfigReader {
         ArrayList<Map<String, Object>> exporters = (ArrayList<Map<String, Object>>) yamlData.get("export");
 
         for (Map<String, Object> export : exporters) {
-            TableExporterBuilder<?> configExporterBuilder;
-            // TODO: VALIDATE
-            switch ((String) export.get("format")) {
-                case "csv" -> {
-                    CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                    if (export.containsKey("separator")) {
-                        csvExporterBuilder.setSeparator((String) export.get("separator"));
-                    }
-
-                    configExporterBuilder = csvExporterBuilder;
-                }
-                case "tsv" ->
-                        configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                case "html" -> {
-                    HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                    if (export.containsKey("title")) {
-                        htmlExporterBuilder.setTitle((String) export.get("title"));
-                    }
-                    if (export.containsKey("style")) {
-                        htmlExporterBuilder.setStyle((String) export.get("style"));
-                    }
-                    if (export.containsKey("exportFullHtml")) {
-                        htmlExporterBuilder.setExportFullHtml((boolean) export.get("exportFullHtml"));
-                    }
-
-                    configExporterBuilder = htmlExporterBuilder;
-                }
-                case "latex" ->
-                        configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                case "markdown", "md" ->
-                        configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
-                default -> {
-                    //TODO: SPECIFY FORMAT AND LINE
-                    System.out.println("Unsupported format");
-                    continue;
-                }
+            TableExporterBuilder<?> configExporterBuilder = parseExportNode(export);
+            if (configExporterBuilder == null) {
+                continue;
             }
 
-            // TODO: use enum for endOfLine, for example CR, LF, CRLF
-            if (export.containsKey("endOfLine")) {
-                configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
-            }
             configExporter.add(configExporterBuilder.build());
         }
 
         return configExporter;
+    }
+
+    private TableExporterBuilder<?> parseExportNode(Map<String, Object> export) {
+        TableExporterBuilder<?> configExporterBuilder;
+        // TODO: VALIDATE
+        switch ((String) export.get("format")) {
+            case "csv" -> {
+                CsvExporterBuilder csvExporterBuilder = new CsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                if (export.containsKey("separator")) {
+                    csvExporterBuilder.setSeparator((String) export.get("separator"));
+                }
+
+                configExporterBuilder = csvExporterBuilder;
+            }
+            case "tsv" ->
+                    configExporterBuilder = new TsvExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            case "html" -> {
+                HtmlExporterBuilder htmlExporterBuilder = new HtmlExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+                if (export.containsKey("title")) {
+                    htmlExporterBuilder.setTitle((String) export.get("title"));
+                }
+                if (export.containsKey("style")) {
+                    htmlExporterBuilder.setStyle((String) export.get("style"));
+                }
+                if (export.containsKey("exportFullHtml")) {
+                    htmlExporterBuilder.setExportFullHtml((boolean) export.get("exportFullHtml"));
+                }
+
+                configExporterBuilder = htmlExporterBuilder;
+            }
+            case "latex" ->
+                    configExporterBuilder = new LatexExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            case "markdown", "md" ->
+                    configExporterBuilder = new MarkdownExporterBuilder((String) export.get("name"), (String) export.get("filename"), (String) export.get("path"));
+            default -> {
+                //TODO: SPECIFY FORMAT AND LINE
+                System.out.println("Unsupported format");
+                return null;
+            }
+        }
+
+        // TODO: use enum for endOfLine, for example CR, LF, CRLF
+        if (export.containsKey("endOfLine")) {
+            configExporterBuilder.setEndOfLine((String) export.get("endOfLine"));
+        }
+
+        return configExporterBuilder;
     }
 }

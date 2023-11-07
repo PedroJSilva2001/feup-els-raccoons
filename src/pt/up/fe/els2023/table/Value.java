@@ -398,4 +398,52 @@ public class Value {
     public Value divide(Value v2) {
         return divide(this, v2, defaultMathContext);
     }
+
+    public boolean lessThan(Object obj) {
+        if (this == obj) {
+            return false;
+        }
+
+        if (!(obj instanceof Value other)) {
+            return false;
+        }
+
+        if (this.value == null || other.value == null) {
+            return false;
+        }
+
+        if (this.value instanceof Comparable<?> && other.value instanceof Comparable<?>) {
+            return ((Comparable<Object>) this.value).compareTo(other.value) < 0;
+        }
+
+        return false;
+    }
+
+    public boolean greaterThan(Object obj) {
+        if (this == obj) {
+            return false;
+        }
+
+        if (!(obj instanceof Value other)) {
+            return false;
+        }
+
+        if (this.value == null || other.value == null) {
+            return false;
+        }
+
+        if (this.value instanceof Comparable<?> && other.value instanceof Comparable<?>) {
+            return ((Comparable<Object>) this.value).compareTo(other.value) > 0;
+        }
+
+        return false;
+    }
+
+    public boolean greaterThanOrEqual(Object obj) {
+        return this.greaterThan(obj) || this.equals(obj);
+    }
+
+    public boolean lessThanOrEqual(Object obj) {
+        return this.lessThan(obj) || this.equals(obj);
+    }
 }

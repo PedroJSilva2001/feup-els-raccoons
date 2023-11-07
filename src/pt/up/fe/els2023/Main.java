@@ -1,8 +1,10 @@
 package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.config.Config;
-import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.interpreter.VariablesTable;
+import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
+import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,17 +30,24 @@ public class Main {
                 tables.put(tableSchema.name(), tableSchema.collect());
             }
 
-            config.exporters().forEach((exporter) -> {
+            var values = new HashMap<String, Value>();
+
+            var operations = config.operations();
+
+            var variablesTable = new VariablesTable(tables, values);
+
+            var btcInterpreter = new TableCascadeInterpreter(variablesTable);
+
+            for (var cascade : operations) {
                 try {
-                    exporter.export(tables);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (TableNotFoundException e) {
-                    throw new RuntimeException(e);
+                    btcInterpreter.execute(cascade);
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
-            });
+            }
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

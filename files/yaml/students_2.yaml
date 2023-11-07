@@ -1,0 +1,15 @@
+---
+course: 3
+students:
+  - studID: 3
+    grades:
+      - 1
+    friends:
+      - 2
+  - studID: 4
+    grades:
+      - 3
+      - 4
+    friends:
+      - 1
+      - 4

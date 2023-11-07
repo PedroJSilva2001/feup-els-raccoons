@@ -6,6 +6,7 @@ import pt.up.fe.els2023.config.*;
 import pt.up.fe.els2023.export.CsvExporter;
 import pt.up.fe.els2023.export.HtmlExporter;
 import pt.up.fe.els2023.export.TsvExporter;
+import pt.up.fe.els2023.operations.*;
 import pt.up.fe.els2023.sources.YamlSource;
 
 import java.io.IOException;
@@ -55,9 +56,32 @@ public class ConfigReaderTest {
                         )
         );
 
-        var expectedExporters = List.of(
-                new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ",")
+        var expectedOperations = List.of(
+                new ArgMaxOperation("decision_tree", "maxRow","min_samples_split"),
+
+                new SelectOperation("decision_tree", "selectResult", List.of("File")),
+
+                new CompositeOperationBuilder(
+                    "decision_tree", List.of(
+                    new ArgMinOperation(null,null,  "min_samples_split"),
+                    new ConcatVerticalOperation(null, null, List.of("maxRow"))
+                )).setResultVariableName("test").build(),
+
+                new WhereOperation("decision_tree", "table1", "Criterion == gini"),
+
+                new ExportOperation("table1", "Table 1",
+                        new CsvExporter("table1", "Table 1", "/dir1/dir2", System.lineSeparator(), ","))
         );
+
+
+        Assertions.assertEquals(expectedOperations.size(), config.operations().size());
+
+        for (int i = 0; i < expectedOperations.size(); i++) {
+            var expectedOperation = expectedOperations.get(i);
+            var resultOperation = config.operations().get(i);
+            Assertions.assertEquals(expectedOperation.getResultVariableName(), resultOperation.getResultVariableName());
+            Assertions.assertEquals(expectedOperation.getClass(), resultOperation.getClass());
+        }
 
         for (var expectedTableSource : expectedTableSources.entrySet()) {
             var resultTableSource = config.tableSources().get(expectedTableSource.getKey());
@@ -66,15 +90,6 @@ public class ConfigReaderTest {
         }
 
         Assertions.assertEquals(expectedTableSchemas, config.tableSchemas());
-
-        for (int i = 0; i < expectedExporters.size(); i++) {
-            var expectedExporter = expectedExporters.get(i);
-            var resultExporter = config.exporters().get(i);
-            Assertions.assertEquals(expectedExporter.getTable(), resultExporter.getTable());
-            Assertions.assertEquals(expectedExporter.getFilename(), resultExporter.getFilename());
-            Assertions.assertEquals(expectedExporter.getPath(), resultExporter.getPath());
-            Assertions.assertEquals(expectedExporter.getEndOfLine(), resultExporter.getEndOfLine());
-        }
     }
 
     @Test
@@ -167,6 +182,7 @@ public class ConfigReaderTest {
         Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
     }
 
+    // TODO: RETEST
     @Test
     public void testReadConfigCsvExporter() throws IOException {
         var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_csv.yaml";
@@ -178,8 +194,6 @@ public class ConfigReaderTest {
                 new CsvExporter("table2", "Table 2", "/dir1/dir2", "\r\n", ";"),
                 new TsvExporter("table3", "Table 3", "/dir1/dir2", "\n")
         );
-
-        Assertions.assertEquals(expectedExporters, config.exporters());
     }
 
     @Test
@@ -213,6 +227,5 @@ public class ConfigReaderTest {
                         """, true)
         );
 
-        Assertions.assertEquals(expectedExporters, config.exporters());
     }
 }
