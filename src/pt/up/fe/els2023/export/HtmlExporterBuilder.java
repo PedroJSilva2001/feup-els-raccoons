@@ -24,16 +24,19 @@ public class HtmlExporterBuilder extends TableExporterBuilder<HtmlExporter> {
                 }""";
     }
 
-    public void setStyle(String style) {
+    public HtmlExporterBuilder setStyle(String style) {
         this.style = style;
+        return this;
     }
 
-    public void setTitle(String title) {
+    public HtmlExporterBuilder setTitle(String title) {
         this.title = title;
+        return this;
     }
 
-    public void setExportFullHtml(boolean exportFullHtml) {
+    public HtmlExporterBuilder setExportFullHtml(boolean exportFullHtml) {
         this.exportFullHtml = exportFullHtml;
+        return this;
     }
 
     @Override
