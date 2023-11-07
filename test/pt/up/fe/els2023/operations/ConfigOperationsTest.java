@@ -8,7 +8,7 @@ import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
 import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
@@ -21,13 +21,13 @@ import java.util.List;
 
 public class ConfigOperationsTest {
 
-    private HashMap<String, ITable> tables;
+    private HashMap<String, Table> tables;
     private HashMap<String, Value> resultVariables;
     private TableCascadeInterpreter btcInterpreter;
 
     @BeforeEach
     public void setup() {
-        ITable table1 = new Table();
+        Table table1 = new RacoonTable();
 
         table1.addColumn("Col1");
         table1.addColumn("Col2");
@@ -37,7 +37,7 @@ public class ConfigOperationsTest {
         table1.addRow(List.of(Value.ofNull(), Value.of("maybe")));
         table1.addRow(List.of(Value.of(4.0), Value.ofNull()));
 
-        ITable table2 = new Table();
+        Table table2 = new RacoonTable();
 
         table2.addColumn("Col1");
         table2.addColumn("Col1_1");
@@ -63,7 +63,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of("yes")));
         expectedTable.addRow(List.of(Value.of("no")));
@@ -82,7 +82,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
 
         expectedTable.addRow(List.of(Value.of(1.0)));
@@ -102,7 +102,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addColumn("Col1_1");
@@ -123,7 +123,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addColumn("Col1_1");
@@ -145,7 +145,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull()));
@@ -161,7 +161,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
@@ -178,7 +178,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col3");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
@@ -196,7 +196,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
@@ -232,7 +232,7 @@ public class ConfigOperationsTest {
 
         Assertions.assertEquals(tables.size(), 3);
 
-        var expectedTable = new Table();
+        var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));

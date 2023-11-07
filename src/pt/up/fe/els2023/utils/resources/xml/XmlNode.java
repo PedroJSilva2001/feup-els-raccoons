@@ -23,6 +23,22 @@ public class XmlNode implements ResourceNode {
         this.name = name;
     }
 
+    private Node getValueOfNode() {
+        if (node.getNodeType() == Element.ATTRIBUTE_NODE) {
+            return node;
+        }
+
+        if (node.getNodeType() == Element.TEXT_NODE) {
+            return node;
+        }
+
+        if (node.getNodeType() == Element.ELEMENT_NODE && node.getChildNodes().getLength() == 1
+                && node.getFirstChild().getNodeType() == Element.TEXT_NODE) {
+            return node.getFirstChild();
+        }
+
+        return null;
+    }
 
     @Override
     public String getName() {
@@ -41,7 +57,10 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isArray() {
-        return node.getNodeType() == Element.ELEMENT_NODE;
+        return node.getNodeType() == Element.ELEMENT_NODE &&
+                (node.getChildNodes().getLength() >= 1 &&
+                        node.getFirstChild().getNodeType() == Element.ELEMENT_NODE) ||
+                node.getChildNodes().getLength() > 1;
     }
 
     @Override
@@ -51,8 +70,9 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isBoolean() {
-        if (node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE) {
-            return node.getNodeValue().equals("true") || node.getNodeValue().equals("false");
+        Node value = getValueOfNode();
+        if (value != null && value.getNodeValue() != null) {
+            return value.getNodeValue().equals("true") || value.getNodeValue().equals("false");
         }
 
         return false;
@@ -60,9 +80,10 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isInteger() {
-        if (node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE) {
+        Node value = getValueOfNode();
+        if (value != null) {
             try {
-                Integer.parseInt(node.getNodeValue());
+                Integer.parseInt(value.getNodeValue());
                 return true;
             } catch (NumberFormatException e) {
                 return false;
@@ -74,9 +95,10 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isDouble() {
-        if (node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE) {
+        Node value = getValueOfNode();
+        if (value != null) {
             try {
-                Double.parseDouble(node.getNodeValue());
+                Double.parseDouble(value.getNodeValue());
                 return true;
             } catch (NumberFormatException e) {
                 return false;
@@ -88,14 +110,15 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isText() {
-        return node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE;
+        return isValue();
     }
 
     @Override
     public boolean isLong() {
-        if (node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE) {
+        Node value = getValueOfNode();
+        if (value != null) {
             try {
-                Long.parseLong(node.getNodeValue());
+                Long.parseLong(value.getNodeValue());
                 return true;
             } catch (NumberFormatException e) {
                 return false;
@@ -119,17 +142,23 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public boolean isObject() {
-        return node.getNodeType() == Element.ELEMENT_NODE;
+        return node.getNodeType() == Element.ELEMENT_NODE &&
+                (node.getChildNodes().getLength() >= 1 &&
+                        node.getFirstChild().getNodeType() == Element.ELEMENT_NODE) ||
+                node.getChildNodes().getLength() > 1;
     }
 
     @Override
     public boolean isValue() {
-        return node.getNodeType() == Element.ATTRIBUTE_NODE || node.getNodeType() == Element.TEXT_NODE;
+        return getValueOfNode() != null;
     }
 
     @Override
     public boolean isContainer() {
-        return node.getNodeType() == Element.ELEMENT_NODE;
+        return node.getNodeType() == Element.ELEMENT_NODE &&
+                (node.getChildNodes().getLength() >= 1 &&
+                node.getFirstChild().getNodeType() == Element.ELEMENT_NODE) ||
+                node.getChildNodes().getLength() > 1;
     }
 
     @Override
@@ -196,16 +225,21 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public Boolean asBoolean() {
+        Node value = getValueOfNode();
+        if (value == null) {
+            return null;
+        }
+
         if (isBoolean()) {
-            return Boolean.parseBoolean(node.getNodeValue());
+            return Boolean.parseBoolean(value.getNodeValue());
         }
 
         if (isInteger() || isLong()) {
-            return Long.parseLong(node.getNodeValue()) != 0;
+            return Long.parseLong(value.getNodeValue()) != 0;
         }
 
         if (isDouble()) {
-            return Double.parseDouble(node.getNodeValue()) != 0;
+            return Double.parseDouble(value.getNodeValue()) != 0;
         }
 
         return null;
@@ -213,16 +247,21 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public Long asLong() {
+        Node value = getValueOfNode();
+        if (value == null) {
+            return null;
+        }
+
         if (isInteger() || isLong()) {
-            return Long.parseLong(node.getNodeValue());
+            return Long.parseLong(value.getNodeValue());
         }
 
         if (isDouble()) {
-            return Math.round(Double.parseDouble(node.getNodeValue()));
+            return Math.round(Double.parseDouble(value.getNodeValue()));
         }
 
         if (isBoolean()) {
-            return Boolean.parseBoolean(node.getNodeValue()) ? 1L : 0L;
+            return Boolean.parseBoolean(value.getNodeValue()) ? 1L : 0L;
         }
 
         return null;
@@ -242,12 +281,17 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public Double asDouble() {
+        Node value = getValueOfNode();
+        if (value == null) {
+            return null;
+        }
+
         if (isInteger() || isLong() || isDouble()) {
-            return Double.parseDouble(node.getNodeValue());
+            return Double.parseDouble(value.getNodeValue());
         }
 
         if (isBoolean()) {
-            return Boolean.parseBoolean(node.getNodeValue()) ? 1.0 : 0.0;
+            return Boolean.parseBoolean(value.getNodeValue()) ? 1.0 : 0.0;
         }
 
         return null;
@@ -255,6 +299,11 @@ public class XmlNode implements ResourceNode {
 
     @Override
     public String asText() {
-        return node.getNodeValue();
+        Node value = getValueOfNode();
+        if (value == null) {
+            return node.getNodeValue();
+        }
+
+        return value.getNodeValue();
     }
 }

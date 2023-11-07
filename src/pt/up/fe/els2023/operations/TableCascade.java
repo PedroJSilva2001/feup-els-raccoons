@@ -165,15 +165,55 @@ public class TableCascade {
     public TableCascade concatHorizontal(Table...others) {
         // side by side
 
-        Table newTable = new RacoonTable(table);
+        Table newTable = new RacoonTable();
 
         Map<String, Integer> columnNameSuffixCount = new HashMap<>();
 
-        for (var column : table.getColumns()) {
-            columnNameSuffixCount.put(column.getName(), 0);
-        }
+        var othersList = new ArrayList<>(Arrays.asList(others));
+        othersList.add(0, table);
 
-        for (var other : others) {
+        for (var other : othersList) {
+            var it1 = newTable.rowIterator();
+            var it2 = other.rowIterator();
+            var rows = new ArrayList<List<Value>>();
+
+            while (it1.hasNext() && it2.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row1 = it1.next();
+                var row2 = it2.next();
+
+                row.addAll(row1.getValues());
+                row.addAll(row2.getValues());
+
+                rows.add(row);
+            }
+
+            while (it1.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row1 = it1.next();
+
+                List<Value> nulls = Collections.nCopies(other.getColumnNumber(), Value.ofNull());
+
+                row.addAll(row1.getValues());
+                row.addAll(nulls);
+
+                rows.add(row);
+            }
+
+            while (it2.hasNext()) {
+                var row = new ArrayList<Value>();
+
+                var row2 = it2.next();
+
+                List<Value> nulls = Collections.nCopies(newTable.getColumnNumber(), Value.ofNull());
+
+                row.addAll(nulls);
+                row.addAll(row2.getValues());
+
+                rows.add(row);
+            }
 
             for (var column : other.getColumns()) {
                 var name = column.getName();
@@ -194,45 +234,8 @@ public class TableCascade {
                     columnNameSuffixCount.put(name, 0);
                 }
             }
-
-            var it1 = table.rowIterator();
-            var it2 = other.rowIterator();
-
-            while (it1.hasNext() && it2.hasNext()) {
-                var row = new ArrayList<Value>();
-
-                var row1 = it1.next();
-                var row2 = it2.next();
-
-                row.addAll(row1.getValues());
-                row.addAll(row2.getValues());
-
-                newTable.addRow(row);
-            }
-
-            while (it1.hasNext()) {
-                var row = new ArrayList<Value>();
-
-                var row1 = it1.next();
-
-                List<Value> nulls = Collections.nCopies(other.getColumnNumber(), Value.ofNull());
-
-                row.addAll(row1.getValues());
-                row.addAll(nulls);
-
-                newTable.addRow(row);
-            }
-
-            while (it2.hasNext()) {
-                var row = new ArrayList<Value>();
-
-                var row2 = it2.next();
-
-                List<Value> nulls = Collections.nCopies(table.getColumnNumber(), Value.ofNull());
-
-                row.addAll(nulls);
-                row.addAll(row2.getValues());
-
+            newTable = new RacoonTable(newTable);
+            for (var row : rows) {
                 newTable.addRow(row);
             }
         }
