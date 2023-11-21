@@ -18,7 +18,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfig() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -94,7 +94,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigExcept() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_except.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_except.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -109,7 +109,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigDirectory() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_directory.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_directory.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -123,7 +123,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigFile() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_file.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_file.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -137,7 +137,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigPath() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_path.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_path.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -151,7 +151,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigAll() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_all.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_all.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -166,7 +166,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigEach() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_each.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_each.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -185,7 +185,7 @@ public class InterpreterDataReaderTest {
     // TODO: RETEST
     @Test
     public void testReadConfigCsvExporter() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_csv.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_csv.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
@@ -198,7 +198,7 @@ public class InterpreterDataReaderTest {
 
     @Test
     public void testReadConfigHtmlExporter() throws IOException {
-        var configLocation = "./test/pt/up/fe/els2023/files/yaml/config_html.yaml";
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_html.yaml";
         var configReader = new ConfigReader(configLocation);
         var config = configReader.readConfig();
 
