@@ -16,21 +16,6 @@ import pt.up.fe.els2023.imports.NodeVisitor;
  * @param value The schema of the values in the array.
  */
 public record EachNode(SchemaNode value) implements SchemaNode {
-    public static EachNode each(SchemaNode value) {
-        return new EachNode(value);
-    }
-
-    public static EachNode each(SchemaNode... values) {
-        return new EachNode(new ListNode(values));
-    }
-
-    public static EachNode each(String columnName) {
-        return new EachNode(new ColumnNode(columnName));
-    }
-
-    public static EachNode each() {
-        return new EachNode(new NullNode());
-    }
 
     @Override
     public void accept(NodeVisitor visitor) {

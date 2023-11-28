@@ -1,22 +1,21 @@
 package pt.up.fe.els2023.table.schema;
 
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.table.schema.*;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static pt.up.fe.els2023.table.schema.AllContainerNode.allContainer;
-import static pt.up.fe.els2023.table.schema.AllNode.all;
-import static pt.up.fe.els2023.table.schema.AllValueNode.allValue;
-import static pt.up.fe.els2023.table.schema.ColumnNode.column;
-import static pt.up.fe.els2023.table.schema.EachNode.each;
-import static pt.up.fe.els2023.table.schema.ExceptNode.except;
-import static pt.up.fe.els2023.table.schema.IndexNode.index;
-import static pt.up.fe.els2023.table.schema.ListNode.list;
-import static pt.up.fe.els2023.table.schema.NullNode.nullNode;
-import static pt.up.fe.els2023.table.schema.PropertyNode.property;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.allContainer;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.all;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.allValue;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.column;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.each;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.except;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.index;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.list;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.nullNode;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.property;
 
 class SchemaNodeTest {
     @Test

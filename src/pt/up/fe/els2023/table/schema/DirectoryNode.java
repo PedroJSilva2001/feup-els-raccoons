@@ -12,14 +12,6 @@ public record DirectoryNode(String columnName) implements SchemaNode {
         this("$directory");
     }
 
-    public static DirectoryNode directory(String columnName) {
-        return new DirectoryNode(columnName);
-    }
-
-    public static DirectoryNode directory() {
-        return new DirectoryNode();
-    }
-
     @Override
     public void accept(NodeVisitor visitor) {
         visitor.visit(this);

@@ -14,10 +14,6 @@ public record ListNode(List<SchemaNode> list) implements SchemaNode {
         this(List.of(nodes));
     }
 
-    public static ListNode list(SchemaNode... nodes) {
-        return new ListNode(List.of(nodes));
-    }
-
     @Override
     public void accept(NodeVisitor visitor) {
         visitor.visit(this);

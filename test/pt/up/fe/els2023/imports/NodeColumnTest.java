@@ -7,9 +7,9 @@ import pt.up.fe.els2023.table.schema.SchemaNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pt.up.fe.els2023.table.schema.AllNode.all;
-import static pt.up.fe.els2023.table.schema.ColumnNode.column;
-import static pt.up.fe.els2023.table.schema.NullNode.nullNode;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.all;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.column;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.nullNode;
 
 public class NodeColumnTest {
     @Test

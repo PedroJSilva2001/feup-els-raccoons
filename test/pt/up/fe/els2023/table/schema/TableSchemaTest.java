@@ -5,15 +5,14 @@ import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.sources.YamlSource;
 import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
-import pt.up.fe.els2023.table.schema.TableSchema;
 
 import java.util.List;
 
-import static pt.up.fe.els2023.table.schema.AllNode.all;
-import static pt.up.fe.els2023.table.schema.DirectoryNode.directory;
-import static pt.up.fe.els2023.table.schema.EachNode.each;
-import static pt.up.fe.els2023.table.schema.FileNode.file;
-import static pt.up.fe.els2023.table.schema.PropertyNode.property;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.all;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.directory;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.each;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.file;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.property;
 
 public class TableSchemaTest {
     @Test

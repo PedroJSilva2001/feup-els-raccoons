@@ -12,14 +12,6 @@ public record PathNode(String columnName) implements SchemaNode {
         this("$path");
     }
 
-    public static PathNode path(String columnName) {
-        return new PathNode(columnName);
-    }
-
-    public static PathNode path() {
-        return new PathNode();
-    }
-
     @Override
     public void accept(NodeVisitor visitor) {
         visitor.visit(this);
