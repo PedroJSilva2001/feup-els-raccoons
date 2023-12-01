@@ -19,7 +19,7 @@ import java.util.*;
  * The table schema describes the structure of the table, including the name of the table, how sources are mapped to
  * the table, and the source of the table.
  */
-public final class TableSchema {
+public class TableSchema {
     private String name;
     private List<SchemaNode> nft;
     private TableSource source;

@@ -9,7 +9,10 @@ import java.util.Set;
  *
  * @param except The properties to exclude.
  */
-public record ExceptNode(Set<String> except) implements SchemaNode {
+public record ExceptNode(Set<String> except, String format) implements SchemaNode {
+    public ExceptNode(Set<String> except) {
+        this(except, "%s");
+    }
 
     @Override
     public void accept(NodeVisitor visitor) {

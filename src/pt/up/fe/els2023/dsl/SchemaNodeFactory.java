@@ -10,14 +10,25 @@ public class SchemaNodeFactory {
         return new AllContainerNode();
     }
 
+    public static AllContainerNode allContainer(String format) {
+        return new AllContainerNode(format);
+    }
+
     public static AllNode all() {
         return new AllNode();
+    }
+
+    public static AllNode all(String format) {
+        return new AllNode(format);
     }
 
     public static AllValueNode allValue() {
         return new AllValueNode();
     }
 
+    public static AllValueNode allValue(String format) {
+        return new AllValueNode(format);
+    }
     public static ColumnNode column(String columnName) {
         return new ColumnNode(columnName);
     }
@@ -50,6 +61,10 @@ public class SchemaNodeFactory {
     // TODO: This would be useful for specifying a certain index of an array, for example.
     public static ExceptNode except(String... except) {
         return new ExceptNode(Set.of(except));
+    }
+
+    public static ExceptNode exceptF(String format, String... except) {
+        return new ExceptNode(Set.of(except), format);
     }
 
     public static FileNode file(String columnName) {
