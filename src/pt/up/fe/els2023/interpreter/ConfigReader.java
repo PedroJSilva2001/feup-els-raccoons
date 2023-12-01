@@ -259,6 +259,15 @@ public class ConfigReader {
         } else if (Objects.equals(keyName, "$path")) {
             String columnName = (String) value;
             return new PathNode(columnName);
+        } else if (Objects.equals(keyName, "$all")) {
+            String format = (String) value;
+            return new AllNode(format);
+        } else if (Objects.equals(keyName, "$all-value")) {
+            String format = (String) value;
+            return new AllValueNode(format);
+        } else if (Objects.equals(keyName, "$all-container")) {
+            String format = (String) value;
+            return new AllContainerNode(format);
         }
 
         Pattern pattern = Pattern.compile("^\\$(.*)\\[(\\d+)]");

@@ -165,6 +165,21 @@ public class InterpreterDataReaderTest {
     }
 
     @Test
+    public void testReadConfigAllFormat() throws IOException {
+        var configLocation = "./test/pt/up/fe/els2023/files/config/config_all_format.yaml";
+        var configReader = new ConfigReader(configLocation);
+        var config = configReader.readConfig();
+
+        var expectedNft = List.of(
+                new AllNode("all %s end"),
+                new AllValueNode("all value %s end"),
+                new AllContainerNode("all container %s end")
+        );
+
+        Assertions.assertEquals(expectedNft, config.tableSchemas().get(0).nft());
+    }
+
+    @Test
     public void testReadConfigEach() throws IOException {
         var configLocation = "./test/pt/up/fe/els2023/files/config/config_each.yaml";
         var configReader = new ConfigReader(configLocation);
