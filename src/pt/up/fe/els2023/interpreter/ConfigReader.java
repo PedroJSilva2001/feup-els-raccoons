@@ -105,6 +105,11 @@ public class ConfigReader {
             case "argMax" -> {
                 return new ArgMaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
+            case "sort" -> {
+                var ascending = !operationNode.containsKey("ascending") || (boolean) operationNode.get("ascending");
+
+                return new SortOperation(initialTable, resultVariableName, (String) operationNode.get("columns"), ascending);
+            }
             case "argMin" -> {
                 return new ArgMinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }

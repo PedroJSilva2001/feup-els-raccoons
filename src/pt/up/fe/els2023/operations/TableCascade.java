@@ -294,11 +294,11 @@ public class TableCascade {
             }
 
             if(v1.isNull()){
-                return -1;
+                return 1;
             }
 
             if(v2.isNull()){
-                return 1;
+                return -1;
             }
 
             var castedV1 = commonRep.cast(v1);
