@@ -1,6 +1,8 @@
 package pt.up.fe.els2023.operations;
 
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.imports.ColumnUtils;
+import pt.up.fe.els2023.table.Column;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.RacoonTable;
 import pt.up.fe.els2023.table.Value;
@@ -18,6 +20,47 @@ public class TableCascade {
 
     public Table get() {
         return table;
+    }
+
+    public TableCascade join(Table other, String column) throws ColumnNotFoundException {
+        var col1 = table.getIndexOfColumn(column);
+        var col2 = other.getIndexOfColumn(column);
+
+        if (col1 == -1 || col2 == -1) {
+            throw new ColumnNotFoundException(column);
+        }
+
+        var newTable = new RacoonTable(table);
+        var columnNames = newTable.getColumns().stream().map(Column::getName).collect(Collectors.toCollection(HashSet::new));
+
+        for (var otherColumn : other.getColumns()) {
+            var name = otherColumn.getName();
+
+            if (!name.equals(column)) {
+                var uniqueName = ColumnUtils.makeUnique(name, columnNames);
+
+                newTable.addColumn(uniqueName);
+                columnNames.add(uniqueName);
+            }
+        }
+
+        for (var row1 : table.getRows()) {
+            for (var row2 : other.getRows()) {
+                if (row1.get(col1).equals(row2.get(col2))) {
+                    var newRow = new ArrayList<>(row1.getValues());
+
+                    for (int i = 0; i < row2.getValues().size(); i++) {
+                        if (i != col2) {
+                            newRow.add(row2.get(i));
+                        }
+                    }
+
+                    newTable.addRow(newRow);
+                }
+            }
+        }
+
+        return new TableCascade(newTable);
     }
 
     public TableCascade select(String ...columns) throws ColumnNotFoundException {
