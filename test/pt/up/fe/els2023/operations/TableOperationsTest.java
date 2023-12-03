@@ -459,4 +459,206 @@ public class TableOperationsTest {
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col1", "Col2", "Col3"));
     }
+
+    @Test
+    public void testLongSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(1L), Value.of("yes")));
+        table1.addRow(List.of(Value.of(4L), Value.of("no")));
+        table1.addRow(List.of(Value.of(2L), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(3L), Value.of("yes")));
+        table1.addRow(List.of(Value.of(5L), Value.of("no")));
+        table1.addRow(List.of(Value.of(0L), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(0L), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(3L), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(4L), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(5L), Value.of("no")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+
+        var expectedTable2 = new RacoonTable();
+
+        expectedTable2.addColumn("Col1");
+        expectedTable2.addColumn("Col2");
+
+        expectedTable2.addRow(List.of(Value.of(5L), Value.of("no")));
+        expectedTable2.addRow(List.of(Value.of(4L), Value.of("no")));
+        expectedTable2.addRow(List.of(Value.of(3L), Value.of("yes")));
+        expectedTable2.addRow(List.of(Value.of(2L), Value.of("maybe")));
+        expectedTable2.addRow(List.of(Value.of(1L), Value.of("yes")));
+        expectedTable2.addRow(List.of(Value.of(0L), Value.of("maybe")));
+
+        Assertions.assertEquals(expectedTable2, table1.btc().sort(false, "Col1").get());
+
+        var expectedTable3 = new RacoonTable();
+
+        expectedTable3.addColumn("Col1");
+        expectedTable3.addColumn("Col2");
+
+        expectedTable3.addRow(List.of(Value.of(2L), Value.of("maybe")));
+        expectedTable3.addRow(List.of(Value.of(0L), Value.of("maybe")));
+        expectedTable3.addRow(List.of(Value.of(4L), Value.of("no")));
+        expectedTable3.addRow(List.of(Value.of(5L), Value.of("no")));
+        expectedTable3.addRow(List.of(Value.of(1L), Value.of("yes")));
+        expectedTable3.addRow(List.of(Value.of(3L), Value.of("yes")));
+
+        Assertions.assertEquals(expectedTable3, table1.btc().sort("Col2").get());
+    }
+
+    @Test
+    public void testDoubleSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(1.1), Value.of("yes")));
+        table1.addRow(List.of(Value.of(4.2), Value.of("no")));
+        table1.addRow(List.of(Value.of(2.3), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(3.4), Value.of("yes")));
+        table1.addRow(List.of(Value.of(3.3), Value.of("no")));
+        table1.addRow(List.of(Value.of(0.6), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(0.6), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(1.1), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2.3), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(3.3), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(3.4), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(4.2), Value.of("no")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+    }
+
+    @Test
+    public void testBooleanSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(true), Value.of("yes")));
+        table1.addRow(List.of(Value.of(false), Value.of("no")));
+        table1.addRow(List.of(Value.of(true), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(false), Value.of("yes")));
+        table1.addRow(List.of(Value.of(false), Value.of("no")));
+        table1.addRow(List.of(Value.of(true), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(false), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(false), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(false), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+    }
+
+    @Test
+    public void testDoubleLongSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(1.1), Value.of("yes")));
+        table1.addRow(List.of(Value.of(4L), Value.of("no")));
+        table1.addRow(List.of(Value.of(2.3), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(3L), Value.of("yes")));
+        table1.addRow(List.of(Value.of(3.3), Value.of("no")));
+        table1.addRow(List.of(Value.of(0L), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(0L), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(1.1), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2.3), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(3L), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(3.3), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(4L), Value.of("no")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+    }
+
+    @Test
+    public void testBooleanDoubleSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(true), Value.of("yes")));
+        table1.addRow(List.of(Value.of(false), Value.of("no")));
+        table1.addRow(List.of(Value.of(true), Value.of("maybe")));
+        table1.addRow(List.of(Value.of(false), Value.of("yes")));
+        table1.addRow(List.of(Value.of(0.3), Value.of("no")));
+        table1.addRow(List.of(Value.of(3L), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(false), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(false), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(0.3), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(3L), Value.of("maybe")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+    }
+
+    @Test
+    public void testStringBooleanSort() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(true), Value.of("yes")));
+        table1.addRow(List.of(Value.of(false), Value.of("no")));
+        table1.addRow(List.of(Value.of(true), Value.of("maybe")));
+        table1.addRow(List.of(Value.of("test"), Value.of("yes")));
+        table1.addRow(List.of(Value.of("house"), Value.of("no")));
+        table1.addRow(List.of(Value.of("fact"), Value.of("maybe")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of("fact"), Value.of("maybe")));
+        expectedTable.addRow(List.of(Value.of(false), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of("house"), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of("test"), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1").get());
+    }
 }

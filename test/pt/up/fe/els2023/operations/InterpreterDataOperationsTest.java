@@ -57,6 +57,41 @@ public class InterpreterDataOperationsTest {
     }
 
     @Test
+    public void testSort() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
+        var sort = new SortOperation("table1", "table3", "Col1", true);
+
+        btcInterpreter.execute(sort);
+
+        Assertions.assertEquals(tables.size(), 3);
+
+        var expectedTable = new RacoonTable();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.of(2.0), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe")));
+
+        Assertions.assertEquals(tables.get("table3"), expectedTable);
+
+        sort = new SortOperation("table1", "table4", "Col1", false);
+
+        btcInterpreter.execute(sort);
+
+        Assertions.assertEquals(tables.size(), 4);
+
+        expectedTable = new RacoonTable();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addRow(List.of(Value.of(4.0), Value.ofNull()));
+        expectedTable.addRow(List.of(Value.of(2.0), Value.of("no")));
+        expectedTable.addRow(List.of(Value.of(1.0), Value.of("yes")));
+        expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe")));
+
+        Assertions.assertEquals(tables.get("table4"), expectedTable);
+    }
+
+    @Test
     public void testSelect() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
         var select = new SelectOperation("table1", "table3", List.of("Col2"));
 
