@@ -80,6 +80,14 @@ public class PopulateVisitor implements NodeVisitor {
         return merge();
     }
 
+    private String formatColumnName(String format, String columnName) {
+        try {
+            return String.format(format, columnName);
+        } catch (Exception e) {
+            return columnName;
+        }
+    }
+
     private Value getValueFromNode(ResourceNode node) {
         if (node.isValue()) {
             if (node.isBoolean()) {
@@ -154,6 +162,8 @@ public class PopulateVisitor implements NodeVisitor {
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
+
+                columnName = formatColumnName(node.format(), columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
                 rowValues.put(columnName, getValueFromNode(child));
@@ -177,6 +187,8 @@ public class PopulateVisitor implements NodeVisitor {
             String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
             properties.add(columnName);
+
+            columnName = formatColumnName(node.format(), columnName);
             columnName = nodeColumnMap.add(node, columnName);
 
             rowValues.put(columnName, getValueFromNode(child));
@@ -200,6 +212,8 @@ public class PopulateVisitor implements NodeVisitor {
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
+
+                columnName = formatColumnName(node.format(), columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
                 rowValues.put(columnName, getValueFromNode(child));
@@ -277,6 +291,8 @@ public class PopulateVisitor implements NodeVisitor {
                 String columnName = ColumnUtils.makeUnique(propertyName, properties);
 
                 properties.add(columnName);
+
+                columnName = formatColumnName(node.format(), columnName);
                 columnName = nodeColumnMap.add(node, columnName);
 
                 rowValues.put(columnName, getValueFromNode(child));

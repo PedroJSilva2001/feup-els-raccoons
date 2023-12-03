@@ -12,14 +12,6 @@ public record FileNode(String columnName) implements SchemaNode {
         this("$file");
     }
 
-    public static FileNode file(String columnName) {
-        return new FileNode(columnName);
-    }
-
-    public static FileNode file() {
-        return new FileNode();
-    }
-
     @Override
     public void accept(NodeVisitor visitor) {
         visitor.visit(this);

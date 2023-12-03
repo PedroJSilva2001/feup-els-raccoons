@@ -1,22 +1,12 @@
 package pt.up.fe.els2023.table.schema;
 
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.table.schema.*;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static pt.up.fe.els2023.table.schema.AllContainerNode.allContainer;
-import static pt.up.fe.els2023.table.schema.AllNode.all;
-import static pt.up.fe.els2023.table.schema.AllValueNode.allValue;
-import static pt.up.fe.els2023.table.schema.ColumnNode.column;
-import static pt.up.fe.els2023.table.schema.EachNode.each;
-import static pt.up.fe.els2023.table.schema.ExceptNode.except;
-import static pt.up.fe.els2023.table.schema.IndexNode.index;
-import static pt.up.fe.els2023.table.schema.ListNode.list;
-import static pt.up.fe.els2023.table.schema.NullNode.nullNode;
-import static pt.up.fe.els2023.table.schema.PropertyNode.property;
+import static pt.up.fe.els2023.dsl.SchemaNodeFactory.*;
 
 class SchemaNodeTest {
     @Test
@@ -39,7 +29,11 @@ class SchemaNodeTest {
                 except("except 1", "except 2"),
                 all(),
                 allContainer(),
-                allValue()
+                allValue(),
+                allValue("all value %s"),
+                allContainer("all container %s"),
+                all("all %s"),
+                exceptF("except %s", "except 1", "except 2")
         );
 
         List<SchemaNode> expected = List.of(
@@ -69,7 +63,11 @@ class SchemaNodeTest {
                 new ExceptNode(Set.of("except 1", "except 2")),
                 new AllNode(),
                 new AllContainerNode(),
-                new AllValueNode()
+                new AllValueNode(),
+                new AllValueNode("all value %s"),
+                new AllContainerNode("all container %s"),
+                new AllNode("all %s"),
+                new ExceptNode(Set.of("except 1", "except 2"), "except %s")
         );
 
         assertEquals(expected, nft);

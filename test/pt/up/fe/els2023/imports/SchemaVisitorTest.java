@@ -166,6 +166,35 @@ public class SchemaVisitorTest {
     }
 
     @Test
+    public void testAllFormat() throws IOException {
+        var source = new YamlSource(
+                "students",
+                List.of("./test/pt/up/fe/els2023/files/yaml/all_test.yaml"));
+
+        var tableSchema = new TableSchema("all_test")
+                .source(source)
+                .nft(
+                        new AllNode("all %s end")
+                );
+
+        var fileReader = new FileReader(source.getFiles().get(0));
+        var reader = new BufferedReader(fileReader);
+
+        var rootNode = tableSchema.source().getResourceParser().parse(reader);
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        var table = visitor.populateFromSource(Path.of("/home/Documents/all_test.yaml"), rootNode, tableSchema.nft());
+
+        Assertions.assertEquals(4, table.size());
+        Assertions.assertEquals(Map.of(
+                "all grades end", List.of(Value.of("[1,2]")),
+                "all friends end", List.of(Value.of("[3,2]")),
+                "all studID end", List.of(Value.of(1)),
+                "all info end", List.of(Value.of("{\"name\":\"John\",\"age\":20}"))
+        ), table);
+    }
+
+    @Test
     public void testAllContainer() throws IOException {
         var source = new YamlSource(
                 "students",
@@ -194,6 +223,60 @@ public class SchemaVisitorTest {
     }
 
     @Test
+    public void testAllContainerFormat() throws IOException {
+        var source = new YamlSource(
+                "students",
+                List.of("./test/pt/up/fe/els2023/files/yaml/all_test.yaml"));
+
+        var tableSchema = new TableSchema("all_test")
+                .source(source)
+                .nft(
+                        new AllContainerNode("all container %s end")
+                );
+
+        var fileReader = new FileReader(source.getFiles().get(0));
+        var reader = new BufferedReader(fileReader);
+
+        var rootNode = tableSchema.source().getResourceParser().parse(reader);
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        var table = visitor.populateFromSource(Path.of("/home/Documents/all_test.yaml"), rootNode, tableSchema.nft());
+
+        Assertions.assertEquals(3, table.size());
+        Assertions.assertEquals(Map.of(
+                "all container grades end", List.of(Value.of("[1,2]")),
+                "all container friends end", List.of(Value.of("[3,2]")),
+                "all container info end", List.of(Value.of("{\"name\":\"John\",\"age\":20}"))
+        ), table);
+    }
+
+    @Test
+    public void testAllValueFormat() throws IOException {
+        var source = new YamlSource(
+                "students",
+                List.of("./test/pt/up/fe/els2023/files/yaml/all_test.yaml"));
+
+        var tableSchema = new TableSchema("all_test")
+                .source(source)
+                .nft(
+                        new AllValueNode("all value %s end")
+                );
+
+        var fileReader = new FileReader(source.getFiles().get(0));
+        var reader = new BufferedReader(fileReader);
+
+        var rootNode = tableSchema.source().getResourceParser().parse(reader);
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        var table = visitor.populateFromSource(Path.of("/home/Documents/all_test.yaml"), rootNode, tableSchema.nft());
+
+        Assertions.assertEquals(1, table.size());
+        Assertions.assertEquals(Map.of(
+                "all value studID end", List.of(Value.of(1))
+        ), table);
+    }
+
+    @Test
     public void testAllValue() throws IOException {
         var source = new YamlSource(
                 "students",
@@ -216,6 +299,33 @@ public class SchemaVisitorTest {
         Assertions.assertEquals(1, table.size());
         Assertions.assertEquals(Map.of(
                 "studID", List.of(Value.of(1))
+        ), table);
+    }
+
+    @Test
+    public void testExceptFormat() throws IOException {
+        var source = new YamlSource(
+                "all_test",
+                List.of("./test/pt/up/fe/els2023/files/yaml/all_test.yaml"));
+
+        var tableSchema = new TableSchema("all_test")
+                .source(source)
+                .nft(
+                        new ExceptNode(Set.of("grades", "info"), "except %s end")
+                );
+
+        var fileReader = new FileReader(source.getFiles().get(0));
+        var reader = new BufferedReader(fileReader);
+
+        var rootNode = tableSchema.source().getResourceParser().parse(reader);
+
+        PopulateVisitor visitor = new PopulateVisitor();
+        var table = visitor.populateFromSource(Path.of("/home/Documents/all_test.yaml"), rootNode, tableSchema.nft());
+
+        Assertions.assertEquals(2, table.size());
+        Assertions.assertEquals(Map.of(
+                "except friends end", List.of(Value.of("[3,2]")),
+                "except studID end", List.of(Value.of(1))
         ), table);
     }
 

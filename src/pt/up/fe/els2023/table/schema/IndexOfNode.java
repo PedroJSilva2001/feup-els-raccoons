@@ -13,21 +13,6 @@ import pt.up.fe.els2023.imports.NodeVisitor;
  * @param value   The schema definition for the value found at the specified index or child.
  */
 public record IndexOfNode(int index, String keyName, SchemaNode value) implements SchemaNode {
-    public static IndexOfNode indexOf(int index, String keyName, SchemaNode value) {
-        return new IndexOfNode(index, keyName, value);
-    }
-
-    public static IndexOfNode indexOf(int index, String keyName, SchemaNode... values) {
-        return new IndexOfNode(index, keyName, new ListNode(values));
-    }
-
-    public static IndexOfNode indexOf(int index, String keyName, String columnName) {
-        return new IndexOfNode(index, keyName, new ColumnNode(columnName));
-    }
-
-    public static IndexOfNode indexOf(int index, String keyName) {
-        return new IndexOfNode(index, keyName, new NullNode());
-    }
 
     @Override
     public void accept(NodeVisitor visitor) {
