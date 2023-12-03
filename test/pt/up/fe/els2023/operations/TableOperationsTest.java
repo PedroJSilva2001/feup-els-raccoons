@@ -103,6 +103,45 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testJoin() throws ColumnNotFoundException {
+        var table1 = new RacoonTable();
+
+        table1.addColumn("Col1");
+        table1.addColumn("Col2");
+
+        table1.addRow(List.of(Value.of(1L), Value.of("hello")));
+        table1.addRow(List.of(Value.of(1L), Value.of("hello again")));
+        table1.addRow(List.of(Value.of(2L), Value.of("bye")));
+        table1.addRow(List.of(Value.of(3L), Value.of("")));
+        table1.addRow(List.of(Value.of(5L), Value.of("")));
+
+        var table2 = new RacoonTable();
+
+        table2.addColumn("Col1");
+        table2.addColumn("Col2");
+
+        table2.addRow(List.of(Value.of(1L), Value.of("other")));
+        table2.addRow(List.of(Value.of(2L), Value.of("other stuff")));
+        table2.addRow(List.of(Value.of(2L), Value.of("other stuff again")));
+        table2.addRow(List.of(Value.of(3L), Value.of("")));
+        table2.addRow(List.of(Value.of(4L), Value.of("")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col2_1");
+
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello"), Value.of("other")));
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello again"), Value.of("other")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye"), Value.of("other stuff")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye"), Value.of("other stuff again")));
+        expectedTable.addRow(List.of(Value.of(3L), Value.of(""), Value.of("")));
+
+        Assertions.assertEquals(expectedTable, table1.btc().join(table2, "Col1").get());
+    }
+
+    @Test
     public void testWhere() {
         var newTable = table1.btc().where(
                 (row) -> row.getObject("Col1").equals(2L)
