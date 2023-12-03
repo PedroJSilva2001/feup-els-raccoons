@@ -57,6 +57,22 @@ public class InterpreterDataOperationsTest {
     }
 
     @Test
+    public void testJoin() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
+        var join = new JoinOperation("table1", "table3", "table2", "Col1");
+
+        btcInterpreter.execute(join);
+
+        Assertions.assertEquals(tables.size(), 3);
+
+        var expectedTable = new RacoonTable();
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+        expectedTable.addColumn("Col1_1");
+
+        Assertions.assertEquals(tables.get("table3"), expectedTable);
+    }
+
+    @Test
     public void testSelect() throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
         var select = new SelectOperation("table1", "table3", List.of("Col2"));
 

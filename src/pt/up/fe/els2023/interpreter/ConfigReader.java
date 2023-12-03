@@ -108,6 +108,9 @@ public class ConfigReader {
             case "argMin" -> {
                 return new ArgMinOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
+            case "join" -> {
+                return new JoinOperation(initialTable, resultVariableName, (String) operationNode.get("otherTable"), (String) operationNode.get("on"));
+            }
             case "concat" -> {
                 Object additionalTablesObject = operationNode.get("additionalTables");
                 List<String> additionalTables = additionalTablesObject instanceof String ? new ArrayList<>(List.of((String) additionalTablesObject)) : (ArrayList<String>) additionalTablesObject;
