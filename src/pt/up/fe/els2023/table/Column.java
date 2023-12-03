@@ -41,6 +41,23 @@ public class Column implements Cloneable {
         return Collections.unmodifiableList(entries);
     }
 
+    public Value.Type getMostGeneralRep() {
+        if (entries.isEmpty()) {
+            return null;
+        }
+
+        Value.Type currType = entries.get(0).getType();
+
+        for (var entry : entries) {
+            var nextType = Value.Type.mostGeneralRep(currType, entry.getType());
+            if (nextType != null) {
+                currType = nextType;
+            }
+        }
+
+        return currType;
+    }
+
     // TODO cache the number representation; update it when new entries are added
     public Value.Type getMostGeneralNumberRep() {
         if (entries.isEmpty()) {
@@ -59,7 +76,10 @@ public class Column implements Cloneable {
                 continue;
             }
 
-            currType = Value.Type.mostGeneralNumberRep(currType, entry.getType());
+            var nextType = Value.Type.mostGeneralNumberRep(currType, entry.getType());
+            if (nextType != null) {
+                currType = nextType;
+            }
         }
 
         return currType;

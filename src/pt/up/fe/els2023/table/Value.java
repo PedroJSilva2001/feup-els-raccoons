@@ -195,6 +195,34 @@ public class Value {
 
         public abstract Value additiveIdentity();
 
+        public static Type mostGeneralRep(Type t1, Type t2) {
+            if (t1 == Type.STRING || t2 == Type.STRING || t1 == Type.NULL || t2 == Type.NULL) {
+                return Type.STRING;
+            }
+
+            if (t1 == Type.BIG_DECIMAL || t2 == Type.BIG_DECIMAL) {
+                return Type.BIG_DECIMAL;
+            }
+
+            if (t1 == Type.DOUBLE || t2 == Type.DOUBLE) {
+                return Type.DOUBLE;
+            }
+
+            if (t1 == Type.BIG_INTEGER || t2 == Type.BIG_INTEGER) {
+                return Type.BIG_INTEGER;
+            }
+
+            if (t1 == Type.LONG || t2 == Type.LONG) {
+                return Type.LONG;
+            }
+
+            if (t1 == Type.BOOLEAN || t2 == Type.BOOLEAN) {
+                return Type.BOOLEAN;
+            }
+
+            return Type.NULL;
+        }
+
         public static Type mostGeneralNumberRep(Type t1, Type t2) {
             if (t1 == Value.Type.NULL || t2 == Value.Type.NULL ||
                     t1 == Value.Type.BOOLEAN || t2 == Value.Type.BOOLEAN ||
@@ -210,13 +238,10 @@ public class Value {
                     (t1 == Value.Type.LONG && t2 == Value.Type.BIG_INTEGER)) {
                 return Value.Type.BIG_INTEGER;
 
-            } else if ((t1 == Value.Type.BIG_DECIMAL && t2 == Value.Type.DOUBLE) ||
-                    (t1 == Value.Type.DOUBLE && t2 == Value.Type.BIG_DECIMAL)) {
-                return Value.Type.BIG_DECIMAL;
-
             }
 
             // the following conversions:
+            //      big decimal <-> double
             //      big integer <-> big decimal
             //      big integer <-> double
             //      long <-> big decimal

@@ -137,15 +137,6 @@ public class TableCascade {
         return where(predicate.negate());
     }
 
-    public TableCascade sort() {
-        return null;
-    }
-
-    public TableCascade sortDescending() {
-        return null;
-    }
-
-
     public TableCascade concatVertical(Table...others) {
         // stacked on top of each other
 
@@ -321,6 +312,55 @@ public class TableCascade {
         }
 
         return counts;
+    }
+
+    public TableCascade sort(boolean ascending, String column) throws ColumnNotFoundException {
+        if (!table.containsColumn(column)) {
+            throw new ColumnNotFoundException(column);
+        }
+
+        var commonRep = table.getColumn(column).getMostGeneralRep();
+        var columnIndex = table.getIndexOfColumn(column);
+
+        if(commonRep == null){
+            return new TableCascade(table);
+        }
+
+        var rowsCopy = new ArrayList<>(table.getRows());
+
+        rowsCopy.sort((r1, r2) -> {
+            var v1 = r1.get(columnIndex);
+            var v2 = r2.get(columnIndex);
+
+            if(v1.isNull() && v2.isNull()){
+                return 0;
+            }
+
+            if(v1.isNull()){
+                return 1;
+            }
+
+            if(v2.isNull()){
+                return -1;
+            }
+
+            var castedV1 = commonRep.cast(v1);
+            var castedV2 = commonRep.cast(v2);
+
+            return ascending ? commonRep.comparator().compare(castedV1, castedV2) : commonRep.comparator().compare(castedV2, castedV1);
+        });
+
+        var newTable = new RacoonTable(table);
+
+        for (var row : rowsCopy) {
+            newTable.addRow(row.getValues());
+        }
+
+        return new TableCascade(newTable);
+    }
+
+    public TableCascade sort(String column) throws ColumnNotFoundException {
+        return sort(true, column);
     }
 
     public Optional<Value> max(String column) throws ColumnNotFoundException {
