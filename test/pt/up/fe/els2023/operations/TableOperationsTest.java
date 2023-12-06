@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.model.operations.*;
-import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.RacoonTable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
 import java.math.BigDecimal;
@@ -38,17 +38,17 @@ public class TableOperationsTest {
         table1.addColumn("Col2");
 
         table1.addRow(List.of(Value.of(1L), Value.of("hello")));
-        table1.addRow(List.of( Value.of(2L),  Value.of("bye")));
-        table1.addRow(List.of( Value.of(3L), Value.of("")));
-        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of( Value.of(242), Value.of("")));
-        table1.addRow(List.of( Value.of(221.12), Value.of("")));
-        table1.addRow(List.of( Value.of(false), Value.of("")));
-        table1.addRow(List.of( Value.of(4L), Value.ofNull()));
-        table1.addRow(List.of( Value.of(5L), Value.ofNull()));
+        table1.addRow(List.of(Value.of(2L), Value.of("bye")));
+        table1.addRow(List.of(Value.of(3L), Value.of("")));
+        table1.addRow(List.of(Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of(Value.of(242), Value.of("")));
+        table1.addRow(List.of(Value.of(221.12), Value.of("")));
+        table1.addRow(List.of(Value.of(false), Value.of("")));
+        table1.addRow(List.of(Value.of(4L), Value.ofNull()));
+        table1.addRow(List.of(Value.of(5L), Value.ofNull()));
 
         table2 = new RacoonTable();
         table2.addColumn("Col1");
@@ -72,13 +72,11 @@ public class TableOperationsTest {
         table3.addRow(List.of(Value.of(4L), Value.ofNull()));
 
 
-
         table4 = new RacoonTable();
         table4.addColumn("Col1");
         table4.addColumn("Col1_1");
         table4.addRow(List.of(Value.of(false), Value.of(true)));
         table4.addRow(List.of(Value.of(true), Value.of(false)));
-
 
 
         table5 = new RacoonTable();
@@ -149,7 +147,6 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, newTable);
 
 
-
         newTable = new WhereOperation(
                 (row) -> row.getObject("Col1").equals(2L) ||
                 (row.getObject("Col2") != null && row.getObject("Col2").equals("bye")))
@@ -180,7 +177,6 @@ public class TableOperationsTest {
         Assertions.assertEquals(expectedTable, newTable);
 
 
-
         newTable = new WhereOperation(
                 (row) -> row.getObject("Col1").equals("not int") &&
                         row.getObject("Col2").equals(55L) // TODO remove integer overload ?
@@ -194,7 +190,6 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
 
         Assertions.assertEquals(expectedTable, newTable);
-
 
 
         newTable = new WhereOperation(
@@ -258,7 +253,7 @@ public class TableOperationsTest {
 
 
         countResult = new MaxOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(countResult.getValue() == null);
+        Assertions.assertNull(countResult.getValue());
 
 
         countResult = new MaxOperation(List.of("Col3")).execute(table2);
@@ -289,7 +284,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(0L), countResult.getValue());
 
         countResult = new MinOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(countResult.getValue() == null);
+        Assertions.assertNull(countResult.getValue());
 
         countResult = new MinOperation(List.of("Col3")).execute(table2);
         Assertions.assertEquals(Value.of(new BigInteger("12")), countResult.getValue());
@@ -506,7 +501,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(393L), sumResult.getValue());
 
         sumResult = new SumOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(sumResult.getValue() == null);
+        Assertions.assertNull(sumResult.getValue());
 
         sumResult = new SumOperation(List.of("Col3")).execute(table2);
         Assertions.assertEquals(Value.of(new BigInteger("1356")), sumResult.getValue());
@@ -528,28 +523,86 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), meanResult.getValue());
 
         meanResult = new MeanOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(222/4), meanResult.getValue());
+        Assertions.assertEquals(Value.of(55.5), meanResult.getValue());
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> new MeanOperation(List.of("Col3")).execute(table1));
 
 
         meanResult = new MeanOperation(List.of("Col1")).execute(table2);
-        Assertions.assertEquals(Value.of(393L/6), meanResult.getValue());
+        Assertions.assertEquals(Value.of((double) 393L / 6), meanResult.getValue());
 
         meanResult = new MeanOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(meanResult.getValue() == null);
+        Assertions.assertNull(meanResult.getValue());
 
         meanResult = new MeanOperation(List.of("Col3")).execute(table2);
         Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), meanResult.getValue());
 
         var means = new HashMap<String, Value>();
         means.put("Col1", Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))));
-        means.put("Col2", Value.of(222/4));
+        means.put("Col2", Value.of(55.5));
         meanResult = new MeanOperation(List.of("Col1", "Col2")).execute(table1);
         Assertions.assertEquals(means, meanResult.getValueMap());
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> new MeanOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
 
+    }
+
+    @Test
+    public void testVar() throws ColumnNotFoundException {
+        var varResult = new VarOperation(List.of("Col1")).execute(table1);
+        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))),
+                varResult.getValue());
+
+        varResult = new VarOperation(List.of("Col2")).execute(table1);
+        Assertions.assertEquals(Value.of(0.25), varResult.getValue());
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> new VarOperation(List.of("Col3")).execute(table1));
+
+        varResult = new VarOperation(List.of("Col1")).execute(table2);
+        Assertions.assertEquals(Value.of((double) 171079L / 12), varResult.getValue());
+
+        varResult = new VarOperation(List.of("Col2")).execute(table2);
+        Assertions.assertNull(varResult.getValue());
+
+        varResult = new VarOperation(List.of("Col3")).execute(table2);
+        Assertions.assertEquals(Value.of(new BigDecimal("893202").divide(new BigDecimal("3"), new MathContext(1000))), varResult.getValue());
+
+        var vars = new HashMap<String, Value>();
+        vars.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))));
+        vars.put("Col2", Value.of(0.25));
+        varResult = new VarOperation(List.of("Col1", "Col2")).execute(table1);
+        Assertions.assertEquals(vars, varResult.getValueMap());
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> new VarOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
+    }
+
+    @Test
+    public void testStd() throws ColumnNotFoundException {
+        var stdResult = new StdOperation(List.of("Col1")).execute(table1);
+        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))),
+                stdResult.getValue());
+
+        stdResult = new StdOperation(List.of("Col2")).execute(table1);
+        Assertions.assertEquals(Value.of(0.5), stdResult.getValue());
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> new StdOperation(List.of("Col3")).execute(table1));
+
+        stdResult = new StdOperation(List.of("Col1")).execute(table2);
+        Assertions.assertEquals(Value.of((double) 171079L / 12).sqrt(), stdResult.getValue());
+
+        stdResult = new VarOperation(List.of("Col2")).execute(table2);
+        Assertions.assertNull(stdResult.getValue());
+
+        stdResult = new StdOperation(List.of("Col3")).execute(table2);
+        Assertions.assertEquals(Value.of(new BigDecimal("297734").sqrt(new MathContext(1000))), stdResult.getValue());
+
+        var stds = new HashMap<String, Value>();
+        stds.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))));
+        stds.put("Col2", Value.of(0.5));
+        stdResult = new StdOperation(List.of("Col1", "Col2")).execute(table1);
+        Assertions.assertEquals(stds, stdResult.getValueMap());
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> new StdOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
     }
 
     @Test
@@ -760,7 +813,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
 
         var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());;
+        Assertions.assertEquals(expectedTable, tableResult.getTable());
     }
 
     @Test

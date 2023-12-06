@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MeanOperation extends TableOperation {
+public class StdOperation extends TableOperation {
 
     private final List<String> columnNames;
 
-    public MeanOperation(List<String> columnNames) {
+    public StdOperation(List<String> columnNames) {
         this.columnNames = columnNames;
     }
 
     @Override
     public String getName() {
-        return "Mean( " + String.join(", ", columnNames) + " )";
+        return "Std( " + String.join(", ", columnNames) + " )";
     }
 
     @Override
@@ -43,15 +43,13 @@ public class MeanOperation extends TableOperation {
             return null;
         }
 
-        var sumRes = new SumOperation(List.of(columnName)).execute(table).getValue();
+        var varRes = new VarOperation(List.of(columnName)).execute(table).getValue();
 
-        if (sumRes == null) {
+        if (varRes == null) {
             return null;
         }
 
-        var meanRes = sumRes.divide(sumRes.getType().cast(Value.of(colValues.size())));
-
-        return meanRes;
+        return varRes.sqrt();
     }
 
     private Map<String, Value> executeForMultipleColumns(Table table) throws ColumnNotFoundException {

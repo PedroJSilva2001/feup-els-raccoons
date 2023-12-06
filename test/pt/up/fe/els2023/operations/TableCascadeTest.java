@@ -37,17 +37,17 @@ public class TableCascadeTest {
         table1.addColumn("Col2");
 
         table1.addRow(List.of(Value.of(1L), Value.of("hello")));
-        table1.addRow(List.of( Value.of(2L),  Value.of("bye")));
-        table1.addRow(List.of( Value.of(3L), Value.of("")));
-        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(55)));
-        table1.addRow(List.of( Value.of("not int"), Value.of(56)));
-        table1.addRow(List.of( Value.of(242), Value.of("")));
-        table1.addRow(List.of( Value.of(221.12), Value.of("")));
-        table1.addRow(List.of( Value.of(false), Value.of("")));
-        table1.addRow(List.of( Value.of(4L), Value.ofNull()));
-        table1.addRow(List.of( Value.of(5L), Value.ofNull()));
+        table1.addRow(List.of(Value.of(2L), Value.of("bye")));
+        table1.addRow(List.of(Value.of(3L), Value.of("")));
+        table1.addRow(List.of(Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(55)));
+        table1.addRow(List.of(Value.of("not int"), Value.of(56)));
+        table1.addRow(List.of(Value.of(242), Value.of("")));
+        table1.addRow(List.of(Value.of(221.12), Value.of("")));
+        table1.addRow(List.of(Value.of(false), Value.of("")));
+        table1.addRow(List.of(Value.of(4L), Value.ofNull()));
+        table1.addRow(List.of(Value.of(5L), Value.ofNull()));
 
         table2 = new RacoonTable();
         table2.addColumn("Col1");
@@ -71,13 +71,11 @@ public class TableCascadeTest {
         table3.addRow(List.of(Value.of(4L), Value.ofNull()));
 
 
-
         table4 = new RacoonTable();
         table4.addColumn("Col1");
         table4.addColumn("Col1_1");
         table4.addRow(List.of(Value.of(false), Value.of(true)));
         table4.addRow(List.of(Value.of(true), Value.of(false)));
-
 
 
         table5 = new RacoonTable();
@@ -162,7 +160,6 @@ public class TableCascadeTest {
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(56)));
 
         Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.getObject("Col1").equals("not int")).get());
-
 
 
         expectedTable = new RacoonTable();
@@ -455,11 +452,11 @@ public class TableCascadeTest {
     public void testMean() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), table1.btc().mean("Col1"));
 
-        Assertions.assertEquals(Value.of(222/4), table1.btc().mean("Col2"));
+        Assertions.assertEquals(Value.of(55.5), table1.btc().mean("Col2"));
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col3"));
 
-        Assertions.assertEquals(Value.of(393L/6), table2.btc().mean("Col1"));
+        Assertions.assertEquals(Value.of((double) 393L / 6), table2.btc().mean("Col1"));
 
         Assertions.assertNull(table2.btc().mean("Col2"));
 
@@ -467,11 +464,57 @@ public class TableCascadeTest {
 
         var means = new HashMap<String, Value>();
         means.put("Col1", Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))));
-        means.put("Col2", Value.of(222/4));
+        means.put("Col2", Value.of(55.5));
 
         Assertions.assertEquals(means, table1.btc().mean("Col1", "Col2"));
 
         Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col1", "Col2", "Col3"));
+    }
+
+    @Test
+    public void testVar() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))),
+                table1.btc().var("Col1"));
+
+        Assertions.assertEquals(Value.of(0.25), table1.btc().var("Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().var("Col3"));
+
+        Assertions.assertEquals(Value.of((double) 171079L / 12), table2.btc().var("Col1"));
+
+        Assertions.assertNull(table2.btc().var("Col2"));
+
+        Assertions.assertEquals(Value.of(new BigDecimal("893202").divide(new BigDecimal("3"), new MathContext(1000))), table2.btc().var("Col3"));
+
+        var vars = new HashMap<String, Value>();
+        vars.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))));
+        vars.put("Col2", Value.of(0.25));
+        Assertions.assertEquals(vars, table1.btc().var("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().var("Col1", "Col2", "Col3"));
+    }
+
+    @Test
+    public void testStd() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))),
+                table1.btc().std("Col1"));
+
+        Assertions.assertEquals(Value.of(0.5), table1.btc().std("Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().std("Col3"));
+
+        Assertions.assertEquals(Value.of((double) 171079L / 12).sqrt(), table2.btc().std("Col1"));
+
+        Assertions.assertNull(table2.btc().std("Col2"));
+
+        Assertions.assertEquals(Value.of(new BigDecimal("297734").sqrt(new MathContext(1000))), table2.btc().std("Col3"));
+
+        var stds = new HashMap<String, Value>();
+        stds.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))));
+        stds.put("Col2", Value.of(0.5));
+        Assertions.assertEquals(stds, table1.btc().std("Col1", "Col2"));
+
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().std("Col1", "Col2", "Col3"));
     }
 
     @Test
