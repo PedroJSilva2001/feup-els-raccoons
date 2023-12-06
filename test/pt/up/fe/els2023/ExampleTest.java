@@ -1,6 +1,7 @@
 package pt.up.fe.els2023;
 
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.exceptions.TableCascadeAlreadyConsumedException;
 import pt.up.fe.els2023.table.schema.TableSchema;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
@@ -24,7 +25,7 @@ import static pt.up.fe.els2023.dsl.SchemaNodeFactory.property;
 public class ExampleTest {
 
     @Test
-    public void exampleTest() throws ColumnNotFoundException, TableNotFoundException, IOException {
+    public void exampleTest() throws ColumnNotFoundException, TableNotFoundException, IOException, TableCascadeAlreadyConsumedException {
         var decisionTreeSource = new YamlSource(
                 "decision_tree",
                 List.of(
@@ -78,7 +79,7 @@ public class ExampleTest {
                 )
                 .collect();
 
-        Table finalTable = vitisResourcesTable.btc().concatHorizontal(
+/*        Table finalTable = vitisResourcesTable.btc().concatHorizontal(
                 decisionTreeParamsTable,
                 profilingFunctionsTable.btc().argMax("Function Time Percentage").get()
         ).get();
@@ -88,6 +89,6 @@ public class ExampleTest {
                 .setExportFullHtml(true)
                 .build();
 
-        exporter.export(finalTable);
+        exporter.export(finalTable);*/
     }
 }

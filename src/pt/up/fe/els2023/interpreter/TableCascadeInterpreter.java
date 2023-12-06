@@ -3,8 +3,8 @@ package pt.up.fe.els2023.interpreter;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.operations.TableCascade;
-import pt.up.fe.els2023.interpreter.operations.TableOperation;
+import pt.up.fe.els2023.dsl.TableCascade;
+import pt.up.fe.els2023.model.operations.TableOperation;
 import pt.up.fe.els2023.table.Value;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class TableCascadeInterpreter {
     }
 
     public void execute(TableOperation operation) throws TableNotFoundException, ColumnNotFoundException, IOException, ImproperTerminalOperationException {
-        var initialTable = operation.getInitialTable();
+        /*var initialTable = operation.getInitialTable();
 
         if (!variablesTable.hasTable(initialTable)) {
             throw new TableNotFoundException(initialTable);
@@ -41,6 +41,6 @@ public class TableCascadeInterpreter {
             variablesTable.putValue(operation.getResultVariableName(), result.getValue());
         } else {
             variablesTable.putTable(operation.getResultVariableName(), result.getTable());
-        }
+        }*/
     }
 }

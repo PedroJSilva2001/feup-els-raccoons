@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.table;
 
-import pt.up.fe.els2023.operations.TableCascade;
+import pt.up.fe.els2023.dsl.TableCascade;
 
 import java.util.*;
 
@@ -31,17 +31,33 @@ public class RacoonTable implements Table {
     }
 
 
-    // Empty table, just with column names
+    // Empty table, just with same column names
+    public RacoonTable(List<String> columnNames) {
+        this.columns = new ArrayList<>();
+
+        for (var columnName : columnNames) {
+            this.columns.add(new Column(columnName));
+        }
+
+        this.rows = new ArrayList<>();
+
+        this.name = null;
+    }
+
+    // Deep copy
     public RacoonTable(Table table) {
-        this.name = String.valueOf(table.getName());
+        this.name = table.getName();
         this.columns = new ArrayList<>();
         this.rows = new ArrayList<>();
 
         for (var column : table.getColumns()) {
             this.columns.add(new Column(column.getName()));
         }
-    }
 
+        for (var row : table.getRows()) {
+            addRow(row.getValues());
+        }
+    }
 
     @Override
     public String getName() {
@@ -204,5 +220,16 @@ public class RacoonTable implements Table {
 
             return getRow(currentIndex++);
         }
+    }
+
+    @Override
+    public List<String> getColumNames() {
+        List<String> columnNames = new ArrayList<>();
+
+        for (var column : columns) {
+            columnNames.add(column.getName());
+        }
+
+        return columnNames;
     }
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import pt.up.fe.els2023.export.*;
-import pt.up.fe.els2023.interpreter.operations.*;
+import pt.up.fe.els2023.model.operations.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.sources.XmlSource;
@@ -77,8 +77,9 @@ public class ConfigReader {
                 }
 
                 if (!ops.isEmpty() && initialTable != null && result != null) {
-                    CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
-                    configOperations.add(builder.build());
+                    // todo: fix this
+                    /*CompositeOperationBuilder builder = new CompositeOperationBuilder(initialTable, ops).setResultVariableName(result);
+                    configOperations.add(builder.build());*/
                 }
             } else if (operation.containsKey("operation")) {
                 result = (String) operation.get("result");
@@ -101,7 +102,7 @@ public class ConfigReader {
     }
 
     private TableOperation parseOperationNode(String initialTable, String resultVariableName, Map<String, Object> operationNode) {
-        switch ((String) operationNode.get("operation")) {
+        /*switch ((String) operationNode.get("operation")) {
             case "argMax" -> {
                 return new ArgMaxOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
@@ -172,7 +173,7 @@ public class ConfigReader {
                 return new SumOperation(initialTable, resultVariableName, (String) operationNode.get("columns"));
             }
             default -> System.out.println("Unsupported operation");
-        }
+        }*/
         return null;
     }
 
