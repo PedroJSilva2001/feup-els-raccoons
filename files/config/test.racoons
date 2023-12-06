@@ -1,0 +1,43 @@
+version "1.0"
+
+a = 2.0
+b = false
+c = a
+c
+
+source src1 from (
+  "./f*/*.json",
+  "./g/single.json"
+)
+
+nft n1 of src1 (
+	all-container,
+	filePath -> "File",
+	"nft" [2],
+	[2] -> "test",
+	config[3],
+	config[2] -> "Peter",
+    config secretVar,
+    config2 secretVar2 -> "Secret2",
+    "version" -> "Version",
+    except ( test ) -> "test %s",
+    data each (
+        student,
+        finalGrade,
+    ),
+)
+
+// test Ola pedro
+
+exporter coolExporter of html (
+    filename: "cool table"
+    path: "/mnt/c/"
+    endOfLine: "\n"
+)
+
+coolTable =
+        table(n1)
+          -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
+          -> concatHorizontal(table(n1), table())
+
+exportStatus = coolTable -> export(coolExporter)
