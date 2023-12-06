@@ -3,11 +3,11 @@ package pt.up.fe.els2023.operations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.dsl.TableCascade;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
-import pt.up.fe.els2023.model.operations.*;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.exceptions.TableCascadeAlreadyConsumedException;
 import pt.up.fe.els2023.table.RacoonTable;
+import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
 import java.math.BigDecimal;
@@ -16,8 +16,7 @@ import java.math.MathContext;
 import java.util.HashMap;
 import java.util.List;
 
-
-public class TableOperationsTest {
+public class TableCascadeTest {
 
     private Table table1;
 
@@ -96,7 +95,7 @@ public class TableOperationsTest {
     }
 
     @Test
-    public void testJoin() throws ColumnNotFoundException {
+    public void testJoin() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -131,29 +130,17 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(2L), Value.of("bye"), Value.of("other stuff again")));
         expectedTable.addRow(List.of(Value.of(3L), Value.of(""), Value.of("")));
 
-        var joinResult = new JoinOperation(table2, "Col1").execute(table1);
-        Assertions.assertEquals(expectedTable, joinResult.getTable());
+        Assertions.assertEquals(expectedTable, table1.btc().join(table2, "Col1").get());
     }
 
     @Test
-    public void testWhere() throws ColumnNotFoundException {
+    public void testWhere() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var expectedTable = new RacoonTable();
         expectedTable.addColumn("Col1");
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
 
-        var newTable = new WhereOperation(
-                (row) -> row.getObject("Col1").equals(2L)
-        ).execute(table1).getTable();
-
-        Assertions.assertEquals(expectedTable, newTable);
-
-
-
-        newTable = new WhereOperation(
-                (row) -> row.getObject("Col1").equals(2L) ||
-                (row.getObject("Col2") != null && row.getObject("Col2").equals("bye")))
-                .execute(table1).getTable();
+        Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.getObject("Col1").equals(2L)).get());
 
 
         expectedTable = new RacoonTable();
@@ -161,12 +148,9 @@ public class TableOperationsTest {
         expectedTable.addColumn("Col2");
         expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
 
-        Assertions.assertEquals(expectedTable, newTable);
 
-
-        newTable = new WhereOperation(
-                (row) -> row.getObject("Col1").equals("not int")
-        ).execute(table1).getTable();
+        Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.getObject("Col1").equals(2L) ||
+                (row.getObject("Col2") != null && row.getObject("Col2").equals("bye"))).get());
 
 
         expectedTable = new RacoonTable();
@@ -177,14 +161,8 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(56)));
 
-        Assertions.assertEquals(expectedTable, newTable);
+        Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.getObject("Col1").equals("not int")).get());
 
-
-
-        newTable = new WhereOperation(
-                (row) -> row.getObject("Col1").equals("not int") &&
-                        row.getObject("Col2").equals(55L) // TODO remove integer overload ?
-        ).execute(table1).getTable();
 
 
         expectedTable = new RacoonTable();
@@ -193,13 +171,9 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
         expectedTable.addRow(List.of(Value.of("not int"), Value.of(55)));
 
-        Assertions.assertEquals(expectedTable, newTable);
 
-
-
-        newTable = new WhereOperation(
-                (row) -> row.get("Col2").isNull() || row.get("Col1").isBoolean() || row.get("Col1").isDouble()
-        ).execute(table1).getTable();
+        Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.getObject("Col1").equals("not int") &&
+                row.getObject("Col2").equals(55L)).get());
 
 
         expectedTable = new RacoonTable();
@@ -210,102 +184,83 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(4L), Value.ofNull()));
         expectedTable.addRow(List.of(Value.of(5L), Value.ofNull()));
 
-        Assertions.assertEquals(expectedTable, newTable);
+        Assertions.assertEquals(expectedTable, table1.btc().where((row) -> row.get("Col2").isNull() ||
+                row.get("Col1").isBoolean() || row.get("Col1").isDouble()).get());
 
 
-        newTable = new WhereOperation(
-                (row) -> row.get("Col3") == null
-        ).execute(table1).getTable();
-
-        Assertions.assertEquals(table1, newTable);
+        Assertions.assertEquals(table1, table1.btc().where((row) -> row.get("Col3") == null).get());
     }
 
     @Test
-    public void testCount() throws ColumnNotFoundException {
-        var countResult = new CountOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(12), countResult.getValue());
+    public void testCount() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(12), table1.btc().count("Col1"));
 
+        Assertions.assertEquals(Value.of(10), table1.btc().count("Col2"));
 
-        countResult = new CountOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(10), countResult.getValue());
-
-
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new CountOperation(List.of("Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().count("Col3"));
 
 
         var counts = new HashMap<String, Value>();
         counts.put("Col1", Value.of(12L));
         counts.put("Col2", Value.of(10L));
-        countResult = new CountOperation(List.of("Col1", "Col2")).execute(table1);
-        Assertions.assertEquals(counts, countResult.getValueMap());
+
+        Assertions.assertEquals(counts, table1.btc().count("Col1", "Col2"));
     }
 
     @Test
-    public void testMax() throws ColumnNotFoundException {
-        var countResult = new MaxOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("242")), countResult.getValue());
+    public void testMax() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("242")), table1.btc().max("Col1"));
 
 
-        countResult = new MaxOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(56L), countResult.getValue());
+        Assertions.assertEquals(Value.of(56L), table1.btc().max("Col2"));
 
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MaxOperation(List.of("Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().max("Col3"));
 
 
-        countResult = new MaxOperation(List.of("Col1")).execute(table2);
-        Assertions.assertEquals(Value.of(332L), countResult.getValue());
+        Assertions.assertEquals(Value.of(332L), table2.btc().max("Col1"));
 
 
-        countResult = new MaxOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(countResult.getValue() == null);
+        Assertions.assertNull(table2.btc().max("Col2"));
 
-
-        countResult = new MaxOperation(List.of("Col3")).execute(table2);
-
-        Assertions.assertEquals(Value.of(new BigInteger("1221")), countResult.getValue());
+        Assertions.assertEquals(Value.of(new BigInteger("1221")), table2.btc().max("Col3"));
 
         var maxes = new HashMap<String, Value>();
         maxes.put("Col1", Value.of(new BigDecimal("242")));
         maxes.put("Col2", Value.of(56L));
 
-        countResult = new MaxOperation(List.of("Col1", "Col2")).execute(table1);
-        Assertions.assertEquals(maxes, countResult.getValueMap());
+        Assertions.assertEquals(maxes, table1.btc().max("Col1", "Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MaxOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().max("Col1", "Col2", "Col3"));
     }
 
+
     @Test
-    public void testMin() throws ColumnNotFoundException {
-        var countResult = new MinOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("1")), countResult.getValue());
+    public void testMin() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("1")), table1.btc().min("Col1"));
 
-        countResult = new MinOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(55L), countResult.getValue());
+        Assertions.assertEquals(Value.of(55L), table1.btc().min("Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MinOperation(List.of("Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().min("Col3"));
 
-        countResult = new MinOperation(List.of("Col1")).execute(table2);
-        Assertions.assertEquals(Value.of(0L), countResult.getValue());
+        Assertions.assertEquals(Value.of(0L), table2.btc().min("Col1"));
 
-        countResult = new MinOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(countResult.getValue() == null);
+        Assertions.assertNull(table2.btc().min("Col2"));
 
-        countResult = new MinOperation(List.of("Col3")).execute(table2);
-        Assertions.assertEquals(Value.of(new BigInteger("12")), countResult.getValue());
+        Assertions.assertEquals(Value.of(new BigInteger("12")), table2.btc().min("Col3"));
 
         var mins = new HashMap<String, Value>();
         mins.put("Col1", Value.of(new BigDecimal("1")));
         mins.put("Col2", Value.of(55L));
 
-        countResult = new MinOperation(List.of("Col1", "Col2")).execute(table1);
-        Assertions.assertEquals(mins, countResult.getValueMap());
+        Assertions.assertEquals(mins, table1.btc().min("Col1", "Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MinOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().min("Col1", "Col2", "Col3"));
     }
 
+
     @Test
-    public void testSelect() throws ColumnNotFoundException {
+    public void testSelect() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
@@ -319,12 +274,9 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(332), Value.of(true), Value.of(true)));
         expectedTable.addRow(List.of(Value.of(12), Value.of(false), Value.of(new BigInteger("12"))));
 
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col2", "Col3").get());
 
-        var tableResult = new SelectOperation(List.of("Col1", "Col2", "Col3")).execute(table2);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
-
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new SelectOperation(List.of("Col1", "Col2", "Col3", "Col4")).execute(table2));
-
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().select("Col1", "Col2", "Col3", "Col4").get());
 
         expectedTable = new RacoonTable();
 
@@ -338,15 +290,13 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(332), Value.of(true)));
         expectedTable.addRow(List.of(Value.of(12), Value.of(new BigInteger("12"))));
 
-        tableResult = new SelectOperation(List.of("Col1", "Col3")).execute(table2);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col1", "Col3").get());
 
 
         expectedTable = new RacoonTable();
 
-        tableResult = new SelectOperation(List.of()).execute(table2);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
-
+        Assertions.assertEquals(expectedTable, table2.btc().select().get());
 
         expectedTable = new RacoonTable();
         expectedTable.addColumn("Col3");
@@ -359,12 +309,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(true), Value.of(332)));
         expectedTable.addRow(List.of(Value.of(new BigInteger("12")), Value.of(12)));
 
-        tableResult = new SelectOperation(List.of("Col3", "Col1")).execute(table2);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table2.btc().select("Col3", "Col1").get());
     }
 
     @Test
-    public void testReject() throws ColumnNotFoundException {
+    public void testReject() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
@@ -377,18 +326,15 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(332), Value.of(true)));
         expectedTable.addRow(List.of(Value.of(12), Value.of(new BigInteger("12"))));
 
-        var tableResult = new RejectOperation(List.of("Col2")).execute(table2);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table2.btc().reject("Col2").get());
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new RejectOperation(List.of("Col1", "Col2", "Col3", "Col25")).execute(table2));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table2.btc().reject("Col1", "Col2", "Col3", "Col4").get());
 
-
-        tableResult = new RejectOperation(List.of()).execute(table2);
-        Assertions.assertEquals(table2, tableResult.getTable());
+        Assertions.assertEquals(table2, table2.btc().reject().get());
     }
 
     @Test
-    public void testConcatVertical() throws ColumnNotFoundException {
+    public void testConcatVertical() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
@@ -402,9 +348,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(false), Value.ofNull(), Value.of(true)));
         expectedTable.addRow(List.of(Value.of(true), Value.ofNull(), Value.of(false)));
 
-        var tableResult = new ConcatVerticalOperation(List.of(table4)).execute(table3);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
-
+        Assertions.assertEquals(expectedTable, table3.btc().concatVertical(table4).get());
 
         expectedTable = new RacoonTable();
 
@@ -420,8 +364,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(4L), Value.ofNull(), Value.ofNull()));
 
 
-        tableResult = new ConcatVerticalOperation(List.of(table3)).execute(table4);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table4.btc().concatVertical(table3).get());
 
 
         expectedTable = new RacoonTable();
@@ -436,9 +379,8 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of("ada"), Value.of(false)));
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(2L), Value.of(true)));
 
-        tableResult = new ConcatVerticalOperation(List.of(table5)).execute(table6);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
 
+        Assertions.assertEquals(expectedTable, table6.btc().concatVertical(table5).get());
 
         expectedTable = new RacoonTable(false);
 
@@ -452,12 +394,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(false), Value.of(true)));
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(true), Value.of(false)));
 
-        tableResult = new ConcatVerticalOperation(List.of(table6)).execute(table5);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table5.btc().concatVertical(table6).get());
     }
 
     @Test
-    public void testConcatHorizontal() throws ColumnNotFoundException {
+    public void testConcatHorizontal() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var expectedTable = new RacoonTable();
 
         expectedTable.addColumn("Col1");
@@ -470,9 +411,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.of("maybe"), Value.ofNull(), Value.ofNull()));
         expectedTable.addRow(List.of(Value.of(4L), Value.ofNull(), Value.ofNull(), Value.ofNull()));
 
-        var tableResult = new ConcatHorizontalOperation(List.of(table4)).execute(table3);
-
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table3.btc().concatHorizontal(table4).get());
 
         expectedTable = new RacoonTable();
 
@@ -486,74 +425,57 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.ofNull(), Value.of("maybe")));
         expectedTable.addRow(List.of(Value.ofNull(), Value.ofNull(), Value.of(4L), Value.ofNull()));
 
-        tableResult = new ConcatHorizontalOperation(List.of(table3)).execute(table4);
-
-
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table4.btc().concatHorizontal(table3).get());
     }
 
     @Test
-    public void testSum() throws ColumnNotFoundException {
-        var sumResult = new SumOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), sumResult.getValue());
+    public void testSum() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), table1.btc().sum("Col1"));
 
-        sumResult = new SumOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(222), sumResult.getValue());
+        Assertions.assertEquals(Value.of(222), table1.btc().sum("Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new SumOperation(List.of("Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().sum("Col3"));
 
-        sumResult = new SumOperation(List.of("Col1")).execute(table2);
-        Assertions.assertEquals(Value.of(393L), sumResult.getValue());
+        Assertions.assertEquals(Value.of(393L), table2.btc().sum("Col1"));
 
-        sumResult = new SumOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(sumResult.getValue() == null);
+        Assertions.assertNull(table2.btc().sum("Col2"));
 
-        sumResult = new SumOperation(List.of("Col3")).execute(table2);
-        Assertions.assertEquals(Value.of(new BigInteger("1356")), sumResult.getValue());
-
+        Assertions.assertEquals(Value.of(new BigInteger("1356")), table2.btc().sum("Col3"));
 
         var maxes = new HashMap<String, Value>();
         maxes.put("Col1", Value.of(new BigDecimal("478.12")));
         maxes.put("Col2", Value.of(222));
 
-        sumResult = new SumOperation(List.of("Col1", "Col2")).execute(table1);
-        Assertions.assertEquals(maxes, sumResult.getValueMap());
+        Assertions.assertEquals(maxes, table1.btc().sum("Col1", "Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new SumOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().sum("Col1", "Col2", "Col3"));
     }
 
     @Test
-    public void testMean() throws ColumnNotFoundException {
-        var meanResult = new MeanOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), meanResult.getValue());
+    public void testMean() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), table1.btc().mean("Col1"));
 
-        meanResult = new MeanOperation(List.of("Col2")).execute(table1);
-        Assertions.assertEquals(Value.of(222/4), meanResult.getValue());
+        Assertions.assertEquals(Value.of(222/4), table1.btc().mean("Col2"));
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MeanOperation(List.of("Col3")).execute(table1));
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col3"));
 
+        Assertions.assertEquals(Value.of(393L/6), table2.btc().mean("Col1"));
 
-        meanResult = new MeanOperation(List.of("Col1")).execute(table2);
-        Assertions.assertEquals(Value.of(393L/6), meanResult.getValue());
+        Assertions.assertNull(table2.btc().mean("Col2"));
 
-        meanResult = new MeanOperation(List.of("Col2")).execute(table2);
-        Assertions.assertTrue(meanResult.getValue() == null);
-
-        meanResult = new MeanOperation(List.of("Col3")).execute(table2);
-        Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), meanResult.getValue());
+        Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), table2.btc().mean("Col3"));
 
         var means = new HashMap<String, Value>();
         means.put("Col1", Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))));
         means.put("Col2", Value.of(222/4));
-        meanResult = new MeanOperation(List.of("Col1", "Col2")).execute(table1);
-        Assertions.assertEquals(means, meanResult.getValueMap());
 
-        Assertions.assertThrows(ColumnNotFoundException.class, () -> new MeanOperation(List.of("Col1", "Col2", "Col3")).execute(table1));
+        Assertions.assertEquals(means, table1.btc().mean("Col1", "Col2"));
 
+        Assertions.assertThrows(ColumnNotFoundException.class, () -> table1.btc().mean("Col1", "Col2", "Col3"));
     }
 
     @Test
-    public void testLongSort() throws ColumnNotFoundException {
+    public void testLongSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -578,9 +500,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(4L), Value.of("no")));
         expectedTable.addRow(List.of(Value.of(5L), Value.of("no")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
-
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
 
         var expectedTable2 = new RacoonTable();
 
@@ -594,8 +514,7 @@ public class TableOperationsTest {
         expectedTable2.addRow(List.of(Value.of(1L), Value.of("yes")));
         expectedTable2.addRow(List.of(Value.of(0L), Value.of("maybe")));
 
-        tableResult = new SortOperation("Col1", false).execute(table1);
-        Assertions.assertEquals(expectedTable2, tableResult.getTable());
+        Assertions.assertEquals(expectedTable2, table1.btc().sort("Col1", false).get());
 
         var expectedTable3 = new RacoonTable();
 
@@ -609,12 +528,11 @@ public class TableOperationsTest {
         expectedTable3.addRow(List.of(Value.of(1L), Value.of("yes")));
         expectedTable3.addRow(List.of(Value.of(3L), Value.of("yes")));
 
-        tableResult = new SortOperation("Col2", true).execute(table1);
-        Assertions.assertEquals(expectedTable3, tableResult.getTable());
+        Assertions.assertEquals(expectedTable3, table1.btc().sort("Col2", true).get());
     }
 
     @Test
-    public void testDoubleSort() throws ColumnNotFoundException {
+    public void testDoubleSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -639,12 +557,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(3.4), Value.of("yes")));
         expectedTable.addRow(List.of(Value.of(4.2), Value.of("no")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
     }
 
     @Test
-    public void testBooleanSort() throws ColumnNotFoundException {
+    public void testBooleanSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -669,12 +586,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
         expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
     }
 
     @Test
-    public void testDoubleLongSort() throws ColumnNotFoundException {
+    public void testDoubleLongSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -699,12 +615,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(3.3), Value.of("no")));
         expectedTable.addRow(List.of(Value.of(4L), Value.of("no")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
     }
 
     @Test
-    public void testBooleanDoubleSort() throws ColumnNotFoundException {
+    public void testBooleanDoubleSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -729,12 +644,11 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
         expectedTable.addRow(List.of(Value.of(3L), Value.of("maybe")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
     }
 
     @Test
-    public void testStringBooleanSort() throws ColumnNotFoundException {
+    public void testStringBooleanSort() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
         var table1 = new RacoonTable();
 
         table1.addColumn("Col1");
@@ -759,45 +673,26 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of(true), Value.of("yes")));
         expectedTable.addRow(List.of(Value.of(true), Value.of("maybe")));
 
-        var tableResult = new SortOperation("Col1", true).execute(table1);
-        Assertions.assertEquals(expectedTable, tableResult.getTable());;
+        Assertions.assertEquals(expectedTable, table1.btc().sort("Col1", true).get());
     }
 
     @Test
-    public void testCompositeOperation() throws ColumnNotFoundException, ImproperTerminalOperationException {
-        var compositeOperation = new CompositeOperation();
-        var result = compositeOperation.execute(table1);
-        Assertions.assertEquals(table1, result.getTable());
+    public void testConsumedCascade() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
+        var cascade = table1.btc();
 
-        compositeOperation.addOperation(new CountOperation(List.of("Col1")));
-        result = compositeOperation.execute(table1);
-        Assertions.assertEquals(Value.of(12), result.getValue());
+        cascade.get();
 
+        Assertions.assertThrows(TableCascadeAlreadyConsumedException.class, cascade::get);
 
-        Assertions.assertThrows(ImproperTerminalOperationException.class,
-                () -> new CompositeOperation(List.of(
-                        new CountOperation(List.of("Col1")),
-                        new WhereOperation((row) -> row.get("Col1").equals(Value.of(2L)))
-                )).execute(table1));
+        TableCascade finalCascade = cascade; // WTF
+        Assertions.assertThrows(TableCascadeAlreadyConsumedException.class, () -> finalCascade.sort("Col1", true));
 
-        Assertions.assertEquals(Value.of(1),
-                new CompositeOperation(List.of(
-                    new WhereOperation((row) -> row.get("Col1").equals(Value.of(2L))),
-                    new CountOperation(List.of("Col1"))
-                )).execute(table1).getValue());
+        cascade = table2.btc();
 
-        var expectedTable = new RacoonTable();
+        cascade.sort("Col1", true).get();
 
-        expectedTable.addColumn("Col1");
-        expectedTable.addColumn("Col2");
+        TableCascade finalCascade1 = cascade;
 
-        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55L)));
-        expectedTable.addRow(List.of(Value.of("not int"), Value.of(55L)));
-
-        Assertions.assertEquals(expectedTable,
-                new CompositeOperation(List.of(
-                        new WhereOperation((row) -> row.get("Col1").equals(Value.of("not int"))),
-                        new WhereOperation((row) -> row.get("Col2").equals(Value.of(55L)))
-                )).execute(table1).getTable());
+        Assertions.assertThrows(TableCascadeAlreadyConsumedException.class, () -> finalCascade1.max("Col1"));
     }
 }

@@ -22,7 +22,7 @@ public abstract class TableExporter {
         this.endOfLine = endOfLine;
     }
 
-    public void export(Table table) throws IOException, TableNotFoundException {
+    public void export(Table table) throws IOException {
         Path fullPath = Paths.get(path, filename);
 
         try (FileWriter writer = new FileWriter(new File(fullPath.toString()).getAbsoluteFile())) {

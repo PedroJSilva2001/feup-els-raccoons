@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.table;
 
 
-import pt.up.fe.els2023.operations.TableCascade;
+import pt.up.fe.els2023.dsl.TableCascade;
 
 import java.util.Iterator;
 import java.util.List;
@@ -34,4 +34,6 @@ public interface Table {
     int getIndexOfColumn(String name);
 
     Iterator<Row> rowIterator();
+
+    List<String> getColumNames();
 }
