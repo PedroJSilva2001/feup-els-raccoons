@@ -7,7 +7,8 @@ import pt.up.fe.els2023.model.operations.*;
 import pt.up.fe.els2023.table.Table;
 import pt.up.fe.els2023.table.Value;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class TableCascade {
@@ -41,11 +42,11 @@ public class TableCascade {
         return addNonAggregateOperation(new JoinOperation(other, column));
     }
 
-    public TableCascade select(String ...columns) throws TableCascadeAlreadyConsumedException {
+    public TableCascade select(String... columns) throws TableCascadeAlreadyConsumedException {
         return addNonAggregateOperation(new SelectOperation(List.of(columns)));
     }
 
-    public TableCascade reject(String ...columns) throws TableCascadeAlreadyConsumedException {
+    public TableCascade reject(String... columns) throws TableCascadeAlreadyConsumedException {
         return addNonAggregateOperation(new RejectOperation(List.of(columns)));
     }
 
@@ -57,11 +58,11 @@ public class TableCascade {
         return addNonAggregateOperation(new DropWhereOperation(predicate));
     }
 
-    public TableCascade concatVertical(Table...others) throws TableCascadeAlreadyConsumedException {
+    public TableCascade concatVertical(Table... others) throws TableCascadeAlreadyConsumedException {
         return addNonAggregateOperation(new ConcatVerticalOperation(List.of(others)));
     }
 
-    public TableCascade concatHorizontal(Table...others) throws TableCascadeAlreadyConsumedException {
+    public TableCascade concatHorizontal(Table... others) throws TableCascadeAlreadyConsumedException {
         return addNonAggregateOperation(new ConcatHorizontalOperation(List.of(others)));
     }
 
@@ -81,7 +82,7 @@ public class TableCascade {
         return getSingleAggregateResult(new CountOperation(List.of(column)));
     }
 
-    public Map<String, Value> count(String ...columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+    public Map<String, Value> count(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
         return getMultipleAggregateResults(new CountOperation(List.of(columns)));
     }
 
@@ -89,7 +90,7 @@ public class TableCascade {
         return getSingleAggregateResult(new MaxOperation(List.of(column)));
     }
 
-    public Map<String, Value> max(String ...columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+    public Map<String, Value> max(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
         return getMultipleAggregateResults(new MaxOperation(List.of(columns)));
     }
 
@@ -101,7 +102,7 @@ public class TableCascade {
         return getSingleAggregateResult(new MinOperation(List.of(column)));
     }
 
-    public Map<String, Value> min(String ...columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+    public Map<String, Value> min(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
         return getMultipleAggregateResults(new MinOperation(List.of(columns)));
     }
 
@@ -113,7 +114,7 @@ public class TableCascade {
         return getSingleAggregateResult(new SumOperation(List.of(column)));
     }
 
-    public Map<String, Value> sum(String ...columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+    public Map<String, Value> sum(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
         return getMultipleAggregateResults(new SumOperation(List.of(columns)));
     }
 
@@ -122,28 +123,24 @@ public class TableCascade {
         return getSingleAggregateResult(new MeanOperation(List.of(column)));
     }
 
-    public Map<String, Value> mean(String ...columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+    public Map<String, Value> mean(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
         return getMultipleAggregateResults(new MeanOperation(List.of(columns)));
     }
 
-    // TODO: implement
-    public Value std(String column) throws TableCascadeAlreadyConsumedException {
-        return null;
+    public Value std(String column) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+        return getSingleAggregateResult(new StdOperation(List.of(column)));
     }
 
-    // TODO: implement
-    public Map<String, Value> std(String ...columns) throws TableCascadeAlreadyConsumedException {
-        return null;
+    public Map<String, Value> std(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+        return getMultipleAggregateResults(new StdOperation(List.of(columns)));
     }
 
-    // TODO: implement
-    public Value var(String column) throws TableCascadeAlreadyConsumedException {
-        return null;
+    public Value var(String column) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+        return getSingleAggregateResult(new VarOperation(List.of(column)));
     }
 
-    // TODO: implement
-    public Map<String, Optional<Value>> var(String ...columns) throws TableCascadeAlreadyConsumedException {
-        return null;
+    public Map<String, Value> var(String... columns) throws TableCascadeAlreadyConsumedException, ColumnNotFoundException {
+        return getMultipleAggregateResults(new VarOperation(List.of(columns)));
     }
 
     private TableCascade addNonAggregateOperation(TableOperation operation) throws TableCascadeAlreadyConsumedException {

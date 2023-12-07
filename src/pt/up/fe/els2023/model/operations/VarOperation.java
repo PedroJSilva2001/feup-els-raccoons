@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MeanOperation extends TableOperation {
+public class VarOperation extends TableOperation {
 
     private final List<String> columnNames;
 
-    public MeanOperation(List<String> columnNames) {
+    public VarOperation(List<String> columnNames) {
         this.columnNames = columnNames;
     }
 
     @Override
     public String getName() {
-        return "Mean( " + String.join(", ", columnNames) + " )";
+        return "Var( " + String.join(", ", columnNames) + " )";
     }
 
     @Override
@@ -39,19 +39,29 @@ public class MeanOperation extends TableOperation {
     private Value executeForSingleColumn(Table table, String columnName) throws ColumnNotFoundException {
         var colValues = getColumnWithCommonNumberRep(table, columnName);
 
-        if (colValues.isEmpty()) {
+        if (colValues.isEmpty() || colValues.size() == 1) {
             return null;
         }
 
-        var sumRes = new SumOperation(List.of(columnName)).execute(table).getValue();
+        var meanRes = new MeanOperation(List.of(columnName)).execute(table).getValue();
 
-        if (sumRes == null) {
+        if (meanRes == null) {
             return null;
         }
 
-        var meanRes = sumRes.divide(sumRes.getType().cast(Value.of(colValues.size())));
+        Value.Type commonNumberRep;
+        if (colValues.get(0).getType() == Value.Type.LONG) {
+            commonNumberRep = Value.Type.DOUBLE;
+        } else {
+            commonNumberRep = colValues.get(0).getType();
+        }
 
-        return meanRes;
+        var varRes = colValues.stream()
+                .map(v -> commonNumberRep.cast(v).subtract(meanRes).pow(Value.of(2.0)))
+                .reduce(commonNumberRep.additiveIdentity(), (v1, v2) -> Value.add(v1, v2))
+                .divide(commonNumberRep.cast(Value.of(colValues.size())));
+
+        return varRes;
     }
 
     private Map<String, Value> executeForMultipleColumns(Table table) throws ColumnNotFoundException {

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Comparator;
-import java.util.function.BinaryOperator;
 
 public class Value {
     public enum Type {
@@ -389,6 +388,24 @@ public class Value {
         return add(this, v2);
     }
 
+    public Value negate() throws IllegalArgumentException {
+        if (!this.isNumber()) {
+            throw new IllegalArgumentException("Cannot negate non-numbers");
+        }
+
+        return switch (this.type) {
+            case NULL, BOOLEAN, STRING -> null;
+            case LONG -> Value.of(-((Long) this.getValue()));
+            case DOUBLE -> Value.of(-((Double) this.getValue()));
+            case BIG_INTEGER -> Value.of(((BigInteger) this.getValue()).negate());
+            case BIG_DECIMAL -> Value.of(((BigDecimal) this.getValue()).negate());
+        };
+    }
+
+    public Value subtract(Value v2) throws IllegalArgumentException {
+        return add(this, v2.negate());
+    }
+
     public static Value divide(Value nume, Value denom, MathContext ctx) {
         var commonNumberRep = Type.mostGeneralNumberRep(nume.type, denom.type);
 
@@ -396,9 +413,17 @@ public class Value {
             return Value.ofNull();
         }
 
-        var thisCasted = commonNumberRep.cast(nume);
-        var denomCasted = commonNumberRep.cast(denom);
+        Value thisCasted;
+        Value denomCasted;
 
+        if (commonNumberRep == Type.LONG) {
+            thisCasted = Type.DOUBLE.cast(nume);
+            denomCasted = Type.DOUBLE.cast(denom);
+            commonNumberRep = Type.DOUBLE;
+        } else {
+            thisCasted = commonNumberRep.cast(nume);
+            denomCasted = commonNumberRep.cast(denom);
+        }
 
         return switch (commonNumberRep) {
             case NULL, BOOLEAN, STRING -> null;
@@ -422,6 +447,56 @@ public class Value {
 
     public Value divide(Value v2) {
         return divide(this, v2, defaultMathContext);
+    }
+
+    public static Value pow(Value base, Value exponent, MathContext ctx) {
+        var commonNumberRep = Type.mostGeneralNumberRep(base.type, exponent.type);
+
+        if (commonNumberRep == null) {
+            return Value.ofNull();
+        }
+
+        var baseCasted = commonNumberRep.cast(base);
+        var exponentCasted = commonNumberRep.cast(exponent);
+
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> null;
+            case LONG -> Value.of((long) Math.pow((Long) baseCasted.getValue(), (Long) exponentCasted.getValue()));
+            case DOUBLE -> Value.of(Math.pow((Double) baseCasted.getValue(), (Double) exponentCasted.getValue()));
+            case BIG_INTEGER -> Value.of(((BigInteger) baseCasted.getValue())
+                    .pow(((BigInteger) exponentCasted.getValue()).intValue()));
+            case BIG_DECIMAL -> Value.of(((BigDecimal) baseCasted.getValue())
+                    .pow(((BigDecimal) exponentCasted.getValue()).intValue(), ctx));
+        };
+    }
+
+    public Value pow(Value v2) {
+        return pow(this, v2, defaultMathContext);
+    }
+
+    public static Value sqrt(Value value, MathContext ctx) {
+        var commonNumberRep = value.type;
+
+        Value valueCasted;
+
+        if (commonNumberRep == Type.LONG) {
+            valueCasted = Type.DOUBLE.cast(value);
+            commonNumberRep = Type.DOUBLE;
+        } else {
+            valueCasted = value;
+        }
+
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> null;
+            case LONG -> Value.of((long) Math.sqrt((Long) valueCasted.getValue()));
+            case DOUBLE -> Value.of(Math.sqrt((Double) valueCasted.getValue()));
+            case BIG_INTEGER -> Value.of(((BigInteger) valueCasted.getValue()).sqrt());
+            case BIG_DECIMAL -> Value.of(((BigDecimal) valueCasted.getValue()).sqrt(ctx));
+        };
+    }
+
+    public Value sqrt() {
+        return sqrt(this, defaultMathContext);
     }
 
     public boolean lessThan(Object obj) {
