@@ -6,11 +6,11 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.model.operations.*;
+import pt.up.fe.els2023.model.schema.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.TableSource;
 import pt.up.fe.els2023.sources.XmlSource;
 import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.schema.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;

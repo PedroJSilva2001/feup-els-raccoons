@@ -1,4 +1,4 @@
-package pt.up.fe.els2023.table.schema;
+package pt.up.fe.els2023.model.schema;
 
 import pt.up.fe.els2023.imports.NodeVisitor;
 

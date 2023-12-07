@@ -2,15 +2,12 @@ package pt.up.fe.els2023;
 
 import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.exceptions.TableCascadeAlreadyConsumedException;
-import pt.up.fe.els2023.table.schema.TableSchema;
+import pt.up.fe.els2023.model.schema.TableSchema;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.export.HtmlExporterBuilder;
-import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.XmlSource;
 import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.Table;
 
 import java.io.IOException;
 import java.util.List;

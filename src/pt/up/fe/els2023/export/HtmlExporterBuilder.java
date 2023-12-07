@@ -1,7 +1,5 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.table.Table;
-
 public class HtmlExporterBuilder extends TableExporterBuilder<HtmlExporter> {
     private String title;
     private String style;

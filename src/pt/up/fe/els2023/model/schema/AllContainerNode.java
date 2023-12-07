@@ -1,8 +1,6 @@
-package pt.up.fe.els2023.table.schema;
+package pt.up.fe.els2023.model.schema;
 
 import pt.up.fe.els2023.imports.NodeVisitor;
-
-import java.util.List;
 
 /**
  * A node that matches all container properties in the object.

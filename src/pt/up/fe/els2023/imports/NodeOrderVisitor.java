@@ -1,6 +1,6 @@
 package pt.up.fe.els2023.imports;
 
-import pt.up.fe.els2023.table.schema.*;
+import pt.up.fe.els2023.model.schema.*;
 
 import java.util.LinkedList;
 import java.util.List;

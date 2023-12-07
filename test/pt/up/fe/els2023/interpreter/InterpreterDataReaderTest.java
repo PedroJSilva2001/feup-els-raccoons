@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.export.CsvExporter;
 import pt.up.fe.els2023.export.HtmlExporter;
 import pt.up.fe.els2023.export.TsvExporter;
-import pt.up.fe.els2023.model.operations.*;
-import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.schema.*;
+import pt.up.fe.els2023.model.schema.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class InterpreterDataReaderTest {

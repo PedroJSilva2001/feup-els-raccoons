@@ -1,4 +1,4 @@
-package pt.up.fe.els2023.table;
+package pt.up.fe.els2023.model.table;
 
 import pt.up.fe.els2023.dsl.TableCascade;
 

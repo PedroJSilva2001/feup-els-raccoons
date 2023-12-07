@@ -2,10 +2,10 @@ package pt.up.fe.els2023;
 
 import pt.up.fe.els2023.interpreter.InterpreterData;
 import pt.up.fe.els2023.interpreter.ConfigReader;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.model.table.Table;
 import pt.up.fe.els2023.interpreter.VariablesTable;
 import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.table.Column;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.table.Row;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.Column;
+import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Row;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.io.IOException;
 import java.io.Writer;

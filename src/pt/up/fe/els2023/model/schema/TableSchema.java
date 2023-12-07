@@ -1,10 +1,10 @@
-package pt.up.fe.els2023.table.schema;
+package pt.up.fe.els2023.model.schema;
 
 import pt.up.fe.els2023.imports.NodeOrderVisitor;
 import pt.up.fe.els2023.imports.PopulateVisitor;
 import pt.up.fe.els2023.sources.TableSource;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Value;
 import pt.up.fe.els2023.utils.GlobFinder;
 
 import java.io.BufferedReader;

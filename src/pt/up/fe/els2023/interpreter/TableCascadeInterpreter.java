@@ -5,7 +5,7 @@ import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.TableNotFoundException;
 import pt.up.fe.els2023.dsl.TableCascade;
 import pt.up.fe.els2023.model.operations.TableOperation;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.io.IOException;
 

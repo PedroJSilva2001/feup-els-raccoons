@@ -2,7 +2,7 @@ package pt.up.fe.els2023.imports;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.table.schema.SchemaNode;
+import pt.up.fe.els2023.model.schema.SchemaNode;
 
 import java.util.ArrayList;
 import java.util.List;
