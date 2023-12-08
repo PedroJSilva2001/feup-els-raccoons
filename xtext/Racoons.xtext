@@ -116,8 +116,13 @@ ExporterDecl
     ;
     
 ExporterAttr
-    : attr=EXPORTER_ATTR ':' value=(STRING | BOOLEAN)
+    : attr=EXPORTER_ATTR ':' value=ExporterValue
     ;
+
+ExporterValue
+	: {String} value=STRING
+	| {Boolean} value=BOOLEAN
+	;
 
 // Expressions
 Assignment
