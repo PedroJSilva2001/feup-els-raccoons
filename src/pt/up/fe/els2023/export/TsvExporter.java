@@ -9,7 +9,6 @@ public class TsvExporter extends CsvExporter {
     }
 
     public static Map<String, AttributeValue> getSupportedAttributes() {
-        System.out.println("TsvExporter");
         var attributes = new HashMap<String, AttributeValue>();
 
         attributes.put("filename", new AttributeValue(AttributeValue.Type.STRING, null, true));

@@ -18,9 +18,11 @@ public class SemanticAnalyser implements SemanticAnalysis {
         var warnings = new ArrayList<Diagnostic>();
         var errors = new ArrayList<Diagnostic>();
 
-        var tableFiller = new SymbolTableFiller(result.root(), result.racoonsConfigFilename());
 
-        // TODO: create call fillSymbolTable() and check for errors
-        return new SemanticAnalysisResult(null, infos, warnings, errors);
+        var tableFiller = new SymbolTableFiller();
+        tableFiller.fill(result.root(), result.racoonsConfigFilename());
+        errors.addAll(tableFiller.getErrors());
+
+        return new SemanticAnalysisResult(tableFiller.getSymbolTable(), infos, warnings, errors);
     }
 }

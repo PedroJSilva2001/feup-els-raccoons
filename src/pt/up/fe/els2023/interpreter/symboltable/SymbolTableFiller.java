@@ -19,18 +19,34 @@ import java.util.Map;
 
 public class SymbolTableFiller {
 
-    private final SymbolTable symbolTable;
+    private SymbolTable symbolTable;
 
-    private final List<Diagnostic> errors;
+    private List<Diagnostic> errors;
 
-    public SymbolTableFiller(EObject root, String racoonsConfigFilename) {
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
+
+    public List<Diagnostic> getErrors() {
+        return errors;
+    }
+
+    public void fill(EObject root, String racoonsConfigFilename) {
         this.symbolTable = new RacoonsSymbolTable(racoonsConfigFilename);
         this.errors = new ArrayList<>();
 
+        fillVersion(root);
+        fillStatementSymbols(root);
+    }
+
+    private void fillVersion(EObject root) {
         var version = ((RacoonsImpl)root).getVersion();
 
         symbolTable.addVersion(version.getCode());
+    }
 
+
+    private void fillStatementSymbols(EObject root) {
         var statements = ((RacoonsImpl)root).getStatements();
 
         FunctionClassMap<EObject, Void> map = new FunctionClassMap<>();
@@ -38,24 +54,22 @@ public class SymbolTableFiller {
         map.put(SourceDeclImpl.class, this::fillSourceDecl);
         map.put(NftDeclImpl.class, this::fillNftDecl);
         map.put(ExporterDeclImpl.class, this::fillExporterDecl);
-        map.put(ExpressionImpl.class, a -> null);
-        map.put(AssignmentImpl.class, a -> null);
+        map.put(ExpressionImpl.class, a -> null); // TODO ignore for now
+        map.put(AssignmentImpl.class, a -> null); // TODO ignore for now
 
         for (var statement : statements) {
             map.apply(statement);
         }
-
-        for (var error : errors) {
-            System.out.println(error);
-        }
     }
+
 
     private Void fillSourceDecl(SourceDeclImpl sourceDecl) {
         var name = sourceDecl.getName();
         var paths = sourceDecl.getPathList();
 
         if (symbolTable.hasSource(name)) {
-            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), "Source with name '" + name + "' already exists"));
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    "Source with name '" + name + "' already exists"));
             return null;
         }
 
@@ -68,7 +82,8 @@ public class SymbolTableFiller {
             case "json" -> new JsonSource(name, paths);
             case "xml" ->  new XmlSource(name, paths);
             default -> {
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), "Could not determine source type for paths of source '" + name + "'"));
+                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                        "Could not determine source type for paths of source '" + name + "'"));
                 yield null;
             }
         };
@@ -79,6 +94,7 @@ public class SymbolTableFiller {
     }
 
     private Void fillNftDecl(NftDeclImpl nftDecl) {
+        // TODO
         System.out.println("NftDecl: " + nftDecl.getName());
         return null;
     }
@@ -86,13 +102,12 @@ public class SymbolTableFiller {
     private Void fillExporterDecl(ExporterDeclImpl exporterDecl) {
         var name = exporterDecl.getName();
         var type = exporterDecl.getType();
-        System.out.println(name);
-        System.out.println(type);
 
         var attrNodes = exporterDecl.getExporterAttrs();
 
         if (symbolTable.hasExporter(name)) {
-            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), "Exporter with name '" + name + "' already exists"));
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    "Exporter with name '" + name + "' already exists"));
             return null;
         }
 
@@ -231,7 +246,8 @@ public class SymbolTableFiller {
 
         for (var supportedAttr : supportedAttrs.keySet()) {
             if (!exporterAttrs.containsKey(supportedAttr) && supportedAttrs.get(supportedAttr).required()) {
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), exporterType + " Exporter '" + name + "' does not have mandatory attribute '" + supportedAttr + "'"));
+                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), exporterType
+                        + " Exporter '" + name + "' does not have mandatory attribute '" + supportedAttr + "'"));
             }
         }
 
@@ -244,7 +260,11 @@ public class SymbolTableFiller {
             var supportedAttr = supportedAttrs.get(specifiedAttr);
 
             if (!attrValueNode.eClass().getName().equalsIgnoreCase(supportedAttr.type().toString())) {
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), NodeModelUtils.getNode(attrValueNode).getStartLine(), -1, exporterType + " Exporter '" + name + "' attribute '" + specifiedAttr + "' has type '" + attrValueNode.eClass().getName() + "' but should have type '" + StringUtils.capitalize(supportedAttr.type().toString().toLowerCase()) + "'"));
+                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                        NodeModelUtils.getNode(attrValueNode).getStartLine(), -1,
+                        exporterType + " Exporter '" + name + "' attribute '" + specifiedAttr +
+                                "' has type '" + attrValueNode.eClass().getName() + "' but should have type '"
+                                + StringUtils.capitalize(supportedAttr.type().toString().toLowerCase()) + "'"));
             }
         }
 
