@@ -5,7 +5,7 @@ public class CsvExporterBuilder extends TableExporterBuilder<CsvExporter> {
 
     public CsvExporterBuilder(String filename, String path) {
         super(filename, path);
-        this.separator = ",";
+        this.separator = CsvExporter.DEFAULT_SEPARATOR;
     }
 
     public CsvExporterBuilder setSeparator(String separator) {

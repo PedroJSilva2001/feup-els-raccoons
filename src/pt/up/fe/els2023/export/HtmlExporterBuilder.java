@@ -3,25 +3,13 @@ package pt.up.fe.els2023.export;
 public class HtmlExporterBuilder extends TableExporterBuilder<HtmlExporter> {
     private String title;
     private String style;
-    private boolean exportFullHtml = false;
+    private boolean exportFullHtml;
 
     public HtmlExporterBuilder(String filename, String path) {
         super(filename, path);
-        this.title = filename;
-        this.style = """
-                table {
-                   border-collapse: collapse;
-                   width: 100%;
-                }
-                th, td {
-                   text-align: left;
-                   padding: 8px;
-                }
-                tr:nth-child(even){background-color: #f2f2f2}
-                th {
-                   background-color: #4CAF50;
-                   color: white;
-                }""";
+        this.title = HtmlExporter.DEFAULT_TITLE; // TODO think about how to put filename here while taking into account the attribute values
+        this.style = HtmlExporter.DEFAULT_STYLE;
+        this.exportFullHtml = HtmlExporter.DEFAULT_EXPORT_FULL_HTML;
     }
 
     public HtmlExporterBuilder setStyle(String style) {

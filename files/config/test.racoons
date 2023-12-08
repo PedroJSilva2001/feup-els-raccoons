@@ -29,11 +29,39 @@ nft n1 of src1 (
 
 // test Ola pedro
 
-exporter coolExporter of html (
+exporter coolCsvExporter of csv (
     filename: "cool table"
     path: "/mnt/c/"
-    endOfLine: "\n"
+    //endOfLine: "\r\n"
+    //separator: ";"
 )
+
+
+exporter coolHtmlExporter of html (
+    filename: "cool table"
+    path: "/mnt/c/"
+    title: "Cool Table"
+    style: "table, th, td { border: 1px solid black; }"
+    exportFullHtml: true
+)
+
+exporter coolTsvExporter of tsv (
+    filename: "cool table"
+    path: "/mnt/c/"
+    endOfLine: "\r\n"
+    separator: ";" // error
+)
+
+exporter coolMarkdownExporter of markdown (
+    filename: "cool table"
+    path: "/mnt/c/"
+)
+
+exporter coolLatexExporter of latex (
+    filename: "cool table"
+    path: "/mnt/c/"
+)
+
 
 coolTable =
         table(n1)

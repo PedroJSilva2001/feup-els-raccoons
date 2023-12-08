@@ -11,6 +11,13 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public abstract class TableExporter {
+    public record AttributeValue(Type type, Object defaultValue, boolean required) {
+        public enum Type {
+            STRING(),
+            BOOLEAN()
+        }
+    }
+
     protected final String endOfLine;
     protected final String filename;
     protected final String path;
