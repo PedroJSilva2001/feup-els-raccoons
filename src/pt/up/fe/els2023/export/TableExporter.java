@@ -13,8 +13,8 @@ import java.util.Objects;
 public abstract class TableExporter {
     public record AttributeValue(Type type, Object defaultValue, boolean required) {
         public enum Type {
-            STRING(),
-            BOOLEAN()
+            STRING,
+            BOOLEAN
         }
     }
 

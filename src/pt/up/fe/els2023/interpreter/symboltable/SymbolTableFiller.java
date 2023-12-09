@@ -109,7 +109,7 @@ public class SymbolTableFiller {
         if (sourceName == null) {
             errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(nftDecl).getStartLine(), -1,
-                    "Source specified in table schema '" + name + "' does not exist"));
+                    "Source specified in table schema '" + name + "' does not exist")); // TODO find how to get the name of the source
             return null;
         }
 
@@ -133,6 +133,7 @@ public class SymbolTableFiller {
                 nodes.add(schemaNode);
             }
         }
+
         // todo diagnostics
 
         symbolTable.addTableSchema(schema.name(), schema.nft(nodes));
@@ -419,13 +420,17 @@ public class SymbolTableFiller {
                                             String exporterType,
                                             Map<String, ExporterValue> exporterAttrs,
                                             Map<String, TableExporter.AttributeValue> supportedAttrs) {
+
+        var newErrors = new ArrayList<Diagnostic>();
+
         for (var specifiedAttr : exporterAttrs.keySet()) {
             if (!supportedAttrs.containsKey(specifiedAttr)) {
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), NodeModelUtils.getNode(exporterAttrs.get(specifiedAttr)).getStartLine(), -1, exporterType + " Exporter '" + name + "' does not support attribute '" + specifiedAttr + "'"));
+                newErrors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), NodeModelUtils.getNode(exporterAttrs.get(specifiedAttr)).getStartLine(), -1, exporterType + " Exporter '" + name + "' does not support attribute '" + specifiedAttr + "'"));
             }
         }
 
-        if (!errors.isEmpty()) {
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
             return true;
         }
 
@@ -436,7 +441,8 @@ public class SymbolTableFiller {
             }
         }
 
-        if (!errors.isEmpty()) {
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
             return true;
         }
 
@@ -445,6 +451,7 @@ public class SymbolTableFiller {
             var supportedAttr = supportedAttrs.get(specifiedAttr);
 
             if (!attrValueNode.eClass().getName().equalsIgnoreCase(supportedAttr.type().toString())) {
+                System.out.println("here");
                 errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(attrValueNode).getStartLine(), -1,
                         exporterType + " Exporter '" + name + "' attribute '" + specifiedAttr +
@@ -453,6 +460,8 @@ public class SymbolTableFiller {
             }
         }
 
-        return !errors.isEmpty();
+        errors.addAll(newErrors);
+
+        return !newErrors.isEmpty();
     }
 }
