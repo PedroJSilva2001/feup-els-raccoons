@@ -48,11 +48,11 @@ SchemaNode
     ;
     
 ColumnNode
-    : '->' (ID | STRING)
+    : '->' name=(ID | STRING)
     ;
     
 ColumnOrNode
-    : {ColumnOrNode} ColumnNode | SchemaNode
+    : {ColumnOrNode} node=(ColumnNode | SchemaNode)
     ;
     
 ListNode
@@ -64,7 +64,7 @@ StringListNode
     ;
     
 ResourceLocationNode
-    : {ResourceLocationNode} (DirectoryNode | PathNode | FileNode) element=ColumnNode?
+    : {ResourceLocationNode} resourceNode=(DirectoryNode | PathNode | FileNode) element=ColumnNode?
     ;
     
 DirectoryNode
@@ -118,7 +118,7 @@ ExporterDecl
 ExporterAttr
     : attr=EXPORTER_ATTR ':' value=ExporterValue
     ;
-
+    
 ExporterValue
 	: {String} value=STRING
 	| {Boolean} value=BOOLEAN
@@ -130,7 +130,7 @@ Assignment
     ;
     
 Expression
-	: LogicalOr
+	: expression=LogicalOr
 	;
 	
 LogicalOr
