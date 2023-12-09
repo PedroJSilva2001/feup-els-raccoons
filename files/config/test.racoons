@@ -11,20 +11,24 @@ source src1 from (
 )
 
 nft n1 of src1 (
-	all-container,
+    data data1 [1] -> "dddd",
+    [1],
+
+
+	/*all-container,
 	filePath -> "File",
 	"nft" [2],
 	[2] -> "test",
 	config[3],
 	config[2] -> "Peter",
-    config secretVar,
+    config "secretVar",
     config2 secretVar2 -> "Secret2",
     "version" -> "Version",
     except ( test ) -> "test %s",
     data each (
         student,
         finalGrade,
-    ),
+    ),*/
 )
 
 // test Ola pedro
@@ -36,20 +40,20 @@ exporter coolCsvExporter of csv (
     //separator: ";"
 )
 
-
 exporter coolHtmlExporter of html (
     filename: "cool table"
     path: "/mnt/c/"
     title: "Cool Table"
     style: "table, th, td { border: 1px solid black; }"
     exportFullHtml: true
+    //separator: ";" // error
 )
 
 exporter coolTsvExporter of tsv (
     filename: "cool table"
     path: "/mnt/c/"
     endOfLine: "\r\n"
-    separator: ";" // error
+    //separator: ";" // error
 )
 
 exporter coolMarkdownExporter of markdown (
