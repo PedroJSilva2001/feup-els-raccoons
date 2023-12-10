@@ -8,7 +8,12 @@ public record Symbol<T>(
 ) {
     public enum Type {
         TABLE,
-        VALUE,
+        BOOLEAN,
+        NUMBER,
+        INTEGER,
+        DOUBLE,
+        STRING,
+        NULL,
         MAP,
         SOURCE,
         TABLE_SCHEMA,
