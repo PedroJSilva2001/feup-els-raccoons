@@ -14,20 +14,25 @@ public interface SymbolTable {
 
     boolean hasSource(String name);
 
-    TableSource getSource(String name);
+    Symbol<TableSource> getSource(String name);
 
-    void addSource(String name, TableSource source);
+    void addSource(String name, TableSource source, int declarationLine);
 
     boolean hasTableSchema(String name);
 
-    TableSchema getTableSchema(String name);
+    Symbol<TableSchema> getTableSchema(String name);
 
-    void addTableSchema(String name, TableSchema schema);
+    void addTableSchema(String name, TableSchema schema, int declarationLine);
 
     boolean hasExporter(String name);
 
-    TableExporter getExporter(String name);
+    Symbol<TableExporter> getExporter(String name);
 
-    void addExporter(String name, TableExporter exporter);
+    void addExporter(String name, TableExporter exporter, int declarationLine);
 
+    boolean hasRawSymbol(String name);
+
+    Symbol<?> getRawSymbol(String name);
+
+    void addRawSymbol(String name, int declarationLine);
 }

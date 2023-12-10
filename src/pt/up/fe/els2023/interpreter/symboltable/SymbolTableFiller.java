@@ -3,11 +3,14 @@ package pt.up.fe.els2023.interpreter.symboltable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import pt.up.fe.els2023.export.*;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.model.schema.*;
 import pt.up.fe.els2023.racoons.ExporterValue;
+import pt.up.fe.els2023.racoons.NftDecl;
+import pt.up.fe.els2023.racoons.RacoonsPackage;
 import pt.up.fe.els2023.racoons.impl.*;
 import pt.up.fe.els2023.sources.JsonSource;
 import pt.up.fe.els2023.sources.XmlSource;
@@ -56,22 +59,32 @@ public class SymbolTableFiller {
         map.put(SourceDeclImpl.class, this::fillSourceDecl);
         map.put(NftDeclImpl.class, this::fillNftDecl);
         map.put(ExporterDeclImpl.class, this::fillExporterDecl);
-        map.put(ExpressionImpl.class, a -> null); // TODO ignore for now
-        map.put(AssignmentImpl.class, a -> null); // TODO ignore for now
+        map.put(ExpressionImpl.class, a -> null);
+        map.put(AssignmentImpl.class, this::fillAssignmentSymbols);
 
         for (var statement : statements) {
             map.apply(statement);
         }
     }
 
+    private Void fillAssignmentSymbols(AssignmentImpl assignment) {
+        var name = assignment.getName();
+
+        if (checkIfSymbolAlreadyExists(name, NodeModelUtils.getNode(assignment).getStartLine())) {
+            return null;
+        }
+
+        symbolTable.addRawSymbol(name, NodeModelUtils.getNode(assignment).getStartLine());
+
+        return null;
+    }
+
     private Void fillSourceDecl(SourceDeclImpl sourceDecl) {
         var name = sourceDecl.getName();
         var paths = sourceDecl.getPathList();
 
-        if (symbolTable.hasSource(name)) {
-            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
-                    "Source with name '" + name + "' already exists"));
-            return null;
+        if (checkIfSymbolAlreadyExists(name, NodeModelUtils.getNode(sourceDecl).getStartLine())) {
+            //return null;
         }
 
         var path = paths.get(0);
@@ -89,41 +102,38 @@ public class SymbolTableFiller {
             }
         };
 
-        symbolTable.addSource(name, source);
+        symbolTable.addSource(name, source, NodeModelUtils.getNode(sourceDecl).getStartLine());
 
         return null;
     }
 
     private Void fillNftDecl(NftDeclImpl nftDecl) {
-        // TODO
         var name = nftDecl.getName();
         var sourceName = nftDecl.getSource().getName();
 
-        if (symbolTable.hasTableSchema(name)) {
-            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
-                    NodeModelUtils.getNode(nftDecl).getStartLine(), -1,
-                    "Table schema with name '" + name + "' already exists"));
+        if (checkIfSymbolAlreadyExists(name, NodeModelUtils.getNode(nftDecl).getStartLine())) {
             return null;
         }
 
         if (sourceName == null) {
+            var crossRefSourceName = NodeModelUtils.findNodesForFeature(nftDecl, RacoonsPackage.Literals.NFT_DECL__SOURCE);
             errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(nftDecl).getStartLine(), -1,
-                    "Source specified in table schema '" + name + "' does not exist")); // TODO find how to get the name of the source
-            return null;
+                    "Source '" + crossRefSourceName.get(0).getText() + "' specified in table schema '" + name + "' does not exist"));
         }
 
         var nftNodes = nftDecl.getNft().getNodeList();
 
         var schema = new TableSchema(name)
-                .source(symbolTable.getSource(sourceName));
+                .source(sourceName != null && symbolTable.hasSource(sourceName)?
+                        symbolTable.getSource(sourceName).value() : null);
 
-        fillNftNodes(schema, nftNodes);
+        fillNftNodes(schema, nftNodes, NodeModelUtils.getNode(nftDecl).getStartLine());
 
         return null;
     }
 
-    private void fillNftNodes(TableSchema schema, EList<pt.up.fe.els2023.racoons.SchemaNode> nftNodes) {
+    private void fillNftNodes(TableSchema schema, EList<pt.up.fe.els2023.racoons.SchemaNode> nftNodes, int declarationLine) {
         var nodes = new ArrayList<SchemaNode>();
 
         for (var nftNode : nftNodes) {
@@ -136,7 +146,7 @@ public class SymbolTableFiller {
 
         // todo diagnostics
 
-        symbolTable.addTableSchema(schema.name(), schema.nft(nodes));
+        symbolTable.addTableSchema(schema.name(), schema.nft(nodes), declarationLine);
     }
 
     private SchemaNode fillSchemaNode(SchemaNodeImpl schemaNode) {
@@ -291,9 +301,7 @@ public class SymbolTableFiller {
 
         var attrNodes = exporterDecl.getExporterAttrs();
 
-        if (symbolTable.hasExporter(name)) {
-            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
-                    "Exporter with name '" + name + "' already exists"));
+        if (checkIfSymbolAlreadyExists(name, NodeModelUtils.getNode(exporterDecl).getStartLine())) {
             return null;
         }
 
@@ -411,7 +419,45 @@ public class SymbolTableFiller {
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
 
+        symbolTable.addExporter(name, exporter, NodeModelUtils.getNode(exporterDecl).getStartLine());
+
         return null;
+    }
+
+    private boolean checkIfSymbolAlreadyExists(String name, int declarationLine) {
+        if (symbolTable.hasSource(name)) {
+            var sourceDeclarationLine = symbolTable.getSource(name).declarationLine();
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    declarationLine, -1,
+                    "Symbol with name '" + name + "' is already assigned to a Source declared at line " + sourceDeclarationLine));
+            return true;
+        }
+
+        if (symbolTable.hasTableSchema(name)) {
+            var tableSchemaDeclarationLine = symbolTable.getTableSchema(name).declarationLine();
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    declarationLine, -1,
+                    "Symbol with name '" + name + "' is already assigned to a TableSchema declared at line " + tableSchemaDeclarationLine));
+            return true;
+        }
+
+        if (symbolTable.hasExporter(name)) {
+            var exporterDeclarationLine = symbolTable.getExporter(name).declarationLine();
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    declarationLine, -1,
+                    "Symbol with name '" + name + "' is already assigned to an Exporter declared at line " + exporterDeclarationLine));
+            return true;
+        }
+
+        if (symbolTable.hasRawSymbol(name)) {
+            var rawSymbolDeclarationLine = symbolTable.getRawSymbol(name).declarationLine();
+            errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    declarationLine, -1,
+                    "Symbol '" + name + "' already exists declared at line " + rawSymbolDeclarationLine));
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -436,7 +482,7 @@ public class SymbolTableFiller {
 
         for (var supportedAttr : supportedAttrs.keySet()) {
             if (!exporterAttrs.containsKey(supportedAttr) && supportedAttrs.get(supportedAttr).required()) {
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), exporterType
+                newErrors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(), exporterType
                         + " Exporter '" + name + "' does not have mandatory attribute '" + supportedAttr + "'"));
             }
         }
@@ -451,8 +497,7 @@ public class SymbolTableFiller {
             var supportedAttr = supportedAttrs.get(specifiedAttr);
 
             if (!attrValueNode.eClass().getName().equalsIgnoreCase(supportedAttr.type().toString())) {
-                System.out.println("here");
-                errors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                newErrors.add(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(attrValueNode).getStartLine(), -1,
                         exporterType + " Exporter '" + name + "' attribute '" + specifiedAttr +
                                 "' has type '" + attrValueNode.eClass().getName() + "' but should have type '"

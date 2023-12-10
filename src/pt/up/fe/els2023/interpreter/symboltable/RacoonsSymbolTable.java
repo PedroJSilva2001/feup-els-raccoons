@@ -9,21 +9,24 @@ import java.util.Map;
 
 public class RacoonsSymbolTable implements SymbolTable {
 
-    private String racoonsConfigFilename;
+    private final String racoonsConfigFilename;
 
     private String version;
 
-    private Map<String, TableSource> sources;
+    private final Map<String, Symbol<TableSource>> sources;
 
-    private Map<String, TableSchema> tableSchemas;
+    private final Map<String, Symbol<TableSchema>> tableSchemas;
 
-    private Map<String, TableExporter> exporters;
+    private final Map<String, Symbol<TableExporter>> exporters;
+
+    private final Map<String, Symbol<?>> rawSymbols; // tables + values + maps
 
     public RacoonsSymbolTable(String fileName) {
         this.racoonsConfigFilename = fileName;
         this.sources = new HashMap<>();
         this.tableSchemas = new HashMap<>();
         this.exporters = new HashMap<>();
+        this.rawSymbols = new HashMap<>();
     }
 
     @Override
@@ -48,13 +51,13 @@ public class RacoonsSymbolTable implements SymbolTable {
     }
 
     @Override
-    public TableSource getSource(String name) {
+    public Symbol<TableSource> getSource(String name) {
         return sources.get(name);
     }
 
     @Override
-    public void addSource(String name, TableSource source) {
-        sources.put(name, source);
+    public void addSource(String name, TableSource source, int declarationLine) {
+        sources.put(name, Symbol.of(name, Symbol.Type.SOURCE, source, declarationLine));
     }
 
     @Override
@@ -63,13 +66,13 @@ public class RacoonsSymbolTable implements SymbolTable {
     }
 
     @Override
-    public TableSchema getTableSchema(String name) {
+    public Symbol<TableSchema> getTableSchema(String name) {
         return tableSchemas.get(name);
     }
 
     @Override
-    public void addTableSchema(String name, TableSchema schema) {
-        tableSchemas.put(name, schema);
+    public void addTableSchema(String name, TableSchema schema, int declarationLine) {
+        tableSchemas.put(name, Symbol.of(name, Symbol.Type.TABLE_SCHEMA, schema, declarationLine));
     }
 
     @Override
@@ -78,12 +81,27 @@ public class RacoonsSymbolTable implements SymbolTable {
     }
 
     @Override
-    public TableExporter getExporter(String name) {
+    public Symbol<TableExporter> getExporter(String name) {
         return exporters.get(name);
     }
 
     @Override
-    public void addExporter(String name, TableExporter exporter) {
-        exporters.put(name, exporter);
+    public void addExporter(String name, TableExporter exporter, int declarationLine) {
+        exporters.put(name, Symbol.of(name, Symbol.Type.EXPORTER, exporter, declarationLine));
+    }
+
+    @Override
+    public boolean hasRawSymbol(String name) {
+        return rawSymbols.containsKey(name);
+    }
+
+    @Override
+    public Symbol<?> getRawSymbol(String name) {
+        return rawSymbols.get(name);
+    }
+
+    @Override
+    public void addRawSymbol(String name, int declarationLine) {
+        rawSymbols.put(name, Symbol.ofVoid(name, declarationLine));
     }
 }
