@@ -18,6 +18,7 @@ public class SyntacticAnalyser implements SyntacticAnalysis {
         var injector = new RacoonsStandaloneSetup().createInjectorAndDoEMFRegistration();
         injector.injectMembers(this);
     }
+
     @Override
     public SyntacticAnalysisResult analyse(String racoonsConfigFilepath, Map<String, String> config) {
         ResourceSet resourceSet = new ResourceSetImpl();
@@ -33,10 +34,10 @@ public class SyntacticAnalyser implements SyntacticAnalysis {
             resource.load(Collections.emptyMap());
 
             resource.getErrors().forEach(error ->
-                    errors.add(Diagnostic.error(filename, error.getColumn(), error.getLine(), error.getMessage())));
+                    errors.add(Diagnostic.error(filename, error.getLine(), error.getColumn(), error.getMessage())));
 
             resource.getWarnings().forEach(warning ->
-                    warnings.add(Diagnostic.warning(filename, warning.getColumn(), warning.getLine(), warning.getMessage())));
+                    warnings.add(Diagnostic.warning(filename, warning.getLine(), warning.getColumn(), warning.getMessage())));
         } catch (IOException e) {
             errors.add(Diagnostic.error(racoonsConfigFilepath, e.getMessage()));
         }
