@@ -12,6 +12,7 @@ import pt.up.fe.els2023.racoons.*;
 import pt.up.fe.els2023.racoons.impl.*;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 
+import java.lang.Boolean;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,20 @@ public class InterpreterRuntime {
             return analyseBaseOperationCall((OperationCall) expression);
         } else if (expression.getClass() == IdentifierImpl.class) {
             return analyseIdentifier((Identifier) expression);
+        } else if (expression.getClass() == ColumnAccessImpl.class) {
+            // TODO
+            return null;
+        } else if (expression.getClass() == PresenceOp.class) {
+            // TODO
+            return null;
+        } else if (expression.getClass() == StringLiteralImpl.class) {
+            return ((StringLiteral) expression).getValue();
+        } else if (expression.getClass() == IntLiteralImpl.class) {
+            return Integer.parseInt(((IntLiteral) expression).getValue());
+        } else if (expression.getClass() == DoubleLiteralImpl.class) {
+            return Double.parseDouble(((DoubleLiteral) expression).getValue());
+        } else if (expression.getClass() == BooleanLiteralImpl.class) {
+            return Boolean.parseBoolean(((BooleanLiteral) expression).getValue());
         }
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
