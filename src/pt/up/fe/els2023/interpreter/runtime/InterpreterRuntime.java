@@ -82,9 +82,53 @@ public class InterpreterRuntime {
             return analyseUnaryOp((UnaryPreOp) expression);
         } else if (expression.getClass() == MultAndDivImpl.class) {
             return analyseMultAndDiv((MultAndDiv) expression);
+        } else if (expression.getClass() == AddAndSubImpl.class) {
+            return analyseAddAndSub((AddAndSub) expression);
         }
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
+    }
+
+    private Object analyseAddAndSub(AddAndSub addAndSub) {
+        var left = analyseLogicalOr(addAndSub.getLeft());
+        var right = analyseLogicalOr(addAndSub.getRight());
+
+        switch (addAndSub.getOp()) {
+            case "+" -> {
+                var leftType = left.getClass();
+                var rightType = right.getClass();
+
+                if (leftType == Integer.class && rightType == Integer.class) {
+                    return ((Number) left).intValue() + ((Number) right).intValue();
+                } else if (leftType == Integer.class && rightType == Double.class) {
+                    return ((Number) left).intValue() + ((Number) right).doubleValue();
+                } else if (leftType == Double.class && rightType == Integer.class) {
+                    return ((Number) left).doubleValue() + ((Number) right).intValue();
+                } else if (leftType == Double.class && rightType == Double.class) {
+                    return ((Number) left).doubleValue() + ((Number) right).doubleValue();
+                } else {
+                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                }
+            }
+            case "-" -> {
+                var leftType = left.getClass();
+                var rightType = right.getClass();
+
+                if (leftType == Integer.class && rightType == Integer.class) {
+                    return ((Number) left).intValue() - ((Number) right).intValue();
+                } else if (leftType == Integer.class && rightType == Double.class) {
+                    return ((Number) left).intValue() - ((Number) right).doubleValue();
+                } else if (leftType == Double.class && rightType == Integer.class) {
+                    return ((Number) left).doubleValue() - ((Number) right).intValue();
+                } else if (leftType == Double.class && rightType == Double.class) {
+                    return ((Number) left).doubleValue() - ((Number) right).doubleValue();
+                } else {
+                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                }
+            }
+        }
+
+        throw new AssertionError("Unsupported binary operator " + addAndSub.getOp() + " in runtime phase");
     }
 
     private Object analyseMultAndDiv(MultAndDiv multAndDiv) {
@@ -93,11 +137,36 @@ public class InterpreterRuntime {
 
         switch (multAndDiv.getOp()) {
             case "*" -> {
-                // TODO CHECK TYPE
-                return ((Number) left).doubleValue() * ((Number) right).doubleValue();
+                var leftType = left.getClass();
+                var rightType = right.getClass();
+
+                if (leftType == Integer.class && rightType == Integer.class) {
+                    return ((Number) left).intValue() * ((Number) right).intValue();
+                } else if (leftType == Integer.class && rightType == Double.class) {
+                    return ((Number) left).intValue() * ((Number) right).doubleValue();
+                } else if (leftType == Double.class && rightType == Integer.class) {
+                    return ((Number) left).doubleValue() * ((Number) right).intValue();
+                } else if (leftType == Double.class && rightType == Double.class) {
+                    return ((Number) left).doubleValue() * ((Number) right).doubleValue();
+                } else {
+                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                }
             }
             case "/" -> {
-                return ((Number) left).doubleValue() / ((Number) right).doubleValue();
+                var leftType = left.getClass();
+                var rightType = right.getClass();
+
+                if (leftType == Integer.class && rightType == Integer.class) {
+                    return ((Number) left).intValue() / ((Number) right).intValue();
+                } else if (leftType == Integer.class && rightType == Double.class) {
+                    return ((Number) left).intValue() / ((Number) right).doubleValue();
+                } else if (leftType == Double.class && rightType == Integer.class) {
+                    return ((Number) left).doubleValue() / ((Number) right).intValue();
+                } else if (leftType == Double.class && rightType == Double.class) {
+                    return ((Number) left).doubleValue() / ((Number) right).doubleValue();
+                } else {
+                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                }
             }
         }
 
@@ -106,7 +175,6 @@ public class InterpreterRuntime {
 
     private Object analyseUnaryOp(UnaryPreOp unaryPreOp) {
         var value = analyseLogicalOr(unaryPreOp.getSubExpression());
-
 
         switch (unaryPreOp.getOp()) {
             case "!" -> {
