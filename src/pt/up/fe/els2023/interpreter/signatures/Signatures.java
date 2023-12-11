@@ -2,9 +2,10 @@ package pt.up.fe.els2023.interpreter.signatures;
 
 import pt.up.fe.els2023.export.CsvExporter;
 import pt.up.fe.els2023.export.HtmlExporter;
+import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.model.operations.*;
+import pt.up.fe.els2023.model.schema.TableSchema;
 import pt.up.fe.els2023.model.table.Table;
-import pt.up.fe.els2023.racoons.Expression;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -226,36 +227,95 @@ public class Signatures {
 
         var parameterValues = new Object[parameterTypes.length];
         var currentParameterIndex = 0;
+        var currentParameterTypeIndex = 0;
+        var currentStringVariadic = new ArrayList<String>();
+        var currentTableVariadic = new ArrayList<Table>();
 
-        for (int i = 0; i < parameterTypes.length; i++) {
-            var parameterType = parameterTypes[i];
-            var parameter = parameters.size() > currentParameterIndex ? parameters.get(currentParameterIndex) : null;
-            var parameterSignature = signature.get(i);
+        while (currentParameterTypeIndex < parameterTypes.length) {
+            var parameterType = parameterTypes[currentParameterTypeIndex];
+            var parameter = currentParameterIndex < parameters.size() ? parameters.get(currentParameterIndex) : null;
+            var parameterSignature = signature.get(currentParameterTypeIndex);
+
+            if (parameterType == List.class) {
+                if (parameterSignature.type() == AttributeValue.Type.VARIADIC_STRING) {
+                    if (parameter instanceof String string) {
+                        currentStringVariadic.add(string);
+                        currentParameterIndex++;
+                        continue;
+                    } else {
+                        if (!currentStringVariadic.isEmpty()) {
+                            parameterValues[currentParameterTypeIndex] = currentStringVariadic;
+                            currentStringVariadic = new ArrayList<>();
+                            currentParameterTypeIndex++;
+                            continue;
+                        }
+
+                        if (parameterSignature.required()) {
+                            throw new RuntimeException("Parameter " + currentParameterTypeIndex + " of operation " + name + " is required");
+                        } else {
+                            parameterValues[currentParameterTypeIndex] = parameterSignature.defaultValue();
+                            currentParameterTypeIndex++;
+                            continue;
+                        }
+                    }
+                } else if (parameterSignature.type() == AttributeValue.Type.VARIADIC_TABLE) {
+                    if (parameter instanceof Table table) {
+                        currentTableVariadic.add(table);
+                        currentParameterIndex++;
+                        continue;
+                    } else {
+                        if (!currentTableVariadic.isEmpty()) {
+                            parameterValues[currentParameterTypeIndex] = currentTableVariadic;
+                            currentTableVariadic = new ArrayList<>();
+                            currentParameterTypeIndex++;
+                            continue;
+                        }
+
+                        if (parameterSignature.required()) {
+                            throw new RuntimeException("Parameter " + currentParameterTypeIndex + " of operation " + name + " is required");
+                        } else {
+                            parameterValues[currentParameterTypeIndex] = parameterSignature.defaultValue();
+                            currentParameterTypeIndex++;
+                            continue;
+                        }
+                    }
+                }
+            }
 
             if (parameterType == String.class && parameterSignature.type() == AttributeValue.Type.STRING && parameter instanceof String) {
-                parameterValues[i] = parameter;
-            } else if (parameterType == List.class && parameter instanceof List) {
-                if (parameterSignature.type() == AttributeValue.Type.VARIADIC_STRING || parameterSignature.type() == AttributeValue.Type.VARIADIC_TABLE) {
-                    parameterValues[i] = parameter;
-                }
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else if ((parameterType == Boolean.class || parameterType == boolean.class ) && parameterSignature.type() == AttributeValue.Type.BOOLEAN && parameter instanceof Boolean) {
-                parameterValues[i] = parameter;
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Predicate.class && parameterSignature.type() == AttributeValue.Type.EXPRESSION && parameter instanceof Predicate) {
-                parameterValues[i] = parameter;
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Table.class && parameterSignature.type() == AttributeValue.Type.TABLE && parameter instanceof Table) {
-                parameterValues[i] = parameter;
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Map.class && parameterSignature.type() == AttributeValue.Type.STRING_MAP && parameter instanceof Map) {
-                parameterValues[i] = parameter;
+                parameterValues[currentParameterTypeIndex] = parameter;
+            } else if (parameterType == TableSchema.class && parameterSignature.type() == AttributeValue.Type.TABLE_SCHEMA && parameter instanceof TableSchema) {
+                parameterValues[currentParameterTypeIndex] = parameter;
+            } else if (parameterType == TableExporter.class && parameterSignature.type() == AttributeValue.Type.EXPORTER && parameter instanceof TableExporter) {
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else {
                 if (parameterSignature.required()) {
-                    throw new RuntimeException("Parameter " + i + " of operation " + name + " is required");
+                    throw new RuntimeException("Parameter " + currentParameterTypeIndex + " of operation " + name + " is required");
                 } else {
-                    parameterValues[i] = parameterSignature.defaultValue();
+                    parameterValues[currentParameterTypeIndex] = parameterSignature.defaultValue();
+                    currentParameterTypeIndex++;
                     continue;
                 }
             }
 
+            currentParameterTypeIndex++;
             currentParameterIndex++;
+        }
+
+        if (!currentStringVariadic.isEmpty()) {
+            parameterValues[currentParameterTypeIndex] = currentStringVariadic;
+        }
+
+        if (!currentTableVariadic.isEmpty()) {
+            parameterValues[currentParameterTypeIndex] = currentTableVariadic;
         }
 
         try {

@@ -1,20 +1,27 @@
 package pt.up.fe.els2023.interpreter.runtime;
 
-import jdk.jshell.Diag;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
+import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
 import pt.up.fe.els2023.exceptions.RacoonsRuntimeException;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.interpreter.semantic.SemanticAnalysisResult;
+import pt.up.fe.els2023.interpreter.signatures.Signatures;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
 import pt.up.fe.els2023.model.operations.OperationResult;
+import pt.up.fe.els2023.model.operations.TableOperation;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Table;
 import pt.up.fe.els2023.racoons.*;
 import pt.up.fe.els2023.racoons.impl.*;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 
 import java.lang.Boolean;
 import java.lang.String;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -520,6 +527,11 @@ public class InterpreterRuntime {
             throw new AssertionError("Expected table creation, got " + name);
         }
         var parameters = operationCall.getParameters();
+
+        if (parameters.isEmpty()) {
+            return new RacoonTable();
+        }
+
         var firstParameter = parameters.get(0).getExpression();
 
         if (firstParameter.getClass() != IdentifierImpl.class) {
@@ -534,19 +546,85 @@ public class InterpreterRuntime {
             throw new AssertionError("Table schema " + nftName + " not found");
         }
 
-        var table = tableSchema.value().collect();
-        return OperationResult.ofTable(table);
+        return tableSchema.value().collect();
     }
 
     private Object analyseTableCascade(TableCascade tableCascade) {
-        //var left = tableCascade.getLeft();
-        //var leftResult = analyseLogicalOr(left);
+        var left = analyseLogicalOr(tableCascade.getLeft());
+        var rightExpression = tableCascade.getRight();
 
-        //if (leftResult.getType() != OperationResult.Type.TABLE) {
-        //    throw new AssertionError("Expected table, got " + leftResult.getType());
-        //}
+        if (rightExpression.getClass() != OperationCallImpl.class) {
+            throw new AssertionError("Expected operation call, got " + rightExpression.getClass().getName());
+        }
 
-        return null;
+        if (left == null) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(tableCascade).getStartLine(),
+                    -1,
+                    "Table cascade on null value"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        if (!(left instanceof Table leftTable)) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(tableCascade).getStartLine(),
+                    -1,
+                    "Table cascade on non-table value"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        var operation = analyseOperationCall((OperationCall) rightExpression);
+
+        try {
+            if (operation == null)  {
+                throw new AssertionError("Unsupported operation " + rightExpression);
+            }
+
+            var operationResult = operation.execute(leftTable);
+
+            return switch (operationResult.getType()) {
+                case TABLE ->
+                    operationResult.getTable();
+
+                case VALUE ->
+                    operationResult.getValue();
+
+                case VALUE_MAP ->
+                    operationResult.getValueMap();
+            };
+        } catch (Exception e) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(tableCascade).getStartLine(),
+                    -1,
+                    e.getMessage()
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+    }
+
+    private TableOperation analyseOperationCall(OperationCall operationCall) {
+        var name = operationCall.getName();
+
+        if (Objects.equals(name, "where") || Objects.equals(name, "dropWhere")) {
+            // TODO: THE PARAMETER IS A LAMBDA
+            return null;
+        }
+
+        List<Object> parameters = new ArrayList<>();
+
+        for (var expression : operationCall.getParameters()) {
+            parameters.add(analyseLogicalOr(expression.getExpression()));
+        }
+
+        return Signatures.createOperation(name, parameters);
     }
 
     private Object analyseIdentifier(Identifier identifier) {
@@ -560,7 +638,7 @@ public class InterpreterRuntime {
         var tableSchema = symbolTable.getTableSchema(id);
 
         if (tableSchema != null) {
-            return tableSchema.value().collect();
+            return tableSchema.value();
         }
 
         var source = symbolTable.getSource(id);
