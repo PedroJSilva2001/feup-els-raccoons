@@ -56,7 +56,7 @@ public class AssignedVariableTypeInferAnalysis extends PreorderSemanticAnalysis 
                 return null;
             } else if (rhsType.equals(IntLiteralImpl.class.getName())) {
                 return Symbol.Type.INTEGER;
-            } else if (rhsType.equals(TableCascadeStartImpl.class.getName())) {
+            } else if (rhsType.equals(OperationCallImpl.class.getName())) {
                 return Symbol.Type.TABLE;
             } else if (rhsType.equals(StringLiteralImpl.class.getName())) {
                 return Symbol.Type.STRING;

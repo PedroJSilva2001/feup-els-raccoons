@@ -119,6 +119,16 @@ public class Signatures {
         varSignature.add(new AttributeValue(AttributeValue.Type.VARIADIC_STRING, List.of(), false));
 
         operationSignatures.put("var", varSignature);
+
+        var tableSignature = new ArrayList<AttributeValue>();
+        tableSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", false));
+
+        operationSignatures.put("table", tableSignature);
+
+        var exportSignature = new ArrayList<AttributeValue>();
+        exportSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
+
+        operationSignatures.put("export", exportSignature);
     }
 
     static {
