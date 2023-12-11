@@ -73,7 +73,11 @@ public class AssignedVariableTypeInferAnalysis extends PreorderSemanticAnalysis 
 
                 var symbol = symbolTable.getRawSymbol(idName);
 
-                assert symbol != null;
+                if (symbol == null) {
+                    // symbol not found. error caught in another analyser
+                    return null;
+                }
+                //assert symbol != null;
 
                 return symbol.type();
             }
