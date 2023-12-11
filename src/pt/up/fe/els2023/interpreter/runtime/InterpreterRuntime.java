@@ -1,6 +1,10 @@
 package pt.up.fe.els2023.interpreter.runtime;
 
+import jdk.jshell.Diag;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import pt.up.fe.els2023.exceptions.RacoonsRuntimeException;
+import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.interpreter.semantic.SemanticAnalysisResult;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
@@ -24,7 +28,7 @@ public class InterpreterRuntime {
         analyseExpressionsAndAssignments(rootNode);
     }
 
-    private void analyseExpressionsAndAssignments(EObject root) {
+    private void analyseExpressionsAndAssignments(EObject root) throws RacoonsRuntimeException {
         var statements = ((RacoonsImpl)root).getStatements();
 
         FunctionClassMap<EObject, Void> map = new FunctionClassMap<>();
@@ -40,14 +44,14 @@ public class InterpreterRuntime {
         }
     }
 
-    private Void analyseExpression(Expression _expression) {
+    private Void analyseExpression(Expression _expression) throws RacoonsRuntimeException {
         var expression = _expression.getExpression();
 
         analyseLogicalOr(expression);
         return null;
     }
 
-    private Object analyseLogicalOr(LogicalOr expression) {
+    private Object analyseLogicalOr(LogicalOr expression) throws RacoonsRuntimeException {
         if (expression.getClass() == ParenthesisImpl.class) {
             var parenthesis = (Parenthesis) expression;
 
@@ -81,7 +85,7 @@ public class InterpreterRuntime {
         } else if (expression.getClass() == ComparisonImpl.class) {
             return analyseComparison((Comparison) expression);
         } else if (expression.getClass() == LogicalAndImpl.class) {
-            //return analyseLogicalAnd((LogicalAnd) expression);
+            return analyseLogicalAnd((LogicalAnd) expression);
         } else if (expression.getClass() == LogicalOrImpl.class) {
            // return analyseBaseLogicalOr((LogicalOr) expression);
         }
@@ -90,12 +94,51 @@ public class InterpreterRuntime {
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
     }
 
-    private Object analyseComparison(Comparison comparison) {
+    private Object analyseLogicalAnd(LogicalAnd logicalAnd) {
+        var left = analyseLogicalOr(logicalAnd.getLeft());
+        var right = analyseLogicalOr(logicalAnd.getRight());
+
+        if (left == null || right == null) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(logicalAnd).getStartLine(),
+                    -1,
+                    "Logical and between null values"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        var leftType = left.getClass();
+        var rightType = right.getClass();
+
+        if (leftType == Boolean.class && rightType == Boolean.class) {
+            return ((Boolean) left) && ((Boolean) right);
+        } else {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(logicalAnd).getStartLine(),
+                    -1,
+                    "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in logical and operation"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+    }
+
+    private Object analyseComparison(Comparison comparison) throws RacoonsRuntimeException {
         var left = analyseLogicalOr(comparison.getLeft());
         var right = analyseLogicalOr(comparison.getRight());
 
         if (left == null || right == null) {
-            throw new AssertionError("Null value in runtime phase");
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(comparison).getStartLine(),
+                    -1,
+                    "Comparison between null values"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
         }
 
         switch (comparison.getOp()) {
@@ -112,7 +155,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() < ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(comparison).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in comparison"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case ">" -> {
@@ -128,7 +178,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() > ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(comparison).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in comparison"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case "<=" -> {
@@ -144,7 +201,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() <= ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(comparison).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in comparison"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case ">=" -> {
@@ -160,7 +224,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() >= ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(comparison).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in comparison"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
         }
@@ -173,7 +244,14 @@ public class InterpreterRuntime {
         var right = analyseLogicalOr(addAndSub.getRight());
 
         if (left == null || right == null) {
-            throw new AssertionError("Null value in runtime phase");
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(addAndSub).getStartLine(),
+                    -1,
+                    "Addition or subtraction between null values"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
         }
 
         switch (addAndSub.getOp()) {
@@ -190,7 +268,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() + ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(addAndSub).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in addition"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case "-" -> {
@@ -206,7 +291,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() - ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(addAndSub).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in subtraction"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
         }
@@ -219,7 +311,14 @@ public class InterpreterRuntime {
         var right = analyseLogicalOr(multAndDiv.getRight());
 
         if (left == null || right == null) {
-            throw new AssertionError("Null value in runtime phase");
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(multAndDiv).getStartLine(),
+                    -1,
+                    "Multiplication or division between null values"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
         }
 
         switch (multAndDiv.getOp()) {
@@ -236,7 +335,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() * ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(multAndDiv).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in multiplication"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case "/" -> {
@@ -252,7 +358,14 @@ public class InterpreterRuntime {
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() / ((Number) right).doubleValue();
                 } else {
-                    throw new AssertionError("Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(multAndDiv).getStartLine(),
+                            -1,
+                            "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in division"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
         }
@@ -264,7 +377,14 @@ public class InterpreterRuntime {
         var value = analyseLogicalOr(unaryPreOp.getSubExpression());
 
         if (value == null) {
-            throw new AssertionError("Null value in runtime phase");
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(unaryPreOp).getStartLine(),
+                    -1,
+                    "Unary operation on null value"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
         }
 
         switch (unaryPreOp.getOp()) {
@@ -272,7 +392,14 @@ public class InterpreterRuntime {
                 if (value.getClass() == Boolean.class) {
                     return !((Boolean) value);
                 } else {
-                    throw new AssertionError("Unsupported type " + value.getClass().getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(unaryPreOp).getStartLine(),
+                            -1,
+                            "Unsupported type " + value.getClass().getName() + " in logical not operation"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case "--" -> {
@@ -281,11 +408,31 @@ public class InterpreterRuntime {
                 } else if (value.getClass() == Double.class) {
                     return -((Double) value);
                 } else {
-                    throw new AssertionError("Unsupported type " + value.getClass().getName() + " in runtime phase");
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(unaryPreOp).getStartLine(),
+                            -1,
+                            "Unsupported type " + value.getClass().getName() + " in unary minus operation"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
                 }
             }
             case "++" -> {
-                return analyseLogicalOr(unaryPreOp.getSubExpression());
+                if (value.getClass() == Integer.class) {
+                    return ((Integer) value) + 1;
+                } else if (value.getClass() == Double.class) {
+                    return ((Double) value) + 1;
+                } else {
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(unaryPreOp).getStartLine(),
+                            -1,
+                            "Unsupported type " + value.getClass().getName() + " in unary plus operation"
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
+                }
             }
         }
 
