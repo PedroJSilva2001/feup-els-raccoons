@@ -657,7 +657,10 @@ public class InterpreterRuntime {
     }
 
     private Void analyseAssignment(Assignment assignment) {
+        var name = assignment.getName();
+        var rhs = analyseLogicalOr(assignment.getRhs().getExpression());
 
+        symbolTable.updateRawSymbolValue(name, rhs);
         return null;
     }
 }

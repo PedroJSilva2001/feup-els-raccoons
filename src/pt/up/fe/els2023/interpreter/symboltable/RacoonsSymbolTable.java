@@ -111,4 +111,11 @@ public class RacoonsSymbolTable implements SymbolTable {
 
         rawSymbols.put(name, Symbol.of(name, type, symbol.value(), symbol.declarationLine()));
     }
+
+    @Override
+    public void updateRawSymbolValue(String name, Object value) {
+        var symbol = rawSymbols.get(name);
+
+        rawSymbols.put(name, Symbol.of(name, symbol.type(), value, symbol.declarationLine()));
+    }
 }
