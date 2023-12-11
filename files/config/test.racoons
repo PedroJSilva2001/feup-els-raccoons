@@ -3,7 +3,6 @@ version "1.0"
 a = 2.0
 b = false
 c = a
-c
 
 source src1 from (
   "./f*/*.json",
@@ -72,4 +71,8 @@ coolTable =
           -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
           -> concatHorizontal(table(n1), table())
 
-exportStatus = coolTable -> export(coolExporter)
+coolTable -> export(coolExporter)
+table(n1)
+  -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
+  -> concatHorizontal(table(n1), table())
+  -> export(coolExporter)

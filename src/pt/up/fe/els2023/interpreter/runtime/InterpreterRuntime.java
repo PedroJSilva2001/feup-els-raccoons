@@ -52,7 +52,7 @@ public class InterpreterRuntime {
         return null;
     }
 
-    private OperationResult analyseLogicalOr(LogicalOr expression) {
+    private Object analyseLogicalOr(LogicalOr expression) {
         if (expression.getClass() == ParenthesisImpl.class) {
             var parenthesis = (Parenthesis) expression;
 
@@ -60,13 +60,15 @@ public class InterpreterRuntime {
         } else if (expression.getClass() == TableCascadeImpl.class) {
             return analyseTableCascade((TableCascade) expression);
         } else if (expression.getClass() == OperationCallImpl.class) {
-            return analyseOperationCall((OperationCall) expression);
-        } // else if identifier, return value from symbol table
+            return analyseBaseOperationCall((OperationCall) expression);
+        } else if (expression.getClass() == IdentifierImpl.class) {
+            return analyseIdentifier((Identifier) expression);
+        }
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
     }
 
-    private OperationResult analyseOperationCall(OperationCall operationCall) {
+    private Object analyseBaseOperationCall(OperationCall operationCall) {
         var name = operationCall.getName();
 
         if (!Objects.equals(name, "table")) {
@@ -91,7 +93,7 @@ public class InterpreterRuntime {
         return OperationResult.ofTable(table);
     }
 
-    private OperationResult analyseTableCascade(TableCascade tableCascade) {
+    private Object analyseTableCascade(TableCascade tableCascade) {
         //var left = tableCascade.getLeft();
         //var leftResult = analyseLogicalOr(left);
 
@@ -100,6 +102,35 @@ public class InterpreterRuntime {
         //}
 
         return null;
+    }
+
+    private Object analyseIdentifier(Identifier identifier) {
+        var id = identifier.getId();
+        var symbol = symbolTable.getRawSymbol(id);
+
+        if (symbol != null) {
+            return symbol.value();
+        }
+
+        var tableSchema = symbolTable.getTableSchema(id);
+
+        if (tableSchema != null) {
+            return tableSchema.value().collect();
+        }
+
+        var source = symbolTable.getSource(id);
+
+        if (source != null) {
+            return source.value();
+        }
+
+        var exporter = symbolTable.getExporter(id);
+
+        if (exporter != null) {
+            return exporter.value();
+        }
+
+        throw new AssertionError("Symbol " + id + " not found");
     }
 
     private Void analyseAssignment(Assignment assignment) {
