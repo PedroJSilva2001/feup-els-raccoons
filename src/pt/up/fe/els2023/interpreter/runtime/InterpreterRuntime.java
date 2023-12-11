@@ -84,6 +84,8 @@ public class InterpreterRuntime {
             return analyseAddAndSub((AddAndSub) expression);
         } else if (expression.getClass() == ComparisonImpl.class) {
             return analyseComparison((Comparison) expression);
+        } else if (expression.getClass() == EqualsAndNEqualsImpl.class) {
+            return analyseEqualsAndNEquals((EqualsAndNEquals) expression);
         } else if (expression.getClass() == LogicalAndImpl.class) {
             return analyseLogicalAnd((LogicalAnd) expression);
         } else if (expression.getClass() == LogicalOrImpl.class) {
@@ -92,6 +94,46 @@ public class InterpreterRuntime {
 
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
+    }
+
+    private Object analyseEqualsAndNEquals(EqualsAndNEquals expression) {
+        var left = analyseLogicalOr(expression.getLeft());
+        var right = analyseLogicalOr(expression.getRight());
+
+        if (left == null || right == null) {
+            return false;
+        }
+
+        var leftType = left.getClass();
+        var rightType = right.getClass();
+
+        if (Objects.equals(expression.getOp(), "==")) {
+            if (leftType == Integer.class && rightType == Integer.class) {
+                return ((Number) left).intValue() == ((Number) right).intValue();
+            } else if (leftType == Integer.class && rightType == Double.class) {
+                return ((Number) left).intValue() == ((Number) right).doubleValue();
+            } else if (leftType == Double.class && rightType == Integer.class) {
+                return ((Number) left).doubleValue() == ((Number) right).intValue();
+            } else if (leftType == Double.class && rightType == Double.class) {
+                return ((Number) left).doubleValue() == ((Number) right).doubleValue();
+            } else {
+                return Objects.equals(left, right);
+            }
+        } else if (Objects.equals(expression.getOp(), "!=")) {
+            if (leftType == Integer.class && rightType == Integer.class) {
+                return ((Number) left).intValue() != ((Number) right).intValue();
+            } else if (leftType == Integer.class && rightType == Double.class) {
+                return ((Number) left).intValue() != ((Number) right).doubleValue();
+            } else if (leftType == Double.class && rightType == Integer.class) {
+                return ((Number) left).doubleValue() != ((Number) right).intValue();
+            } else if (leftType == Double.class && rightType == Double.class) {
+                return ((Number) left).doubleValue() != ((Number) right).doubleValue();
+            } else {
+                return !Objects.equals(left, right);
+            }
+        }
+
+        throw new AssertionError("Unsupported binary operator " + expression.getOp() + " in runtime phase");
     }
 
     private Object analyseLogicalAnd(LogicalAnd logicalAnd) {
