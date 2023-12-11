@@ -89,11 +89,43 @@ public class InterpreterRuntime {
         } else if (expression.getClass() == LogicalAndImpl.class) {
             return analyseLogicalAnd((LogicalAnd) expression);
         } else if (expression.getClass() == LogicalOrImpl.class) {
-           // return analyseBaseLogicalOr((LogicalOr) expression);
+           return analyseBaseLogicalOr((LogicalOr) expression);
         }
 
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
+    }
+
+    private Object analyseBaseLogicalOr(LogicalOr logicalOr) {
+        var left = analyseLogicalOr(logicalOr.getLeft());
+        var right = analyseLogicalOr(logicalOr.getRight());
+
+        if (left == null || right == null) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(logicalOr).getStartLine(),
+                    -1,
+                    "Logical or between null values"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        var leftType = left.getClass();
+        var rightType = right.getClass();
+
+        if (leftType == Boolean.class && rightType == Boolean.class) {
+            return ((Boolean) left) || ((Boolean) right);
+        } else {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(logicalOr).getStartLine(),
+                    -1,
+                    "Unsupported type " + leftType.getName() + " and " + rightType.getName() + " in logical or operation"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
     }
 
     private Object analyseEqualsAndNEquals(EqualsAndNEquals expression) {
