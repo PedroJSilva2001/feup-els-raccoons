@@ -80,16 +80,33 @@ public class InterpreterRuntime {
             return Boolean.parseBoolean(((BooleanLiteral) expression).getValue());
         } else if (expression.getClass() == UnaryPreOpImpl.class) {
             return analyseUnaryOp((UnaryPreOp) expression);
+        } else if (expression.getClass() == MultAndDivImpl.class) {
+            return analyseMultAndDiv((MultAndDiv) expression);
         }
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
     }
 
+    private Object analyseMultAndDiv(MultAndDiv multAndDiv) {
+        var left = analyseLogicalOr(multAndDiv.getLeft());
+        var right = analyseLogicalOr(multAndDiv.getRight());
+
+        switch (multAndDiv.getOp()) {
+            case "*" -> {
+                // TODO CHECK TYPE
+                return ((Number) left).doubleValue() * ((Number) right).doubleValue();
+            }
+            case "/" -> {
+                return ((Number) left).doubleValue() / ((Number) right).doubleValue();
+            }
+        }
+
+        throw new AssertionError("Unsupported binary operator " + multAndDiv.getOp() + " in runtime phase");
+    }
+
     private Object analyseUnaryOp(UnaryPreOp unaryPreOp) {
         var value = analyseLogicalOr(unaryPreOp.getSubExpression());
-        if (value == null) {
-            throw new AssertionError("Null value in runtime phase");
-        }
+
 
         switch (unaryPreOp.getOp()) {
             case "!" -> {
