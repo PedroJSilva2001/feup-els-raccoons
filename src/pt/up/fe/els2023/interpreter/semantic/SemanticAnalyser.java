@@ -2,7 +2,7 @@ package pt.up.fe.els2023.interpreter.semantic;
 
 import org.eclipse.emf.ecore.EObject;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
-import pt.up.fe.els2023.interpreter.semantic.analysis.AssignedVariableTypeInferAnalysis;
+import pt.up.fe.els2023.interpreter.semantic.analysis.*;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTableFiller;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
@@ -73,14 +73,86 @@ public class SemanticAnalyser implements SemanticAnalysis {
     }
 
     private Void analyseExpression(Expression expression) {
+        var analysis = List.of(
+                new VariableExistenceAnalysis(),
+                new TableCascadeStartAnalysis());
+
+
+        for (var analysisStep : analysis) {
+            analysisStep.visit(expression, symbolTable);
+
+            var newErrors = analysisStep.errors();
+
+            if (!newErrors.isEmpty()) {
+                errors.addAll(newErrors);
+                return null;
+            }
+        }
+
+        /*var variableUseAnalysis = new VariableExistenceAnalysis();
+        variableUseAnalysis.visit(expression, symbolTable);
+
+        var newErrors = variableUseAnalysis.errors();
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
+            return null;
+        }
+
+        var tableCascadeStartAnalysis = new TableCascadeStartAnalysis();
+
+        tableCascadeStartAnalysis.visit(expression, symbolTable);
+
+        newErrors = tableCascadeStartAnalysis.errors();
+
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
+            return null;
+        }*/
 
         return null;
     }
 
     private Void analyseAssignment(Assignment assignment) {
+        var analysis = List.of(
+                new VariableExistenceAnalysis(),
+                new TableCascadeStartAnalysis(),
+                new AssignedVariableTypeInferAnalysis());
+
+        for (var analysisStep : analysis) {
+            analysisStep.visit(assignment, symbolTable);
+
+            var newErrors = analysisStep.errors();
+
+            if (!newErrors.isEmpty()) {
+                errors.addAll(newErrors);
+                return null;
+            }
+        }
+
+        /*var variableUseAnalysis = new VariableExistenceAnalysis();
+
+        variableUseAnalysis.visit(assignment, symbolTable);
+
+        var newErrors = variableUseAnalysis.errors();
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
+            return null;
+        }
+
+        var tableCascadeStartAnalysis = new TableCascadeStartAnalysis();
+
+        tableCascadeStartAnalysis.visit(assignment, symbolTable);
+
+        newErrors = tableCascadeStartAnalysis.errors();
+
+        if (!newErrors.isEmpty()) {
+            errors.addAll(newErrors);
+            return null;
+        }
+
         var assignedVariableAnalysis = new AssignedVariableTypeInferAnalysis();
 
-        assignedVariableAnalysis.visit(assignment, symbolTable);
+        assignedVariableAnalysis.visit(assignment, symbolTable);*/
 
                 //var newErrors = assignedVariableAnalysis.getErrors();
 

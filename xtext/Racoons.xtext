@@ -170,7 +170,8 @@ ExpressionTerminal
     : {Parenthesis} '(' element=Expression ')'
     | {ColumnAccess} 'col' '(' col=STRING ')'
     | {PresenceOp} 'containsCol' '(' expression=Expression ')'
-    | {TableCascadeStart} name=TABLE_OP '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
+    | {MapGet} 'get' '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
+    | OperationCall
     | {Identifier} id=ID
     | {StringLiteral} value=STRING
     | {IntLiteral} value=INTEGER

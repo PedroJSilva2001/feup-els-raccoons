@@ -48,15 +48,18 @@ public class AssignedVariableTypeInferAnalysis extends PreorderSemanticAnalysis 
                     return Symbol.Type.TABLE;
             }
         } else {
+            // Expression is a terminal
             if (rhsType.equals(ParenthesisImpl.class.getName())) {
                 return getType(((ParenthesisImpl) rhs.getExpression()).getElement(), symbolTable);
             } else if (rhsType.equals(ColumnAccessImpl.class.getName())) {
                 return null;
+            } else if (rhsType.equals(MapGet.class.getName())) {
+                return Symbol.Type.NUMBER;
             } else if (rhsType.equals(PresenceOpImpl.class.getName())) {
                 return null;
             } else if (rhsType.equals(IntLiteralImpl.class.getName())) {
                 return Symbol.Type.INTEGER;
-            } else if (rhsType.equals(TableCascadeStartImpl.class.getName())) {
+            } else if (rhsType.equals(OperationCallImpl.class.getName())) {
                 return Symbol.Type.TABLE;
             } else if (rhsType.equals(StringLiteralImpl.class.getName())) {
                 return Symbol.Type.STRING;
