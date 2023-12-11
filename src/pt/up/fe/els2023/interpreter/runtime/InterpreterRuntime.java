@@ -78,9 +78,42 @@ public class InterpreterRuntime {
             return Double.parseDouble(((DoubleLiteral) expression).getValue());
         } else if (expression.getClass() == BooleanLiteralImpl.class) {
             return Boolean.parseBoolean(((BooleanLiteral) expression).getValue());
+        } else if (expression.getClass() == UnaryPreOpImpl.class) {
+            return analyseUnaryOp((UnaryPreOp) expression);
         }
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
+    }
+
+    private Object analyseUnaryOp(UnaryPreOp unaryPreOp) {
+        var value = analyseLogicalOr(unaryPreOp.getSubExpression());
+        if (value == null) {
+            throw new AssertionError("Null value in runtime phase");
+        }
+
+        switch (unaryPreOp.getOp()) {
+            case "!" -> {
+                if (value.getClass() == Boolean.class) {
+                    return !((Boolean) value);
+                } else {
+                    throw new AssertionError("Unsupported type " + value.getClass().getName() + " in runtime phase");
+                }
+            }
+            case "--" -> {
+                if (value.getClass() == Integer.class) {
+                    return -((Integer) value);
+                } else if (value.getClass() == Double.class) {
+                    return -((Double) value);
+                } else {
+                    throw new AssertionError("Unsupported type " + value.getClass().getName() + " in runtime phase");
+                }
+            }
+            case "++" -> {
+                return analyseLogicalOr(unaryPreOp.getSubExpression());
+            }
+        }
+
+        throw new AssertionError("Unsupported unary operator " + unaryPreOp.getOp() + " in runtime phase");
     }
 
     private Object analyseBaseOperationCall(OperationCall operationCall) {
