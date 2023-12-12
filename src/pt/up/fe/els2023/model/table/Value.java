@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Comparator;
+import java.util.Objects;
 
 public class Value {
     public enum Type {
@@ -372,6 +373,18 @@ public class Value {
         }
 
         return this.value.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Value value1)) return false;
+        return Objects.equals(value, value1.value) && type == value1.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, type);
     }
 
     public boolean equals(Value obj) {
