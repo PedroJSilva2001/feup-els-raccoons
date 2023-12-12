@@ -198,7 +198,7 @@ terminal TABLE_OP
     | 'concatVertical'
     | 'concatHorizontal'
 
-    | 'renameColumns'
+    | 'renameColumn'
     
     | 'argMax'
     | 'argMin'
