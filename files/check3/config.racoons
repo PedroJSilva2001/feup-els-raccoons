@@ -1,0 +1,56 @@
+version "1.0"
+
+source yaml from (
+    "./files/check3/files/*/analysis.yaml"
+)
+
+source xml from (
+    "./files/check3/files/*/analysis.xml"
+)
+
+source json from (
+    "./files/check3/files/*/profiling.json"
+)
+
+
+nft dynamic of yaml (
+    filePath -> "Path",
+    total results dynamic all -> "%s (Dynamic)"
+)
+
+nft static of xml (
+    filePath -> "Path",
+    total results static all -> "%s (Static)"
+)
+
+nft functions of json (
+    filePath -> "Path",
+    "functions" each (
+        name,
+        "time%"
+    )
+)
+
+exporter dynamicExporter of csv (
+    filename: "dynamic.csv"
+    path: "./build/"
+)
+
+exporter staticExporter of csv (
+    filename: "static.csv"
+    path: "./build/"
+)
+
+exporter functionsExporter of csv (
+    filename: "functions.csv"
+    path: "./build/"
+)
+
+table(dynamic) -> sort("Path") -> export(dynamicExporter)
+table(static) -> sort("Path") -> export(staticExporter)
+table(functions) -> sort("Path") -> export(functionsExporter)
+
+functionsTable = table(functions)
+
+topFunction = functionsTable -> argMax("time%")
+topFunction -> export(functionsExporter)

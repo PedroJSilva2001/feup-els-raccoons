@@ -9,6 +9,7 @@ import pt.up.fe.els2023.exceptions.RacoonsRuntimeException;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.interpreter.semantic.SemanticAnalysisResult;
 import pt.up.fe.els2023.interpreter.signatures.Signatures;
+import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
 import pt.up.fe.els2023.model.operations.*;
@@ -74,8 +75,11 @@ public class InterpreterRuntime {
         } else if (expression.getClass() == ColumnAccessImpl.class) {
             return analyseColumnAccess((ColumnAccess) expression);
         } else if (expression.getClass() == PresenceOpImpl.class) {
-            // TODO
-            return null;
+            return analysePresenceOp((PresenceOp) expression);
+        } else if (expression.getClass() == NullCheckImpl.class) {
+            return analyseNullCheck((NullCheck) expression);
+        } else if (expression.getClass() == MapGetImpl.class) {
+            return analyseMapGet((MapGet) expression);
         } else if (expression.getClass() == StringLiteralImpl.class) {
             return ((StringLiteral) expression).getValue();
         } else if (expression.getClass() == IntLiteralImpl.class) {
@@ -102,6 +106,90 @@ public class InterpreterRuntime {
 
 
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
+    }
+
+    private Object analyseMapGet(MapGet expression) {
+        if (expression.getExpressions().size() != 2) {
+            throw new AssertionError("Unsupported map get expression with " + expression.getExpressions().size() + " arguments");
+        }
+
+        var mapName = expression.getExpressions().get(0).getExpression();
+
+        if (mapName.getClass() != IdentifierImpl.class) {
+            throw new AssertionError("Unsupported map get expression with " + mapName.getClass().getName() + " as first argument");
+        }
+
+        var mapNameString = ((Identifier) mapName).getId();
+
+        var mapKey = expression.getExpressions().get(1).getExpression();
+
+        if (mapKey.getClass() != StringLiteralImpl.class) {
+            throw new AssertionError("Unsupported map get expression with " + mapKey.getClass().getName() + " as second argument");
+        }
+
+        var mapKeyString = ((StringLiteral) mapKey).getValue();
+
+        var mapSymbol = symbolTable.getRawSymbol(mapNameString);
+
+        if (mapSymbol == null) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(expression).getStartLine(),
+                    -1,
+                    "Symbol " + mapNameString + " not found"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        if (mapSymbol.type() != Symbol.Type.MAP || !(mapSymbol.value() instanceof Map)) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(expression).getStartLine(),
+                    -1,
+                    "Symbol " + mapNameString + " is not a map"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+
+        try {
+            var map = (Map<String, Value>) mapSymbol.value();
+
+            if (!map.containsKey(mapKeyString)) {
+                var diagnostic = Diagnostic.error(
+                        symbolTable.getRacoonsConfigFilename(),
+                        NodeModelUtils.getNode(expression).getStartLine(),
+                        -1,
+                        "Map " + mapNameString + " does not contain key " + mapKeyString
+                );
+
+                throw new RacoonsRuntimeException(diagnostic);
+            }
+
+            return map.get(mapKeyString).getValue();
+        } catch (ClassCastException e) {
+            var diagnostic = Diagnostic.error(
+                    symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(expression).getStartLine(),
+                    -1,
+                    "Symbol " + mapNameString + " is not a map"
+            );
+
+            throw new RacoonsRuntimeException(diagnostic);
+        }
+    }
+
+    private RowWrapperFunction analyseNullCheck(NullCheck nullCheck) {
+        var columnName = nullCheck.getCol();
+
+        return rowWrapper -> Value.of(rowWrapper.get(columnName) == null);
+    }
+
+    private RowWrapperFunction analysePresenceOp(PresenceOp presenceOp) {
+        var columnName = presenceOp.getCol();
+
+        return rowWrapper -> Value.of(rowWrapper.contains(columnName));
     }
 
     private RowWrapperFunction analyseColumnAccess(ColumnAccess columnAccess) {
@@ -691,7 +779,7 @@ public class InterpreterRuntime {
                     operationResult.getTable();
 
                 case VALUE ->
-                    operationResult.getValue();
+                    operationResult.getValue().getValue();
 
                 case VALUE_MAP ->
                     operationResult.getValueMap();
