@@ -64,6 +64,9 @@ top2Function = functionsTable -> where(col("name") == "foo2()")
 top3Function = functionsTable -> where(col("name") == "foo3()")
 
 topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, "Path")
+    -> renameColumn("name", "name #1") -> renameColumn("time%", "% #1")
+    -> renameColumn("name_1", "name #2") -> renameColumn("time%_1", "% #2")
+    -> renameColumn("name_2", "name #3") -> renameColumn("time%_2", "% #3")
 
 final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
 

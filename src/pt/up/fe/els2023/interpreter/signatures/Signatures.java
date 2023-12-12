@@ -81,10 +81,11 @@ public class Signatures {
         operationClass.put("concatHorizontal", ConcatHorizontalOperation.class);
 
         var renameSignature = new ArrayList<AttributeValue>();
-        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING_MAP, Map.of(), false));
+        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING, null, true));
+        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING, null, true));
 
-        operationSignatures.put("rename", renameSignature);
-        operationClass.put("rename", RenameOperation.class);
+        operationSignatures.put("renameColumn", renameSignature);
+        operationClass.put("renameColumn", RenameOperation.class);
 
         var sortSignature = new ArrayList<AttributeValue>();
         sortSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
