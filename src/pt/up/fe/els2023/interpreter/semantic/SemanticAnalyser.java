@@ -83,7 +83,8 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new ExpressionResultNotUsedAnalysis(),
                 new TableCascadeStartAnalysis(),
                 new ImproperTerminalOperationAnalysis(),
-                new TypeCheckingAnalysis());
+                new TypeCheckingAnalysis(),
+                new OperationCallCompatibilityAnalysis());
 
 
         for (var analysisStep : analysis) {
@@ -106,7 +107,8 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new TableCascadeStartAnalysis(),
                 new AssignedVariableTypeInferAnalysis(),
                 new ImproperTerminalOperationAnalysis(),
-                new TypeCheckingAnalysis());
+                new TypeCheckingAnalysis(),
+                new OperationCallCompatibilityAnalysis());
 
         for (var analysisStep : analysis) {
             analysisStep.visit(assignment, symbolTable);
