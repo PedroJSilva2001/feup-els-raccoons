@@ -3,6 +3,7 @@ package pt.up.fe.els2023.interpreter.semantic;
 import org.eclipse.emf.ecore.EObject;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.interpreter.semantic.analysis.*;
+import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTableFiller;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
@@ -43,6 +44,10 @@ public class SemanticAnalyser implements SemanticAnalysis {
 
         analyseExpressionsAndAssignments(result.root());
 
+        for (var symb : symbolTable.getSymbols()) {
+            System.out.println(symb.name() + " " + symb.type() + " " + symb.declarationLine());
+        }
+
         return new SemanticAnalysisResult(symbolTable, infos, warnings, errors);
     }
 
@@ -76,7 +81,9 @@ public class SemanticAnalyser implements SemanticAnalysis {
         var analysis = List.of(
                 new VariableExistenceAnalysis(),
                 new ExpressionResultNotUsedAnalysis(),
-                new TableCascadeStartAnalysis());
+                new TableCascadeStartAnalysis(),
+                new ImproperTerminalOperationAnalysis(),
+                new TypeCheckingAnalysis());
 
 
         for (var analysisStep : analysis) {
@@ -90,26 +97,6 @@ public class SemanticAnalyser implements SemanticAnalysis {
             }
         }
 
-        /*var variableUseAnalysis = new VariableExistenceAnalysis();
-        variableUseAnalysis.visit(expression, symbolTable);
-
-        var newErrors = variableUseAnalysis.errors();
-        if (!newErrors.isEmpty()) {
-            errors.addAll(newErrors);
-            return null;
-        }
-
-        var tableCascadeStartAnalysis = new TableCascadeStartAnalysis();
-
-        tableCascadeStartAnalysis.visit(expression, symbolTable);
-
-        newErrors = tableCascadeStartAnalysis.errors();
-
-        if (!newErrors.isEmpty()) {
-            errors.addAll(newErrors);
-            return null;
-        }*/
-
         return null;
     }
 
@@ -118,6 +105,7 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new VariableExistenceAnalysis(),
                 new TableCascadeStartAnalysis(),
                 new AssignedVariableTypeInferAnalysis(),
+                new ImproperTerminalOperationAnalysis(),
                 new TypeCheckingAnalysis());
 
         for (var analysisStep : analysis) {
@@ -130,35 +118,6 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 return null;
             }
         }
-
-        /*var variableUseAnalysis = new VariableExistenceAnalysis();
-
-        variableUseAnalysis.visit(assignment, symbolTable);
-
-        var newErrors = variableUseAnalysis.errors();
-        if (!newErrors.isEmpty()) {
-            errors.addAll(newErrors);
-            return null;
-        }
-
-        var tableCascadeStartAnalysis = new TableCascadeStartAnalysis();
-
-        tableCascadeStartAnalysis.visit(assignment, symbolTable);
-
-        newErrors = tableCascadeStartAnalysis.errors();
-
-        if (!newErrors.isEmpty()) {
-            errors.addAll(newErrors);
-            return null;
-        }
-
-        var assignedVariableAnalysis = new AssignedVariableTypeInferAnalysis();
-
-        assignedVariableAnalysis.visit(assignment, symbolTable);*/
-
-                //var newErrors = assignedVariableAnalysis.getErrors();
-
-        //errors.addAll(newErrors);
 
         return null;
     }

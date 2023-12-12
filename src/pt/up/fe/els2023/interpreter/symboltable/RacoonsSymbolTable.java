@@ -4,7 +4,9 @@ import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.model.schema.TableSchema;
 import pt.up.fe.els2023.sources.TableSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RacoonsSymbolTable implements SymbolTable {
@@ -115,5 +117,17 @@ public class RacoonsSymbolTable implements SymbolTable {
     @Override
     public boolean hasSymbol(String name) {
         return hasRawSymbol(name) || hasSource(name) || hasTableSchema(name) || hasExporter(name);
+
+    }
+
+    @Override
+    public List<Symbol<?>> getSymbols() {
+        var res = new ArrayList<Symbol<?>>();
+
+        for (var key : rawSymbols.keySet()) {
+            res.add(rawSymbols.get(key));
+        }
+
+        return res;
     }
 }
