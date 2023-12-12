@@ -75,6 +75,7 @@ public class SemanticAnalyser implements SemanticAnalysis {
     private Void analyseExpression(Expression expression) {
         var analysis = List.of(
                 new VariableExistenceAnalysis(),
+                new ExpressionResultNotUsedAnalysis(),
                 new TableCascadeStartAnalysis());
 
 
