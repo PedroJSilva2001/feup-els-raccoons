@@ -2,7 +2,8 @@ package pt.up.fe.els2023.interpreter.semantic;
 
 import org.eclipse.emf.ecore.EObject;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
-import pt.up.fe.els2023.interpreter.semantic.analysis.AssignedVariableTypeInferAnalysis;
+import pt.up.fe.els2023.interpreter.semantic.analysis.*;
+import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTableFiller;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
@@ -43,6 +44,10 @@ public class SemanticAnalyser implements SemanticAnalysis {
 
         analyseExpressionsAndAssignments(result.root());
 
+        for (var symb : symbolTable.getSymbols()) {
+          //  System.out.println(symb.name() + " " + symb.type() + " " + symb.declarationLine());
+        }
+
         return new SemanticAnalysisResult(symbolTable, infos, warnings, errors);
     }
 
@@ -73,18 +78,51 @@ public class SemanticAnalyser implements SemanticAnalysis {
     }
 
     private Void analyseExpression(Expression expression) {
+        var analysis = List.of(
+                new VariableExistenceAnalysis(),
+                new ExpressionResultNotUsedAnalysis(),
+                new TableCascadeStartAnalysis(),
+                new ImproperTerminalOperationAnalysis(),
+                new TypeCheckingAnalysis(),
+                new OperationCallCompatibilityAnalysis(),
+                new FilterSpecialOperationsUseAnalysis(),
+                new OperationCallCompatibilityAnalysis());
+
+
+        for (var analysisStep : analysis) {
+            analysisStep.visit(expression, symbolTable);
+
+            var newErrors = analysisStep.errors();
+
+            if (!newErrors.isEmpty()) {
+                errors.addAll(newErrors);
+                return null;
+            }
+        }
 
         return null;
     }
 
     private Void analyseAssignment(Assignment assignment) {
-        var assignedVariableAnalysis = new AssignedVariableTypeInferAnalysis();
+        var analysis = List.of(
+                new VariableExistenceAnalysis(),
+                new TableCascadeStartAnalysis(),
+                new AssignedVariableTypeInferAnalysis(),
+                new ImproperTerminalOperationAnalysis(),
+                new TypeCheckingAnalysis(),
+                new FilterSpecialOperationsUseAnalysis(),
+                new OperationCallCompatibilityAnalysis());
 
-        assignedVariableAnalysis.visit(assignment, symbolTable);
+        for (var analysisStep : analysis) {
+            analysisStep.visit(assignment, symbolTable);
 
-                //var newErrors = assignedVariableAnalysis.getErrors();
+            var newErrors = analysisStep.errors();
 
-        //errors.addAll(newErrors);
+            if (!newErrors.isEmpty()) {
+                errors.addAll(newErrors);
+                return null;
+            }
+        }
 
         return null;
     }

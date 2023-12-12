@@ -37,6 +37,11 @@ public class Signatures {
         operationSignatures = new HashMap<>();
         operationClass = new HashMap<>();
 
+        var mapGetSignature = new ArrayList<AttributeValue>();
+        mapGetSignature.add(new AttributeValue(AttributeValue.Type.TABLE, "", true));
+        mapGetSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
+        operationSignatures.put("get", mapGetSignature);
+
         var joinSignature = new ArrayList<AttributeValue>();
         joinSignature.add(new AttributeValue(AttributeValue.Type.TABLE, null, true));
         joinSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));

@@ -4,6 +4,8 @@ import pt.up.fe.els2023.export.TableExporter;
 import pt.up.fe.els2023.model.schema.TableSchema;
 import pt.up.fe.els2023.sources.TableSource;
 
+import java.util.List;
+
 public interface SymbolTable {
 
     String getRacoonsConfigFilename();
@@ -36,7 +38,10 @@ public interface SymbolTable {
 
     void addRawSymbol(String name, int declarationLine);
 
-    public void updateRawSymbolType(String name, Symbol.Type type);
+    void updateRawSymbolType(String name, Symbol.Type type);
+
+    boolean hasSymbol(String name);
+    List<Symbol<?>> getSymbols();
 
     void updateRawSymbolValue(String name, Object value);
 }

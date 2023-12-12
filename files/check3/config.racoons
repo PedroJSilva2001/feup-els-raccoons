@@ -70,5 +70,7 @@ topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, 
 
 final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
 
+finalSum = final -> columnSum()
+
 topFunctions -> export(functionsExporter)
-final -> export(finalExporter)
+final -> concatVertical(finalSum) ->  export(finalExporter)
