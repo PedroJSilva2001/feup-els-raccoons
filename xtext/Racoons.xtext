@@ -1,0 +1,254 @@
+grammar pt.up.fe.els2023.Racoons with org.eclipse.xtext.common.Terminals
+
+generate racoons "http://www.up.pt/fe/els2023/Racoons"
+   
+// PARSER
+ 
+Racoons
+	: version=Version? statements+=Statement*
+	;
+
+
+Version
+	: 'version' code=STRING
+	;
+
+Statement
+	: SourceDecl
+	| NftDecl
+	| ExporterDecl
+	| Assignment
+    | Expression
+	;
+
+// Source
+SourceDecl
+	: 'source' name=ID 'from'
+        '('
+        	pathList+=STRING (',' pathList+=STRING)* ','?
+        ')'
+	;
+
+// Nft
+NftDecl
+    : 'nft' name=ID 'of' source=[SourceDecl]
+        nft=ListNode
+    ;
+    
+SchemaNode
+    : EachNode
+    | ListNode
+    | PropertyNode
+    | ResourceLocationNode
+    | AllNode
+    | AllValuesNode
+    | AllContainersNode
+    | ExceptNode
+    | IndexNode
+    ;
+    
+ColumnNode
+    : '->' name=(ID | STRING)
+    ;
+    
+ColumnOrNode
+    : {ColumnOrNode} node=(ColumnNode | SchemaNode)
+    ;
+    
+ListNode
+    : '(' nodeList+=SchemaNode (',' nodeList+=SchemaNode)* ','? ')'
+    ;
+    
+StringListNode
+    : '(' nodeList+=(ID | STRING) (',' nodeList+=(ID | STRING))* ','? ')'
+    ;
+    
+ResourceLocationNode
+    : {ResourceLocationNode} resourceNode=(DirectoryNode | PathNode | FileNode) element=ColumnNode?
+    ;
+    
+DirectoryNode
+    : 'directory'
+    ;
+    
+PathNode
+    : 'filePath'
+    ;
+    
+FileNode
+	: 'file'
+    ;
+    
+AllNode
+    : {AllNode} 'all' formatNode=ColumnNode?
+    ;
+    
+AllValuesNode
+    : {AllValuesNode} 'all-value' formatNode=ColumnNode?
+    ;
+    
+AllContainersNode
+    : {AllContainerNode} 'all-container' formatNode=ColumnNode?
+    ;
+    
+ExceptNode
+    : {ExceptNode} 'except' element=(StringListNode) formatNode=ColumnNode?
+    ;
+ 
+PropertyNode
+    : {PropertyNode} name=(ID | STRING) element=ColumnOrNode?
+    ;
+    
+IndexNode
+    : {IndexNode} '[' index=INTEGER ']' element=ColumnOrNode?
+    ;
+    
+EachNode
+    : {EachNode} 'each' element=ColumnOrNode?
+    ;
+
+// Exporter
+ExporterDecl
+    : 'exporter' name=ID 'of' type=EXPORTER_TYPE
+        '('
+            exporterAttrs+=ExporterAttr* // not specified attributes will be set to default values (same behavior as DSL)
+        ')'
+    ;
+    
+ExporterAttr
+    : attr=EXPORTER_ATTR ':' value=ExporterValue
+    ;
+    
+ExporterValue
+	: {String} value=STRING
+	| {Boolean} value=BOOLEAN
+	;
+
+// Expressions
+Assignment
+    : name=ID '=' rhs=Expression
+    ;
+    
+Expression
+	: expression=LogicalOr
+	;
+	
+LogicalOr
+	:  LogicalAnd ({LogicalOr.left=current} op='||' right=LogicalAnd)*
+	;
+	
+LogicalAnd
+	: EqualsAndNEquals ({LogicalAnd.left=current} op='&&' right=EqualsAndNEquals)*
+	;
+	
+EqualsAndNEquals
+	: Comparison ({EqualsAndNEquals.left=current} op=('==' | '!=') right=Comparison)*
+	;
+	
+Comparison
+	: AddAndSub ({Comparison.left=current} op=('<=' | '<' | '>=' | '>') right=AddAndSub)*
+	;
+	
+AddAndSub
+	: MultAndDiv ({AddAndSub.left=current} op=('+' | '-') right=MultAndDiv)*
+	;
+	
+MultAndDiv
+	: UnaryPreOp ({MultAndDiv.left=current} op=('*' | '/') right=UnaryPreOp)*
+	;
+	
+UnaryPreOp
+    : op=('!' | '++' | '--') subExpression=UnaryPreOp
+    | ExpressionTerminal ({TableCascade.left=current} '->' right=OperationCall)*
+    ;
+	
+OperationCall
+    : name=TABLE_OP '(' (parameters+=Expression (','parameters+=Expression)*)? ')'
+    ;
+	
+ExpressionTerminal
+    : {Parenthesis} '(' element=Expression ')'
+    | {ColumnAccess} 'col' '(' col=STRING ')'
+	| {NullCheck} 'isNull' '(' col=STRING ')'
+    | {PresenceOp} 'containsCol' '(' col=STRING ')'
+    | {MapGet} 'get' '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
+    | OperationCall
+    | {Identifier} id=ID
+    | {StringLiteral} value=STRING
+    | {IntLiteral} value=INTEGER
+    | {DoubleLiteral} value=DOUBLE
+    | {BooleanLiteral} value=BOOLEAN
+    ;
+	
+// LEXER
+
+// Keywords and other reserved symbols
+terminal TABLE_OP
+	: 'table'
+
+    | 'select'
+    | 'reject'
+
+    | 'where'
+    | 'dropWhere'
+
+    | 'sort'
+
+    | 'concatVertical'
+    | 'concatHorizontal'
+
+    | 'renameColumn'
+    
+    | 'argMax'
+    | 'argMin'
+
+    | 'count'
+    | 'min'
+    | 'max'
+    | 'sum'
+    | 'mean'
+    | 'std'
+    | 'var'
+
+    | 'join'
+    | 'groupBy'
+    
+    | 'limit'
+
+    | 'export'
+   	;
+   	
+terminal EXPORTER_TYPE
+	: 'csv'
+    | 'html'
+    | 'latex'
+    | 'markdown'
+    | 'tsv'
+    ;
+terminal EXPORTER_ATTR
+   : 'filename'
+   | 'path'
+   | 'endOfLine'
+   | 'separator'
+   | 'title'
+   | 'style'
+   | 'exportFullHtml'
+   ;
+
+// Delimiters
+terminal DOT: '.';
+
+terminal fragment TRUE: 'true';
+terminal fragment FALSE: 'false';
+
+terminal BOOLEAN
+    : TRUE | FALSE
+    ;
+    
+terminal INTEGER
+    : ('0'..'9')+
+    ;
+
+terminal DOUBLE
+    : ('0'..'9')+ DOT ('0'..'9')+
+    ;
