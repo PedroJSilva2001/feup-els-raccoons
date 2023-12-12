@@ -24,7 +24,8 @@ public class Signatures {
             VARIADIC_TABLE,
             STRING_MAP,
             TABLE_SCHEMA,
-            EXPORTER
+            EXPORTER,
+            INTEGER
         }
     }
 
@@ -176,6 +177,18 @@ public class Signatures {
 
         operationSignatures.put("export", exportSignature);
         operationClass.put("export", ExportOperation.class);
+
+        var limitSignature = new ArrayList<AttributeValue>();
+        limitSignature.add(new AttributeValue(AttributeValue.Type.INTEGER, 0, true));
+
+        operationSignatures.put("limit", limitSignature);
+        operationClass.put("limit", LimitOperation.class);
+
+        var groupBySignature = new ArrayList<AttributeValue>();
+        groupBySignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
+
+        operationSignatures.put("groupBy", groupBySignature);
+        operationClass.put("groupBy", GroupByOperation.class);
     }
 
     static {
@@ -303,6 +316,8 @@ public class Signatures {
             if (parameterType == String.class && parameterSignature.type() == AttributeValue.Type.STRING && parameter instanceof String) {
                 parameterValues[currentParameterTypeIndex] = parameter;
             } else if ((parameterType == Boolean.class || parameterType == boolean.class ) && parameterSignature.type() == AttributeValue.Type.BOOLEAN && parameter instanceof Boolean) {
+                parameterValues[currentParameterTypeIndex] = parameter;
+            } else if ((parameterType == Integer.class || parameterType == int.class) && parameterSignature.type() == AttributeValue.Type.INTEGER && parameter instanceof Integer) {
                 parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Predicate.class && parameterSignature.type() == AttributeValue.Type.EXPRESSION && parameter instanceof Predicate) {
                 parameterValues[currentParameterTypeIndex] = parameter;

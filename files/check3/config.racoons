@@ -42,9 +42,20 @@ exporter htmlExporter of html (
     exportFullHtml: true
 )
 
+exporter testExporter of html (
+    filename: "test.html"
+    path: "./build/"
+    exportFullHtml: true
+)
+
+
 dynamicTable = table(dynamic)
 staticTable = table(static)
 functionsTable = table(functions)
+
+functionsGroup = functionsTable -> groupBy("Path") -> sort("time%", false) -> limit(3) -> get
+
+functionsGroup -> export(testExporter)
 
 top1Function = functionsTable -> where(col("name") == "foo1()")
 top2Function = functionsTable -> where(col("name") == "foo2()")

@@ -13,6 +13,7 @@ import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
 import pt.up.fe.els2023.model.operations.*;
+import pt.up.fe.els2023.model.table.RacoonGroupTable;
 import pt.up.fe.els2023.model.table.RacoonTable;
 import pt.up.fe.els2023.model.table.Table;
 import pt.up.fe.els2023.model.table.Value;
@@ -754,7 +755,7 @@ public class InterpreterRuntime {
             throw new RacoonsRuntimeException(diagnostic);
         }
 
-        if (!(left instanceof Table leftTable)) {
+        if (!(left instanceof Table) && !(left instanceof RacoonGroupTable)) {
             var diagnostic = Diagnostic.error(
                     symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(tableCascade).getStartLine(),
@@ -772,11 +773,16 @@ public class InterpreterRuntime {
                 throw new AssertionError("Unsupported operation " + rightExpression);
             }
 
-            var operationResult = operation.execute(leftTable);
+            var operationResult = left instanceof Table table
+                    ? operation.execute(table)
+                    : operation.execute((RacoonGroupTable) left);
 
             return switch (operationResult.getType()) {
                 case TABLE ->
                     operationResult.getTable();
+
+                case GROUP_TABLE ->
+                    operationResult.getGroupTable();
 
                 case VALUE ->
                     operationResult.getValue().getValue();
@@ -809,32 +815,7 @@ public class InterpreterRuntime {
             var parameter = parameters.get(0).getExpression();
             var analysedParameter = analyseLogicalOr(parameter);
 
-            Predicate<RowWrapper> predicate;
-
-            if (analysedParameter instanceof Boolean) {
-                predicate = rowWrapper -> (Boolean) analysedParameter;
-            } else if (analysedParameter instanceof RowWrapperFunction function) {
-                predicate = rowWrapper -> {
-                    var value = function.apply(rowWrapper);
-
-                    try {
-                        return (Boolean) value.getValue();
-                    } catch (ClassCastException e) {
-                        var diagnostic = Diagnostic.error(
-                                symbolTable.getRacoonsConfigFilename(),
-                                NodeModelUtils.getNode(parameter).getStartLine(),
-                                -1,
-                                "Expected boolean, got " + value.getValue().getClass().getName()
-                        );
-
-                        throw new RacoonsRuntimeException(diagnostic);
-                    } catch (Exception e) {
-                        return false;
-                    }
-                };
-            } else {
-                throw new AssertionError("Unsupported type " + analysedParameter.getClass().getName() + " in where operation");
-            }
+            Predicate<RowWrapper> predicate = getRowWrapperPredicate(analysedParameter, parameter);
 
             if (Objects.equals(name, "where")) {
                 return new WhereOperation(predicate);
@@ -850,6 +831,36 @@ public class InterpreterRuntime {
         }
 
         return Signatures.createOperation(name, parameters);
+    }
+
+    private Predicate<RowWrapper> getRowWrapperPredicate(Object analysedParameter, LogicalOr parameter) {
+        Predicate<RowWrapper> predicate;
+
+        if (analysedParameter instanceof Boolean) {
+            predicate = rowWrapper -> (Boolean) analysedParameter;
+        } else if (analysedParameter instanceof RowWrapperFunction function) {
+            predicate = rowWrapper -> {
+                var value = function.apply(rowWrapper);
+
+                try {
+                    return (Boolean) value.getValue();
+                } catch (ClassCastException e) {
+                    var diagnostic = Diagnostic.error(
+                            symbolTable.getRacoonsConfigFilename(),
+                            NodeModelUtils.getNode(parameter).getStartLine(),
+                            -1,
+                            "Expected boolean, got " + value.getValue().getClass().getName()
+                    );
+
+                    throw new RacoonsRuntimeException(diagnostic);
+                } catch (Exception e) {
+                    return false;
+                }
+            };
+        } else {
+            throw new AssertionError("Unsupported type " + analysedParameter.getClass().getName() + " in where operation");
+        }
+        return predicate;
     }
 
     private Object analyseIdentifier(Identifier identifier) {
