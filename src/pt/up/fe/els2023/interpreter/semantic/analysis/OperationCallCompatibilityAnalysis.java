@@ -145,7 +145,7 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
                     symbolTable.getRawSymbol(((IdentifierImpl) param.getExpression()).getId()).type() != Symbol.Type.STRING) {
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(operationCall).getStartLine(), -1,
-                        "Symbol '" + ((IdentifierImpl) param.getExpression()).getId() + "' must be of type string"));
+                        "Symbol '" + (param.getExpression()) + "' must be of type string"));
             } else if (!param.getExpression().getClass().getName().equals(StringLiteralImpl.class.getName())) {
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(operationCall).getStartLine(), -1,

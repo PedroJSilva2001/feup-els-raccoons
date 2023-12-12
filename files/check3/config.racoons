@@ -31,33 +31,20 @@ nft functions of json (
     )
 )
 
-exporter dynamicExporter of csv (
-    filename: "dynamic.csv"
-    path: "./build/"
-)
-
-exporter staticExporter of csv (
-    filename: "static.csv"
-    path: "./build/"
-)
-
-exporter functionsExporter of csv (
-    filename: "functions.csv"
-    path: "./build/"
-)
-
-exporter finalExporter of csv (
+exporter csvExporter of csv (
     filename: "final.csv"
     path: "./build/"
+)
+
+exporter htmlExporter of html (
+    filename: "final.html"
+    path: "./build/"
+    exportFullHtml: true
 )
 
 dynamicTable = table(dynamic)
 staticTable = table(static)
 functionsTable = table(functions)
-
-dynamicTable -> sort("Path") -> export(dynamicExporter)
-staticTable -> sort("Path") -> export(staticExporter)
-functionsTable -> sort("Path") -> export(functionsExporter)
 
 top1Function = functionsTable -> where(col("name") == "foo1()")
 top2Function = functionsTable -> where(col("name") == "foo2()")
@@ -71,6 +58,7 @@ topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, 
 final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
 
 finalSum = final -> columnSum()
+finalMean = final -> columnMean()
 
-topFunctions -> export(functionsExporter)
-final -> concatVertical(finalSum) ->  export(finalExporter)
+final -> concatVertical(finalSum, finalMean) ->  export(csvExporter)
+final -> concatVertical(finalSum, finalMean) ->  export(htmlExporter)
