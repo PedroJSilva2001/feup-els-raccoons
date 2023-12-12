@@ -4,14 +4,9 @@ package pt.up.fe.els2023;
 import pt.up.fe.els2023.interpreter.diagnostic.Reportable;
 import pt.up.fe.els2023.interpreter.runtime.InterpreterRuntime;
 import pt.up.fe.els2023.interpreter.semantic.SemanticAnalyser;
-import pt.up.fe.els2023.interpreter.signatures.Signatures;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalyser;
-import pt.up.fe.els2023.model.operations.RowWrapper;
-import pt.up.fe.els2023.model.operations.TableOperation;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.function.Predicate;
 
 public class Main {
 

@@ -1,16 +1,16 @@
 package pt.up.fe.els2023.interpreter.semantic.analysis;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
-import pt.up.fe.els2023.interpreter.signatures.Signatures;
 import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
-import pt.up.fe.els2023.racoons.Expression;
 import pt.up.fe.els2023.racoons.MapGet;
 import pt.up.fe.els2023.racoons.OperationCall;
-import pt.up.fe.els2023.racoons.impl.*;
+import pt.up.fe.els2023.racoons.impl.IdentifierImpl;
+import pt.up.fe.els2023.racoons.impl.MapGetImpl;
+import pt.up.fe.els2023.racoons.impl.OperationCallImpl;
+import pt.up.fe.els2023.racoons.impl.StringLiteralImpl;
 
 public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis {
     public OperationCallCompatibilityAnalysis() {
@@ -25,8 +25,7 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
         var operationName = operationCall.getName();
 
         switch (operationName) {
-            case "count", "min", "max", "sum", "mean", "std", "var",
-                    "select", "reject":
+            case "count", "min", "max", "sum", "mean", "std", "var", "select", "reject":
                 // variadic string column
                 //TODO
                 validateVariadicStringColumn(operationName, operationCall, symbolTable);
@@ -64,6 +63,8 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
                 break;
             case "groupBy", "limit":
                 break;
+            case "columnSum", "columnMean":
+                break;
             default:
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(node).getStartLine(), -1,
@@ -76,22 +77,39 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
 
     private void validateJoin(OperationCall operationCall, SymbolTable symbolTable) {
         var operationParams = operationCall.getParameters();
-        if (operationParams == null || operationParams.size() != 2 ||
-                (!operationParams.get(1).getExpression().getClass().getName().equals(IdentifierImpl.class.getName()) &&
-                        !operationParams.get(1).getExpression().getClass().getName().equals(StringLiteralImpl.class.getName()))) {
+        if (operationParams == null || operationParams.size() != 2) {
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(operationCall).getStartLine(), -1,
-                    "Operation join() must have exactly one argument of type table schema and one argument of type string"));
-        } else if (!operationParams.get(0).getExpression().getClass().getName().equals(IdentifierImpl.class.getName()) ||
-                !symbolTable.hasTableSchema(((IdentifierImpl) operationParams.get(0).getExpression()).getId()) ||
-                symbolTable.getTableSchema(((IdentifierImpl) operationParams.get(0).getExpression()).getId()).type() != Symbol.Type.TABLE_SCHEMA) {
+                    "Operation join() must have exactly one argument of type table and one argument of type string"));
+            return;
+        }
+        var firstExpr = operationParams.get(0).getExpression();
+        var secondExpr = operationParams.get(1).getExpression();
+        if ((!secondExpr.getClass().getName().equals(IdentifierImpl.class.getName()) &&
+                !secondExpr.getClass().getName().equals(StringLiteralImpl.class.getName())) ||
+                (!firstExpr.getClass().getName().equals(IdentifierImpl.class.getName()) &&
+                        !firstExpr.getClass().getName().equals(OperationCallImpl.class.getName()))) {
+
+            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(operationCall).getStartLine(), -1,
+                    "Operation join() must have exactly one argument of type table and one argument of type string"));
+        } else if (firstExpr.getClass().getName().equals(OperationCallImpl.class.getName()) &&
+                !((OperationCallImpl) firstExpr).getName().equals("table")) {
+
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(operationParams.get(0)).getStartLine(), -1,
-                    "Symbol '" + ((IdentifierImpl) operationParams.get(0).getExpression()).getId() + "' must be of type table schema"));
-        } else if (operationParams.get(1).getExpression().getClass().getName().equals(IdentifierImpl.class.getName()) && (
-                !symbolTable.hasRawSymbol(((IdentifierImpl) operationParams.get(1).getExpression()).getId()) ||
-                        symbolTable.getRawSymbol(((IdentifierImpl) operationParams.get(1).getExpression()).getId()).type() != Symbol.Type.STRING
-        )) {
+                    "Operation '" + ((OperationCallImpl) firstExpr).getName() + "' must be of type table"));
+        } else if (firstExpr.getClass().getName().equals(IdentifierImpl.class.getName()) &&
+                symbolTable.hasRawSymbol(((IdentifierImpl) firstExpr).getId()) &&
+                symbolTable.getRawSymbol(((IdentifierImpl) firstExpr).getId()).type() != Symbol.Type.TABLE) {
+
+            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+                    NodeModelUtils.getNode(operationParams.get(0)).getStartLine(), -1,
+                    "Symbol '" + ((IdentifierImpl) firstExpr).getId() + "' must be of type table"));
+        } else if (secondExpr.getClass().getName().equals(IdentifierImpl.class.getName()) &&
+                (!symbolTable.hasRawSymbol(((IdentifierImpl) secondExpr).getId()) ||
+                        symbolTable.getRawSymbol(((IdentifierImpl) secondExpr).getId()).type() != Symbol.Type.STRING)) {
+
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(operationCall).getStartLine(), -1,
                     "Symbol '" + ((IdentifierImpl) operationParams.get(1).getExpression()).getId() + "' must be of type string"));
@@ -103,11 +121,11 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
 
     private void validateTableConstructor(OperationCall operationCall, SymbolTable symbolTable) {
         var operationParams = operationCall.getParameters();
-        if (operationParams == null || operationParams.size() != 1
-                || !operationParams.get(0).getExpression().getClass().getName().equals(IdentifierImpl.class.getName())) {
+        if (operationParams == null || operationParams.size() != 1 ||
+                !operationParams.get(0).getExpression().getClass().getName().equals(IdentifierImpl.class.getName())) {
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(operationCall).getStartLine(), -1,
-                    "Operation table() must have one argument of type table schema"));
+                    "Operation table() must have one argument of type table"));
         } else if (!symbolTable.hasTableSchema(((IdentifierImpl) operationParams.get(0).getExpression()).getId()) ||
                 symbolTable.getTableSchema(((IdentifierImpl) operationParams.get(0).getExpression()).getId()).type() != Symbol.Type.TABLE_SCHEMA) {
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
@@ -118,8 +136,8 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
 
     private void validateExporter(OperationCall operationCall, SymbolTable symbolTable) {
         var operationParams = operationCall.getParameters();
-        if (operationParams == null || operationParams.size() != 1
-                || !operationParams.get(0).getExpression().getClass().getName().equals(IdentifierImpl.class.getName())) {
+        if (operationParams == null || operationParams.size() != 1 ||
+                !operationParams.get(0).getExpression().getClass().getName().equals(IdentifierImpl.class.getName())) {
             addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(operationCall).getStartLine(), -1,
                     "Operation export() must have one argument of type exporter"));
@@ -140,13 +158,14 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
             return;
         }
         for (var param : operationParams) {
-            if (!param.getExpression().getClass().getName().equals(IdentifierImpl.class.getName()) ||
-                    !symbolTable.hasRawSymbol(((IdentifierImpl) param.getExpression()).getId()) ||
-                    symbolTable.getRawSymbol(((IdentifierImpl) param.getExpression()).getId()).type() != Symbol.Type.STRING) {
+            if (param.getExpression().getClass().getName().equals(IdentifierImpl.class.getName()) &&
+                    (!symbolTable.hasRawSymbol(((IdentifierImpl) param.getExpression()).getId()) ||
+                            symbolTable.getRawSymbol(((IdentifierImpl) param.getExpression()).getId()).type() != Symbol.Type.STRING)) {
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(operationCall).getStartLine(), -1,
-                        "Symbol '" + (param.getExpression()) + "' must be of type string"));
-            } else if (!param.getExpression().getClass().getName().equals(StringLiteralImpl.class.getName())) {
+                        "Symbol '" + ((IdentifierImpl) param.getExpression()).getId() + "' must be of type string"));
+            } else if (!param.getExpression().getClass().getName().equals(StringLiteralImpl.class.getName()) &&
+                    !param.getExpression().getClass().getName().equals(IdentifierImpl.class.getName())) {
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                         NodeModelUtils.getNode(operationCall).getStartLine(), -1,
                         "Operation " + opName + "() must have " + i + " argument(s) of type string"));
