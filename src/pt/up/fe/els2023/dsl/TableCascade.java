@@ -66,8 +66,8 @@ public class TableCascade {
         return addNonAggregateOperation(new ConcatHorizontalOperation(List.of(others)));
     }
 
-    public TableCascade rename(Map<String, String> columnMapping) throws TableCascadeAlreadyConsumedException {
-        return addNonAggregateOperation(new RenameOperation(columnMapping));
+    public TableCascade rename(String oldColumnName, String newColumnName) throws TableCascadeAlreadyConsumedException {
+        return addNonAggregateOperation(new RenameOperation(oldColumnName, newColumnName));
     }
 
     public TableCascade sort(String column, boolean ascending) throws TableCascadeAlreadyConsumedException {
