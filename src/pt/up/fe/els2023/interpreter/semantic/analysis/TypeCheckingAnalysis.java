@@ -11,88 +11,101 @@ public class TypeCheckingAnalysis extends PreorderSemanticAnalysis {
     public TypeCheckingAnalysis() {
         super();
 
-        addVisit(AssignmentImpl.class.getName(), this::visitAssignment);
-        addVisit(LogicalOrImpl.class.getName(), this::visitBinaryOp);
-        addVisit(LogicalAndImpl.class.getName(), this::visitBinaryOp);
-        addVisit(EqualsAndNEqualsImpl.class.getName(), this::visitComparison);
-        addVisit(ComparisonImpl.class.getName(), this::visitComparison);
-        addVisit(AddAndSubImpl.class.getName(), this::visitMathOp);
-        addVisit(MultAndDivImpl.class.getName(), this::visitMathOp);
-        addVisit(UnaryPreOpImpl.class.getName(), this::visitUnaryPreOp);
-        addVisit(TableCascadeImpl.class.getName(), this::visitTableCascade);
+        addVisit(ExpressionImpl.class.getName(), this::visitExpression);
     }
 
-    private boolean containsError = false;
+    private Void visitExpression(EObject node, SymbolTable symbolTable) {
+        Diagnostic error = null;
+        Diagnostic newError = null;
 
-    private Void visitAssignment(EObject node, SymbolTable symbolTable) {
-        containsError = false;
+        var it = node.eAllContents();
+
+        EObject expression;
+
+        while (it.hasNext()) {
+            expression = it.next();
+
+            if (expression.getClass().getName().equals(LogicalOrImpl.class.getName()) || expression.getClass().getName().equals(LogicalAndImpl.class.getName())) {
+                newError = visitBinaryOp(expression, symbolTable);
+            } else if (expression.getClass().getName().equals(EqualsAndNEqualsImpl.class.getName()) || expression.getClass().getName().equals(ComparisonImpl.class.getName())) {
+                newError = visitComparison(expression, symbolTable);
+            } else if (expression.getClass().getName().equals(AddAndSubImpl.class.getName()) || expression.getClass().getName().equals(MultAndDivImpl.class.getName())) {
+                newError = visitMathOp(expression, symbolTable);
+            } else if (expression.getClass().getName().equals(UnaryPreOpImpl.class.getName())) {
+                newError = visitUnaryPreOp(expression, symbolTable);
+            } else if (expression.getClass().getName().equals(TableCascadeImpl.class.getName())) {
+                newError = visitTableCascade(expression, symbolTable);
+            }
+
+            if (newError != null) {
+                error = newError;
+            }
+        }
+
+        if (error != null) {
+            addError(error);
+        }
 
         return null;
     }
 
-    private Void visitBinaryOp(EObject node, SymbolTable symbolTable) {
+    private Diagnostic visitBinaryOp(EObject node, SymbolTable symbolTable) {
         var leftType = getType(((LogicalOrImpl) node).getLeft(), symbolTable);
         var rightType = getType(((LogicalOrImpl) node).getRight(), symbolTable);
 
-        if ((leftType != rightType || leftType != Symbol.Type.BOOLEAN) && !containsError) {
-            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+        if (leftType != rightType || leftType != Symbol.Type.BOOLEAN) {
+            return Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(node).getStartLine(), -1,
-                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine()));
-            containsError = true;
+                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine());
         }
         return null;
     }
 
-    private Void visitComparison(EObject node, SymbolTable symbolTable) {
+    private Diagnostic visitComparison(EObject node, SymbolTable symbolTable) {
         var leftType = getType(((LogicalOrImpl) node).getLeft(), symbolTable);
         var rightType = getType(((LogicalOrImpl) node).getRight(), symbolTable);
 
-        if ((leftType != rightType || (leftType != Symbol.Type.BOOLEAN && leftType != Symbol.Type.NUMBER && leftType != Symbol.Type.STRING)) && !containsError) {
-            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+        if ((leftType != rightType || (leftType != Symbol.Type.BOOLEAN && leftType != Symbol.Type.NUMBER && leftType != Symbol.Type.STRING)) && (leftType != Symbol.Type.NOT_RESOLVED && rightType != Symbol.Type.NOT_RESOLVED)) {
+            return Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(node).getStartLine(), -1,
-                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine()));
-            containsError = true;
+                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine());
         }
         return null;
     }
 
-    private Void visitMathOp(EObject node, SymbolTable symbolTable) {
+    private Diagnostic visitMathOp(EObject node, SymbolTable symbolTable) {
         var leftType = getType(((LogicalOrImpl) node).getLeft(), symbolTable);
         var rightType = getType(((LogicalOrImpl) node).getRight(), symbolTable);
 
-        if ((leftType != rightType || leftType != Symbol.Type.NUMBER) && !containsError) {
-            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+        if ((leftType != rightType || leftType != Symbol.Type.NUMBER) && (leftType != Symbol.Type.NOT_RESOLVED && rightType != Symbol.Type.NOT_RESOLVED)) {
+            return Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(node).getStartLine(), -1,
-                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine()));
-            containsError = true;
+                    "Incompatible types '" + leftType + "' and '" + rightType + "' in line " + NodeModelUtils.getNode(node).getStartLine());
         }
         return null;
     }
 
-    private Void visitUnaryPreOp(EObject node, SymbolTable symbolTable) {
+    private Diagnostic visitUnaryPreOp(EObject node, SymbolTable symbolTable) {
         var unaryPreOpType = getType(node, symbolTable);
         var subExpression = ((UnaryPreOpImpl) node).getSubExpression();
 
         var subExpressionType = getType(subExpression, symbolTable);
 
-        if (subExpressionType != unaryPreOpType && !containsError) {
-            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+        if (subExpressionType != unaryPreOpType) {
+            return Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(node).getStartLine(), -1,
-                    "Incompatible types '" + subExpressionType + "' and '" + unaryPreOpType + "' in line " + NodeModelUtils.getNode(node).getStartLine()));
-            containsError = true;
+                    "Incompatible types '" + subExpressionType + "' and '" + unaryPreOpType + "' in line " + NodeModelUtils.getNode(node).getStartLine());
         }
-
         return null;
     }
 
-    private Void visitTableCascade(EObject node, SymbolTable symbolTable) {
+    private Diagnostic visitTableCascade(EObject node, SymbolTable symbolTable) {
         var rightType = getType(((TableCascadeImpl) node).getRight(), symbolTable);
 
-        if (rightType != Symbol.Type.TABLE && rightType != Symbol.Type.MAP && rightType != Symbol.Type.NUMBER && !containsError) {
-            addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
+        if (rightType != Symbol.Type.TABLE && rightType != Symbol.Type.MAP && rightType != Symbol.Type.NUMBER) {
+            return Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
                     NodeModelUtils.getNode(node).getStartLine(), -1,
-                    "Incompatible types in line " + NodeModelUtils.getNode(node).getStartLine()));
-            containsError = true;
+                    "Incompatible types in line " + NodeModelUtils.getNode(node).getStartLine());
         }
         return null;
     }
@@ -121,8 +134,8 @@ public class TypeCheckingAnalysis extends PreorderSemanticAnalysis {
         } else {
             if (expressionType.equals(ParenthesisImpl.class.getName())) {
                 return getType(((ParenthesisImpl) expression).getElement().getExpression(), symbolTable);
-            } else if (expressionType.equals(PresenceOpImpl.class.getName())) {
-                return Symbol.Type.BOOLEAN;
+            } else if (expressionType.equals(PresenceOpImpl.class.getName()) || expressionType.equals(ColumnAccessImpl.class.getName()) || expressionType.equals(NullCheckImpl.class.getName()) || expressionType.equals(MapGetImpl.class.getName())) {
+                return Symbol.Type.NOT_RESOLVED;
             } else if (expressionType.equals(IntLiteralImpl.class.getName())
                     || expressionType.equals(DoubleLiteralImpl.class.getName())) {
                 return Symbol.Type.NUMBER;
@@ -152,7 +165,12 @@ public class TypeCheckingAnalysis extends PreorderSemanticAnalysis {
                 } else if (symbolTable.getSource(idName) != null) {
                     return Symbol.Type.SOURCE;
                 } else if (symbolTable.getRawSymbol(idName) != null) {
-                    return symbolTable.getRawSymbol(idName).type();
+                    var type = symbolTable.getRawSymbol(idName).type();
+
+                    if (type == Symbol.Type.INTEGER || type == Symbol.Type.DOUBLE) {
+                        return Symbol.Type.NUMBER;
+                    }
+                    return type;
                 }
             }
         }

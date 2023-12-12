@@ -45,7 +45,7 @@ public class SemanticAnalyser implements SemanticAnalysis {
         analyseExpressionsAndAssignments(result.root());
 
         for (var symb : symbolTable.getSymbols()) {
-            System.out.println(symb.name() + " " + symb.type() + " " + symb.declarationLine());
+          //  System.out.println(symb.name() + " " + symb.type() + " " + symb.declarationLine());
         }
 
         return new SemanticAnalysisResult(symbolTable, infos, warnings, errors);
@@ -84,6 +84,8 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new TableCascadeStartAnalysis(),
                 new ImproperTerminalOperationAnalysis(),
                 new TypeCheckingAnalysis(),
+                new OperationCallCompatibilityAnalysis(),
+                new FilterSpecialOperationsUseAnalysis(),
                 new OperationCallCompatibilityAnalysis());
 
 
@@ -108,6 +110,7 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new AssignedVariableTypeInferAnalysis(),
                 new ImproperTerminalOperationAnalysis(),
                 new TypeCheckingAnalysis(),
+                new FilterSpecialOperationsUseAnalysis(),
                 new OperationCallCompatibilityAnalysis());
 
         for (var analysisStep : analysis) {
