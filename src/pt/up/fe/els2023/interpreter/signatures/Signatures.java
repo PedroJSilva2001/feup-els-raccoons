@@ -93,6 +93,12 @@ public class Signatures {
         operationSignatures.put("columnSum", columnSum);
         operationClass.put("columnSum", ColumnSum.class);
 
+        var columnMean = new ArrayList<AttributeValue>();
+        columnMean.add(new AttributeValue(AttributeValue.Type.VARIADIC_STRING, List.of(), false));
+
+        operationSignatures.put("columnMean", columnMean);
+        operationClass.put("columnMean", ColumnMean.class);
+
         var sortSignature = new ArrayList<AttributeValue>();
         sortSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
         sortSignature.add(new AttributeValue(AttributeValue.Type.BOOLEAN, true, false));
