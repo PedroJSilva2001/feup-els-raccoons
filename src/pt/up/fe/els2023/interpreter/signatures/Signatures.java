@@ -24,7 +24,8 @@ public class Signatures {
             VARIADIC_TABLE,
             STRING_MAP,
             TABLE_SCHEMA,
-            EXPORTER
+            EXPORTER,
+            INTEGER
         }
     }
 
@@ -86,10 +87,23 @@ public class Signatures {
         operationClass.put("concatHorizontal", ConcatHorizontalOperation.class);
 
         var renameSignature = new ArrayList<AttributeValue>();
-        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING_MAP, Map.of(), false));
+        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING, null, true));
+        renameSignature.add(new AttributeValue(AttributeValue.Type.STRING, null, true));
 
-        operationSignatures.put("rename", renameSignature);
-        operationClass.put("rename", RenameOperation.class);
+        operationSignatures.put("renameColumn", renameSignature);
+        operationClass.put("renameColumn", RenameOperation.class);
+
+        var columnSum = new ArrayList<AttributeValue>();
+        columnSum.add(new AttributeValue(AttributeValue.Type.VARIADIC_STRING, List.of(), false));
+
+        operationSignatures.put("columnSum", columnSum);
+        operationClass.put("columnSum", ColumnSum.class);
+
+        var columnMean = new ArrayList<AttributeValue>();
+        columnMean.add(new AttributeValue(AttributeValue.Type.VARIADIC_STRING, List.of(), false));
+
+        operationSignatures.put("columnMean", columnMean);
+        operationClass.put("columnMean", ColumnMean.class);
 
         var sortSignature = new ArrayList<AttributeValue>();
         sortSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
@@ -152,17 +166,35 @@ public class Signatures {
         operationSignatures.put("var", varSignature);
         operationClass.put("var", VarOperation.class);
 
-        /*var tableSignature = new ArrayList<AttributeValue>();
+        var tableSignature = new ArrayList<AttributeValue>();
         tableSignature.add(new AttributeValue(AttributeValue.Type.TABLE_SCHEMA, "", false));
 
         operationSignatures.put("table", tableSignature);
-        operationClass.put("table", TableCreateOperation.class);*/
+        operationClass.put("table", TableCreateOperation.class);
 
         var exportSignature = new ArrayList<AttributeValue>();
         exportSignature.add(new AttributeValue(AttributeValue.Type.EXPORTER, "", true));
 
         operationSignatures.put("export", exportSignature);
         operationClass.put("export", ExportOperation.class);
+
+        var limitSignature = new ArrayList<AttributeValue>();
+        limitSignature.add(new AttributeValue(AttributeValue.Type.INTEGER, 0, true));
+
+        operationSignatures.put("limit", limitSignature);
+        operationClass.put("limit", LimitOperation.class);
+
+        var groupBySignature = new ArrayList<AttributeValue>();
+        groupBySignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
+
+        operationSignatures.put("groupBy", groupBySignature);
+        operationClass.put("groupBy", GroupByOperation.class);
+
+        var getRowSignature = new ArrayList<AttributeValue>();
+        getRowSignature.add(new AttributeValue(AttributeValue.Type.INTEGER, 0, true));
+
+        operationSignatures.put("getRow", getRowSignature);
+        operationClass.put("getRow", GetRowOperation.class);
     }
 
     static {
@@ -291,6 +323,8 @@ public class Signatures {
                 parameterValues[currentParameterTypeIndex] = parameter;
             } else if ((parameterType == Boolean.class || parameterType == boolean.class ) && parameterSignature.type() == AttributeValue.Type.BOOLEAN && parameter instanceof Boolean) {
                 parameterValues[currentParameterTypeIndex] = parameter;
+            } else if ((parameterType == Integer.class || parameterType == int.class) && parameterSignature.type() == AttributeValue.Type.INTEGER && parameter instanceof Integer) {
+                parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Predicate.class && parameterSignature.type() == AttributeValue.Type.EXPRESSION && parameter instanceof Predicate) {
                 parameterValues[currentParameterTypeIndex] = parameter;
             } else if (parameterType == Table.class && parameterSignature.type() == AttributeValue.Type.TABLE && parameter instanceof Table) {
@@ -313,14 +347,6 @@ public class Signatures {
 
             currentParameterTypeIndex++;
             currentParameterIndex++;
-        }
-
-        if (!currentStringVariadic.isEmpty()) {
-            parameterValues[currentParameterTypeIndex] = currentStringVariadic;
-        }
-
-        if (!currentTableVariadic.isEmpty()) {
-            parameterValues[currentParameterTypeIndex] = currentTableVariadic;
         }
 
         try {

@@ -3,6 +3,7 @@ package pt.up.fe.els2023.model.table;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Row {
     private final List<Value> values;
@@ -54,7 +55,7 @@ public class Row {
         }
 
         for (int i = 0; i < this.values.size(); i++) {
-            if (!this.get(i).equals(other.get(i))) {
+            if (!Objects.equals(this.get(i), other.get(i))) {
                 return false;
             }
         }

@@ -42,4 +42,6 @@ public interface SymbolTable {
 
     boolean hasSymbol(String name);
     List<Symbol<?>> getSymbols();
+
+    void updateRawSymbolValue(String name, Object value);
 }

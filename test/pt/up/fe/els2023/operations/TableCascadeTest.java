@@ -206,7 +206,7 @@ public class TableCascadeTest {
 
     @Test
     public void testMax() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("242")), table1.btc().max("Col1"));
+        Assertions.assertEquals(Value.of(242.0), table1.btc().max("Col1"));
 
 
         Assertions.assertEquals(Value.of(56L), table1.btc().max("Col2"));
@@ -223,7 +223,7 @@ public class TableCascadeTest {
         Assertions.assertEquals(Value.of(new BigInteger("1221")), table2.btc().max("Col3"));
 
         var maxes = new HashMap<String, Value>();
-        maxes.put("Col1", Value.of(new BigDecimal("242")));
+        maxes.put("Col1", Value.of(242.0));
         maxes.put("Col2", Value.of(56L));
 
         Assertions.assertEquals(maxes, table1.btc().max("Col1", "Col2"));
@@ -234,7 +234,7 @@ public class TableCascadeTest {
 
     @Test
     public void testMin() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("1")), table1.btc().min("Col1"));
+        Assertions.assertEquals(Value.of(1.0), table1.btc().min("Col1"));
 
         Assertions.assertEquals(Value.of(55L), table1.btc().min("Col2"));
 
@@ -247,7 +247,7 @@ public class TableCascadeTest {
         Assertions.assertEquals(Value.of(new BigInteger("12")), table2.btc().min("Col3"));
 
         var mins = new HashMap<String, Value>();
-        mins.put("Col1", Value.of(new BigDecimal("1")));
+        mins.put("Col1", Value.of(1.0));
         mins.put("Col2", Value.of(55L));
 
         Assertions.assertEquals(mins, table1.btc().min("Col1", "Col2"));
@@ -427,7 +427,7 @@ public class TableCascadeTest {
 
     @Test
     public void testSum() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), table1.btc().sum("Col1"));
+        Assertions.assertEquals(Value.of(478.12), table1.btc().sum("Col1"));
 
         Assertions.assertEquals(Value.of(222), table1.btc().sum("Col2"));
 
@@ -440,7 +440,7 @@ public class TableCascadeTest {
         Assertions.assertEquals(Value.of(new BigInteger("1356")), table2.btc().sum("Col3"));
 
         var maxes = new HashMap<String, Value>();
-        maxes.put("Col1", Value.of(new BigDecimal("478.12")));
+        maxes.put("Col1", Value.of(478.12));
         maxes.put("Col2", Value.of(222));
 
         Assertions.assertEquals(maxes, table1.btc().sum("Col1", "Col2"));
@@ -450,7 +450,7 @@ public class TableCascadeTest {
 
     @Test
     public void testMean() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), table1.btc().mean("Col1"));
+        Assertions.assertEquals(Value.of(68.30285714285715), table1.btc().mean("Col1"));
 
         Assertions.assertEquals(Value.of(55.5), table1.btc().mean("Col2"));
 
@@ -463,7 +463,7 @@ public class TableCascadeTest {
         Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), table2.btc().mean("Col3"));
 
         var means = new HashMap<String, Value>();
-        means.put("Col1", Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))));
+        means.put("Col1", Value.of(68.30285714285715));
         means.put("Col2", Value.of(55.5));
 
         Assertions.assertEquals(means, table1.btc().mean("Col1", "Col2"));
@@ -473,7 +473,7 @@ public class TableCascadeTest {
 
     @Test
     public void testVar() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))),
+        Assertions.assertEquals(Value.of(10693.727477551021),
                 table1.btc().var("Col1"));
 
         Assertions.assertEquals(Value.of(0.25), table1.btc().var("Col2"));
@@ -484,10 +484,10 @@ public class TableCascadeTest {
 
         Assertions.assertNull(table2.btc().var("Col2"));
 
-        Assertions.assertEquals(Value.of(new BigDecimal("893202").divide(new BigDecimal("3"), new MathContext(1000))), table2.btc().var("Col3"));
+        Assertions.assertEquals(Value.of(297734.0), table2.btc().var("Col3"));
 
         var vars = new HashMap<String, Value>();
-        vars.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))));
+        vars.put("Col1", Value.of(10693.727477551021));
         vars.put("Col2", Value.of(0.25));
         Assertions.assertEquals(vars, table1.btc().var("Col1", "Col2"));
 
@@ -496,7 +496,7 @@ public class TableCascadeTest {
 
     @Test
     public void testStd() throws ColumnNotFoundException, TableCascadeAlreadyConsumedException {
-        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))),
+        Assertions.assertEquals(Value.of(103.41048050149956),
                 table1.btc().std("Col1"));
 
         Assertions.assertEquals(Value.of(0.5), table1.btc().std("Col2"));
@@ -507,10 +507,10 @@ public class TableCascadeTest {
 
         Assertions.assertNull(table2.btc().std("Col2"));
 
-        Assertions.assertEquals(Value.of(new BigDecimal("297734").sqrt(new MathContext(1000))), table2.btc().std("Col3"));
+        Assertions.assertEquals(Value.of(545.6500710162146), table2.btc().std("Col3"));
 
         var stds = new HashMap<String, Value>();
-        stds.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))));
+        stds.put("Col1", Value.of(103.41048050149956));
         stds.put("Col2", Value.of(0.5));
         Assertions.assertEquals(stds, table1.btc().std("Col1", "Col2"));
 

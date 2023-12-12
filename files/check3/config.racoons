@@ -1,0 +1,78 @@
+version "1.0"
+
+source yaml from (
+    "./files/check3/files/*/analysis.yaml"
+)
+
+source xml from (
+    "./files/check3/files/*/analysis.xml"
+)
+
+source json from (
+    "./files/check3/files/*/profiling.json"
+)
+
+
+nft dynamic of yaml (
+    directory -> "Path",
+    total results dynamic all -> "%s (Dynamic)"
+)
+
+nft static of xml (
+    directory -> "Path",
+    total results static all -> "%s (Static)"
+)
+
+nft functions of json (
+    directory -> "Path",
+    "functions" each (
+        name,
+        "time%"
+    )
+)
+
+exporter csvExporter of csv (
+    filename: "final.csv"
+    path: "./build/"
+)
+
+exporter htmlExporter of html (
+    filename: "final.html"
+    path: "./build/"
+    exportFullHtml: true
+)
+
+exporter testExporter of html (
+    filename: "test.html"
+    path: "./build/"
+    exportFullHtml: true
+)
+
+
+dynamicTable = table(dynamic)
+staticTable = table(static)
+functionsTable = table(functions)
+
+functionsGroup = functionsTable -> groupBy("Path") -> sort("time%", false) -> limit(3)
+
+functionsGroup -> export(testExporter)
+
+top1Function = functionsGroup -> getRow(0)
+top2Function = functionsGroup -> getRow(1)
+top3Function = functionsGroup -> getRow(2)
+
+topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, "Path")
+    -> renameColumn("name", "name #1") -> renameColumn("time%", "% #1")
+    -> renameColumn("name_1", "name #2") -> renameColumn("time%_1", "% #2")
+    -> renameColumn("name_2", "name #3") -> renameColumn("time%_2", "% #3")
+
+final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
+
+final -> export(testExporter)
+a= col("a")
+
+finalSum = final -> columnSum()
+finalMean = final -> columnMean()
+
+final -> concatVertical(finalSum, finalMean) ->  export(csvExporter)
+final -> concatVertical(finalSum, finalMean) ->  export(htmlExporter)

@@ -94,6 +94,107 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testColumnSum() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of(393L)));
+
+        var sumResult = new ColumnSum(List.of("Col1")).execute(table2);
+
+        Assertions.assertEquals(expectedTable, sumResult.getTable());
+    }
+
+    @Test
+    public void testColumnMean() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of((double) 393L/6)));
+
+        var meanResult = new ColumnMean(List.of("Col1")).execute(table2);
+
+        Assertions.assertEquals(expectedTable, meanResult.getTable());
+    }
+
+
+    @Test
+    public void testLimit() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
+
+        var limitResult = new LimitOperation(2).execute(table1);
+
+        Assertions.assertEquals(expectedTable, limitResult.getTable());
+    }
+
+    @Test
+    public void testGroupBy() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var table = new RacoonTable();
+        table.addColumn("Path");
+        table.addColumn("Size");
+        table.addColumn("Type");
+
+        table.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        table.addRow(List.of(Value.of("/home/user"), Value.of(10L), Value.of("png")));
+        table.addRow(List.of(Value.of("/home/user"), Value.of(11L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(10L), Value.of("png")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(11L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(12L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/var"), Value.of(13L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/var"), Value.of(14L), Value.of("jpg")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Path");
+        expectedTable.addColumn("Size");
+        expectedTable.addColumn("Type");
+
+        expectedTable.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        expectedTable.addRow(List.of(Value.of("/etc"), Value.of(10L), Value.of("png")));
+        expectedTable.addRow(List.of(Value.of("/var"), Value.of(13L), Value.of("jpg")));
+
+//        var groupByResult = new GroupByOperation("Path", null).execute(table);
+
+//        Assertions.assertEquals(expectedTable, groupByResult.getTable());
+
+        expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Path");
+        expectedTable.addColumn("Size");
+        expectedTable.addColumn("Type");
+
+        expectedTable.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        expectedTable.addRow(List.of(Value.of("/etc"), Value.of(12L), Value.of("jpg")));
+        expectedTable.addRow(List.of(Value.of("/var"), Value.of(14L), Value.of("jpg")));
+
+//        groupByResult = new GroupByOperation("Path", new MaxOperation(List.of("Size"))).execute(table);
+
+//        Assertions.assertEquals(expectedTable, groupByResult.getTable());
+    }
+
+    @Test
+    public void testGetRow() throws ColumnNotFoundException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello")));
+
+        var getRowResult = new GetRowOperation(0).execute(table1);
+
+        Assertions.assertEquals(expectedTable, getRowResult.getTable());
+    }
+
+    @Test
     public void testJoin() throws ColumnNotFoundException {
         var table1 = new RacoonTable();
 
@@ -238,7 +339,7 @@ public class TableOperationsTest {
     @Test
     public void testMax() throws ColumnNotFoundException {
         var countResult = new MaxOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("242")), countResult.getValue());
+        Assertions.assertEquals(Value.of(242.0), countResult.getValue());
 
 
         countResult = new MaxOperation(List.of("Col2")).execute(table1);
@@ -261,7 +362,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(new BigInteger("1221")), countResult.getValue());
 
         var maxes = new HashMap<String, Value>();
-        maxes.put("Col1", Value.of(new BigDecimal("242")));
+        maxes.put("Col1", Value.of(242.0));
         maxes.put("Col2", Value.of(56L));
 
         countResult = new MaxOperation(List.of("Col1", "Col2")).execute(table1);
@@ -273,7 +374,7 @@ public class TableOperationsTest {
     @Test
     public void testMin() throws ColumnNotFoundException {
         var countResult = new MinOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("1")), countResult.getValue());
+        Assertions.assertEquals(Value.of(1.0), countResult.getValue());
 
         countResult = new MinOperation(List.of("Col2")).execute(table1);
         Assertions.assertEquals(Value.of(55L), countResult.getValue());
@@ -290,7 +391,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(new BigInteger("12")), countResult.getValue());
 
         var mins = new HashMap<String, Value>();
-        mins.put("Col1", Value.of(new BigDecimal("1")));
+        mins.put("Col1", Value.of(1.0));
         mins.put("Col2", Value.of(55L));
 
         countResult = new MinOperation(List.of("Col1", "Col2")).execute(table1);
@@ -490,7 +591,7 @@ public class TableOperationsTest {
     @Test
     public void testSum() throws ColumnNotFoundException {
         var sumResult = new SumOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12")), sumResult.getValue());
+        Assertions.assertEquals(Value.of(478.12), sumResult.getValue());
 
         sumResult = new SumOperation(List.of("Col2")).execute(table1);
         Assertions.assertEquals(Value.of(222), sumResult.getValue());
@@ -508,7 +609,7 @@ public class TableOperationsTest {
 
 
         var maxes = new HashMap<String, Value>();
-        maxes.put("Col1", Value.of(new BigDecimal("478.12")));
+        maxes.put("Col1", Value.of(478.12));
         maxes.put("Col2", Value.of(222));
 
         sumResult = new SumOperation(List.of("Col1", "Col2")).execute(table1);
@@ -520,7 +621,7 @@ public class TableOperationsTest {
     @Test
     public void testMean() throws ColumnNotFoundException {
         var meanResult = new MeanOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))), meanResult.getValue());
+        Assertions.assertEquals(Value.of(68.30285714285715), meanResult.getValue());
 
         meanResult = new MeanOperation(List.of("Col2")).execute(table1);
         Assertions.assertEquals(Value.of(55.5), meanResult.getValue());
@@ -538,7 +639,7 @@ public class TableOperationsTest {
         Assertions.assertEquals(Value.of(new BigInteger("1356").divide(new BigInteger("3"))), meanResult.getValue());
 
         var means = new HashMap<String, Value>();
-        means.put("Col1", Value.of(new BigDecimal("478.12").divide(new BigDecimal("7"), new MathContext(1000))));
+        means.put("Col1", Value.of(68.30285714285715));
         means.put("Col2", Value.of(55.5));
         meanResult = new MeanOperation(List.of("Col1", "Col2")).execute(table1);
         Assertions.assertEquals(means, meanResult.getValueMap());
@@ -550,7 +651,7 @@ public class TableOperationsTest {
     @Test
     public void testVar() throws ColumnNotFoundException {
         var varResult = new VarOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))),
+        Assertions.assertEquals(Value.of(10693.727477551021),
                 varResult.getValue());
 
         varResult = new VarOperation(List.of("Col2")).execute(table1);
@@ -565,10 +666,10 @@ public class TableOperationsTest {
         Assertions.assertNull(varResult.getValue());
 
         varResult = new VarOperation(List.of("Col3")).execute(table2);
-        Assertions.assertEquals(Value.of(new BigDecimal("893202").divide(new BigDecimal("3"), new MathContext(1000))), varResult.getValue());
+        Assertions.assertEquals(Value.of(297734.0), varResult.getValue());
 
         var vars = new HashMap<String, Value>();
-        vars.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000))));
+        vars.put("Col1", Value.of(10693.727477551021));
         vars.put("Col2", Value.of(0.25));
         varResult = new VarOperation(List.of("Col1", "Col2")).execute(table1);
         Assertions.assertEquals(vars, varResult.getValueMap());
@@ -579,7 +680,7 @@ public class TableOperationsTest {
     @Test
     public void testStd() throws ColumnNotFoundException {
         var stdResult = new StdOperation(List.of("Col1")).execute(table1);
-        Assertions.assertEquals(Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))),
+        Assertions.assertEquals(Value.of(103.41048050149956),
                 stdResult.getValue());
 
         stdResult = new StdOperation(List.of("Col2")).execute(table1);
@@ -594,10 +695,10 @@ public class TableOperationsTest {
         Assertions.assertNull(stdResult.getValue());
 
         stdResult = new StdOperation(List.of("Col3")).execute(table2);
-        Assertions.assertEquals(Value.of(new BigDecimal("297734").sqrt(new MathContext(1000))), stdResult.getValue());
+        Assertions.assertEquals(Value.of(545.6500710162146), stdResult.getValue());
 
         var stds = new HashMap<String, Value>();
-        stds.put("Col1", Value.of(new BigDecimal("327495404").divide(new BigDecimal("30625"), new MathContext(1000)).sqrt(new MathContext(1000))));
+        stds.put("Col1", Value.of(103.41048050149956));
         stds.put("Col2", Value.of(0.5));
         stdResult = new StdOperation(List.of("Col1", "Col2")).execute(table1);
         Assertions.assertEquals(stds, stdResult.getValueMap());

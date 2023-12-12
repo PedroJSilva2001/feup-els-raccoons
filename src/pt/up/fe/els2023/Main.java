@@ -2,6 +2,7 @@ package pt.up.fe.els2023;
 
 
 import pt.up.fe.els2023.interpreter.diagnostic.Reportable;
+import pt.up.fe.els2023.interpreter.runtime.InterpreterRuntime;
 import pt.up.fe.els2023.interpreter.semantic.SemanticAnalyser;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalyser;
 
@@ -19,7 +20,6 @@ public class Main {
 
         System.out.println("Using Racoons config file: " + configFile);
 
-
         var syntaxResult = new SyntacticAnalyser().analyse(configFile, Collections.emptyMap());
 
         if (report(syntaxResult)) {
@@ -34,6 +34,10 @@ public class Main {
             System.out.println("Semantic errors found. Aborting.");
             return;
         }
+
+        var interpreter = new InterpreterRuntime();
+
+        interpreter.run(syntaxResult, semanticResult, Collections.emptyMap());
     }
 
     private static boolean report(Reportable reportable) {

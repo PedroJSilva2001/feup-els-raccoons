@@ -31,6 +31,6 @@ public class ArgMaxOperation extends TableOperation {
             return OperationResult.ofTable(new RacoonTable(table.getColumNames()));
         }
 
-        return new WhereOperation(rowWrapper -> rowWrapper.get(columnName).equals(maxResult)).execute(table);
+        return new WhereOperation(rowWrapper -> rowWrapper.get(columnName).equals(maxResult.getValue())).execute(table);
     }
 }

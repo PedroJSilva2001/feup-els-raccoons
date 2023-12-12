@@ -54,7 +54,7 @@ public class SumOperation extends TableOperation {
 
         for (var columnName : columnNames) {
             var value = executeForSingleColumn(table, columnName);
-            valueMap.put(columnName, value);
+            valueMap.put(columnName, value == null ? Value.ofNull() : value);
         }
 
         return valueMap;

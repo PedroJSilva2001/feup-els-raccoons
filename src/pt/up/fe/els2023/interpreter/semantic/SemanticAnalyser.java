@@ -3,7 +3,6 @@ package pt.up.fe.els2023.interpreter.semantic;
 import org.eclipse.emf.ecore.EObject;
 import pt.up.fe.els2023.interpreter.diagnostic.Diagnostic;
 import pt.up.fe.els2023.interpreter.semantic.analysis.*;
-import pt.up.fe.els2023.interpreter.symboltable.Symbol;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTableFiller;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
@@ -85,8 +84,7 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new ImproperTerminalOperationAnalysis(),
                 new TypeCheckingAnalysis(),
                 new OperationCallCompatibilityAnalysis(),
-                new FilterSpecialOperationsUseAnalysis(),
-                new OperationCallCompatibilityAnalysis());
+                new FilterSpecialOperationsUseAnalysis());
 
 
         for (var analysisStep : analysis) {
@@ -110,8 +108,9 @@ public class SemanticAnalyser implements SemanticAnalysis {
                 new AssignedVariableTypeInferAnalysis(),
                 new ImproperTerminalOperationAnalysis(),
                 new TypeCheckingAnalysis(),
-                new FilterSpecialOperationsUseAnalysis(),
-                new OperationCallCompatibilityAnalysis());
+                new OperationCallCompatibilityAnalysis(),
+                new FilterSpecialOperationsUseAnalysis()
+                );
 
         for (var analysisStep : analysis) {
             analysisStep.visit(assignment, symbolTable);
