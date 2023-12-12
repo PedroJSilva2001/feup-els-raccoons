@@ -32,12 +32,6 @@ nft n1 of src1 (
 
 // test Ola pedro
 
-exporter coolCsvExporter of csv (
-    filename: "cool table"
-    path: "/mnt/c/"
-    //endOfLine: "\r\n"
-    //separator: ";"
-)
 
 exporter coolHtmlExporter of html (
     filename: "cool table"
@@ -65,14 +59,62 @@ exporter coolLatexExporter of latex (
     path: "/mnt/c/"
 )
 
+1 == 1
+1 == 1.0
+1.0 == 1
+1.0 == 1.0
+1 != 1
+true && false
+false || false
+1 < 1
 
+//coolTable =
+//        table(n1)
+//          -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
+//          -> concatHorizontal(table(n1), table())
+
+//coolTable -> export(coolExporter)
+//table(n1)
+//  -> concatHorizontal(table(n1), table())
+//  -> export(coolExporter)
+
+exporter coolExporter of csv (
+    filename: "cool.csv"
+    path: "./build/"
+)
+
+exporter coolExporter2 of csv (
+    filename: "cool2.csv"
+    path: "./build/"
+)
+
+source src2 from (
+    "./files/yaml/students*.yaml",
+)
+
+nft n2 of src2 (
+    file -> "File",
+    course -> "Course",
+    students each (
+        studID -> "Student ID",
+        grades each -> "Grades",
+    ),
+)
+
+//table2 = table(n2) -> select("File") -> concatHorizontal(table(n2) -> reject("File"))
+
+//table(n2) -> select("File") -> concatHorizontal(table(n2) -> reject("File")) -> export(coolExporter)
+//table(n2) -> argMin("Grades") -> export(coolExporter)
+//table2 -> select("File") -> export(coolExporter)
+
+table(n2) -> export(coolExporter)
+d = col("Grades") == col("Grades")
+table2 = table(n2)
 coolTable =
-        table(n1)
-          -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
-          -> concatHorizontal(table(n1), table())
+        table2
+          -> where(col("Grades") >= (table2 -> max("Grades")))
 
-coolTable -> export(coolExporter)
-table(n1)
-  -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
-  -> concatHorizontal(table(n1), table())
-  -> export(coolExporter)
+coolTable -> export(coolExporter2)
+values = table2 -> max("Grades", "Course")
+
+table2 -> where(col("Grades") == get (values, "Grades")) -> export(coolExporter)

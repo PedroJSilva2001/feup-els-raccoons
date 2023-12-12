@@ -1,0 +1,71 @@
+version "1.0"
+
+source yaml from (
+    "./files/check3/files/*/analysis.yaml"
+)
+
+source xml from (
+    "./files/check3/files/*/analysis.xml"
+)
+
+source json from (
+    "./files/check3/files/*/profiling.json"
+)
+
+
+nft dynamic of yaml (
+    directory -> "Path",
+    total results dynamic all -> "%s (Dynamic)"
+)
+
+nft static of xml (
+    directory -> "Path",
+    total results static all -> "%s (Static)"
+)
+
+nft functions of json (
+    directory -> "Path",
+    "functions" each (
+        name,
+        "time%"
+    )
+)
+
+exporter dynamicExporter of csv (
+    filename: "dynamic.csv"
+    path: "./build/"
+)
+
+exporter staticExporter of csv (
+    filename: "static.csv"
+    path: "./build/"
+)
+
+exporter functionsExporter of csv (
+    filename: "functions.csv"
+    path: "./build/"
+)
+
+exporter finalExporter of csv (
+    filename: "final.csv"
+    path: "./build/"
+)
+
+dynamicTable = table(dynamic)
+staticTable = table(static)
+functionsTable = table(functions)
+
+dynamicTable -> sort("Path") -> export(dynamicExporter)
+staticTable -> sort("Path") -> export(staticExporter)
+functionsTable -> sort("Path") -> export(functionsExporter)
+
+top1Function = functionsTable -> where(col("name") == "foo1()")
+top2Function = functionsTable -> where(col("name") == "foo2()")
+top3Function = functionsTable -> where(col("name") == "foo3()")
+
+topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, "Path")
+
+final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
+
+topFunctions -> export(functionsExporter)
+final -> export(finalExporter)
