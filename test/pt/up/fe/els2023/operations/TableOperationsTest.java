@@ -94,6 +94,51 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testGroupBy() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var table = new RacoonTable();
+        table.addColumn("Path");
+        table.addColumn("Size");
+        table.addColumn("Type");
+
+        table.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        table.addRow(List.of(Value.of("/home/user"), Value.of(10L), Value.of("png")));
+        table.addRow(List.of(Value.of("/home/user"), Value.of(11L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(10L), Value.of("png")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(11L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/etc"), Value.of(12L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/var"), Value.of(13L), Value.of("jpg")));
+        table.addRow(List.of(Value.of("/var"), Value.of(14L), Value.of("jpg")));
+
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Path");
+        expectedTable.addColumn("Size");
+        expectedTable.addColumn("Type");
+
+        expectedTable.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        expectedTable.addRow(List.of(Value.of("/etc"), Value.of(10L), Value.of("png")));
+        expectedTable.addRow(List.of(Value.of("/var"), Value.of(13L), Value.of("jpg")));
+
+        var groupByResult = new GroupByOperation("Path", null).execute(table);
+
+        Assertions.assertEquals(expectedTable, groupByResult.getTable());
+
+        expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Path");
+        expectedTable.addColumn("Size");
+        expectedTable.addColumn("Type");
+
+        expectedTable.addRow(List.of(Value.of("/home/user"), Value.of(1024L), Value.of("dir")));
+        expectedTable.addRow(List.of(Value.of("/etc"), Value.of(12L), Value.of("jpg")));
+        expectedTable.addRow(List.of(Value.of("/var"), Value.of(14L), Value.of("jpg")));
+
+        groupByResult = new GroupByOperation("Path", new ArgMaxOperation("Size")).execute(table);
+
+        Assertions.assertEquals(expectedTable, groupByResult.getTable());
+    }
+
+    @Test
     public void testJoin() throws ColumnNotFoundException {
         var table1 = new RacoonTable();
 
