@@ -14,17 +14,17 @@ source json from (
 
 
 nft dynamic of yaml (
-    filePath -> "Path",
+    directory -> "Path",
     total results dynamic all -> "%s (Dynamic)"
 )
 
 nft static of xml (
-    filePath -> "Path",
+    directory -> "Path",
     total results static all -> "%s (Static)"
 )
 
 nft functions of json (
-    filePath -> "Path",
+    directory -> "Path",
     "functions" each (
         name,
         "time%"
@@ -46,11 +46,26 @@ exporter functionsExporter of csv (
     path: "./build/"
 )
 
-table(dynamic) -> sort("Path") -> export(dynamicExporter)
-table(static) -> sort("Path") -> export(staticExporter)
-table(functions) -> sort("Path") -> export(functionsExporter)
+exporter finalExporter of csv (
+    filename: "final.csv"
+    path: "./build/"
+)
 
+dynamicTable = table(dynamic)
+staticTable = table(static)
 functionsTable = table(functions)
 
-topFunction = functionsTable -> argMax("time%")
-topFunction -> export(functionsExporter)
+dynamicTable -> sort("Path") -> export(dynamicExporter)
+staticTable -> sort("Path") -> export(staticExporter)
+functionsTable -> sort("Path") -> export(functionsExporter)
+
+top1Function = functionsTable -> where(col("name") == "foo1()")
+top2Function = functionsTable -> where(col("name") == "foo2()")
+top3Function = functionsTable -> where(col("name") == "foo3()")
+
+topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, "Path")
+
+final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
+
+topFunctions -> export(functionsExporter)
+final -> export(finalExporter)

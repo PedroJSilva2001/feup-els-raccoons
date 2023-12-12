@@ -183,7 +183,7 @@ public class InterpreterRuntime {
     private RowWrapperFunction analyseNullCheck(NullCheck nullCheck) {
         var columnName = nullCheck.getCol();
 
-        return rowWrapper -> Value.of(rowWrapper.get(columnName) == null);
+        return rowWrapper -> Value.of(rowWrapper.get(columnName).isNull());
     }
 
     private RowWrapperFunction analysePresenceOp(PresenceOp presenceOp) {
