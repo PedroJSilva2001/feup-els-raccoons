@@ -12,9 +12,9 @@ import java.util.List;
 
 public class GroupByOperation extends TableOperation {
     private final String columnName;
-    private final TableOperation aggregateOperation;
+    private final TerminalOperation aggregateOperation;
 
-    public GroupByOperation(String columnName, TableOperation aggregateOperation) {
+    public GroupByOperation(String columnName, TerminalOperation aggregateOperation) {
         this.columnName = columnName;
         this.aggregateOperation = aggregateOperation;
     }
@@ -51,9 +51,15 @@ public class GroupByOperation extends TableOperation {
                 rows.addRow(groupTable.getRows().get(0).getValues());
             } else {
                 var aggregate = aggregateOperation.execute(groupTable);
+                var aggregateColumns = aggregateOperation.getColumns();
 
-                if (aggregate.getType() == OperationResult.Type.TABLE) {
-                    rows.addRow(aggregate.getTable().getRows().get(0).getValues());
+                if (aggregate.getType() == OperationResult.Type.VALUE) {
+                    var column = aggregateColumns.get(0);
+
+                    var operation = new WhereOperation(rowWrapper -> rowWrapper.get(column).equals(aggregate.getValue()));
+                    var firstRow = operation.execute(groupTable).getTable().getRows().get(0);
+
+                    rows.addRow(firstRow.getValues());
                 }
             }
         }

@@ -9,34 +9,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MaxOperation extends TableOperation {
-
-    private final List<String> columnNames;
-
+public class MaxOperation extends TerminalOperation {
     public MaxOperation(List<String> columnNames) {
+        super(columnNames);
         assert(!columnNames.isEmpty());
-
-        this.columnNames = columnNames;
     }
 
     @Override
     public String getName() {
-        return "Max( " + String.join(", ", columnNames) + " )";
-    }
-
-    @Override
-    public boolean isTerminal() {
-        return true;
+        return "Max( " + String.join(", ", getColumns()) + " )";
     }
 
     // TODO dont forget ImproperTerminalOperationException
     @Override
     public OperationResult execute(Table table) throws ColumnNotFoundException {
+        var columnNames = getColumns();
         if (columnNames.size() == 1) {
             return OperationResult.ofValue(executeForSingleColumn(table, columnNames.get(0)));
         }
 
-        return OperationResult.ofValueMap(executeForMultipleColumns(table));
+        return OperationResult.ofValueMap(executeForMultipleColumns(table, columnNames));
     }
 
     private Value executeForSingleColumn(Table table, String columnName) throws ColumnNotFoundException {
@@ -53,7 +45,7 @@ public class MaxOperation extends TableOperation {
         return result.orElse(null);
     }
 
-    private Map<String, Value> executeForMultipleColumns(Table table) throws ColumnNotFoundException {
+    private Map<String, Value> executeForMultipleColumns(Table table, List<String> columnNames) throws ColumnNotFoundException {
         var valueMap = new HashMap<String, Value>();
 
         for (var columnName : columnNames) {

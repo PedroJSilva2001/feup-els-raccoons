@@ -94,6 +94,21 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testLimit() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello")));
+        expectedTable.addRow(List.of(Value.of(2L), Value.of("bye")));
+
+        var limitResult = new LimitOperation(2).execute(table1);
+
+        Assertions.assertEquals(expectedTable, limitResult.getTable());
+    }
+
+    @Test
     public void testGroupBy() throws ColumnNotFoundException, ImproperTerminalOperationException {
         var table = new RacoonTable();
         table.addColumn("Path");
@@ -133,7 +148,7 @@ public class TableOperationsTest {
         expectedTable.addRow(List.of(Value.of("/etc"), Value.of(12L), Value.of("jpg")));
         expectedTable.addRow(List.of(Value.of("/var"), Value.of(14L), Value.of("jpg")));
 
-        groupByResult = new GroupByOperation("Path", new ArgMaxOperation("Size")).execute(table);
+        groupByResult = new GroupByOperation("Path", new MaxOperation(List.of("Size"))).execute(table);
 
         Assertions.assertEquals(expectedTable, groupByResult.getTable());
     }
