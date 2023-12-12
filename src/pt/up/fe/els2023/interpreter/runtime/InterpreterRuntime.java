@@ -1,5 +1,6 @@
 package pt.up.fe.els2023.interpreter.runtime;
 
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
@@ -10,10 +11,10 @@ import pt.up.fe.els2023.interpreter.semantic.SemanticAnalysisResult;
 import pt.up.fe.els2023.interpreter.signatures.Signatures;
 import pt.up.fe.els2023.interpreter.symboltable.SymbolTable;
 import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalysisResult;
-import pt.up.fe.els2023.model.operations.OperationResult;
-import pt.up.fe.els2023.model.operations.TableOperation;
+import pt.up.fe.els2023.model.operations.*;
 import pt.up.fe.els2023.model.table.RacoonTable;
 import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Value;
 import pt.up.fe.els2023.racoons.*;
 import pt.up.fe.els2023.racoons.impl.*;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class InterpreterRuntime {
     private SymbolTable symbolTable;
@@ -70,8 +72,7 @@ public class InterpreterRuntime {
         } else if (expression.getClass() == IdentifierImpl.class) {
             return analyseIdentifier((Identifier) expression);
         } else if (expression.getClass() == ColumnAccessImpl.class) {
-            // TODO
-            return null;
+            return analyseColumnAccess((ColumnAccess) expression);
         } else if (expression.getClass() == PresenceOpImpl.class) {
             // TODO
             return null;
@@ -103,6 +104,25 @@ public class InterpreterRuntime {
         throw new AssertionError("Unsupported expression " + expression.getClass().getName() + " in runtime phase");
     }
 
+    private RowWrapperFunction analyseColumnAccess(ColumnAccess columnAccess) {
+        var columnName = columnAccess.getCol();
+
+        return rowWrapper -> {
+            if (!rowWrapper.contains(columnName)) {
+                var diagnostic = Diagnostic.error(
+                        symbolTable.getRacoonsConfigFilename(),
+                        NodeModelUtils.getNode(columnAccess).getStartLine(),
+                        -1,
+                        "Column " + columnName + " not found"
+                );
+
+                throw new RacoonsRuntimeException(diagnostic);
+            }
+
+            return rowWrapper.get(columnName);
+        };
+    }
+
     private Object analyseBaseLogicalOr(LogicalOr logicalOr) {
         var left = analyseLogicalOr(logicalOr.getLeft());
         var right = analyseLogicalOr(logicalOr.getRight());
@@ -123,6 +143,12 @@ public class InterpreterRuntime {
 
         if (leftType == Boolean.class && rightType == Boolean.class) {
             return ((Boolean) left) || ((Boolean) right);
+        } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) (function).apply(rowWrapper).getValue() || ((Boolean) (function2).apply(rowWrapper).getValue()));
+        } else if (left instanceof RowWrapperFunction function && rightType == Boolean.class) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) (function).apply(rowWrapper).getValue() || ((Boolean) right));
+        } else if (leftType == Boolean.class && right instanceof RowWrapperFunction function) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) left || ((Boolean) (function).apply(rowWrapper).getValue()));
         } else {
             var diagnostic = Diagnostic.error(
                     symbolTable.getRacoonsConfigFilename(),
@@ -155,6 +181,12 @@ public class InterpreterRuntime {
                 return ((Number) left).doubleValue() == ((Number) right).intValue();
             } else if (leftType == Double.class && rightType == Double.class) {
                 return ((Number) left).doubleValue() == ((Number) right).doubleValue();
+            } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).equals(function2.apply(rowWrapper)));
+            } else if (left instanceof RowWrapperFunction function) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).equals(Value.ofObject(right)));
+            } else if (right instanceof RowWrapperFunction function) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(Value.ofObject(left).equals(function.apply(rowWrapper)));
             } else {
                 return Objects.equals(left, right);
             }
@@ -167,6 +199,12 @@ public class InterpreterRuntime {
                 return ((Number) left).doubleValue() != ((Number) right).intValue();
             } else if (leftType == Double.class && rightType == Double.class) {
                 return ((Number) left).doubleValue() != ((Number) right).doubleValue();
+            } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(!function.apply(rowWrapper).equals(function2.apply(rowWrapper)));
+            } else if (left instanceof RowWrapperFunction function) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(!function.apply(rowWrapper).equals(Value.ofObject(right)));
+            } else if (right instanceof RowWrapperFunction function) {
+                return (RowWrapperFunction) rowWrapper -> Value.of(!Value.ofObject(left).equals(function.apply(rowWrapper)));
             } else {
                 return !Objects.equals(left, right);
             }
@@ -195,6 +233,12 @@ public class InterpreterRuntime {
 
         if (leftType == Boolean.class && rightType == Boolean.class) {
             return ((Boolean) left) && ((Boolean) right);
+        } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) (function).apply(rowWrapper).getValue() && ((Boolean) (function2).apply(rowWrapper).getValue()));
+        } else if (left instanceof RowWrapperFunction function && rightType == Boolean.class) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) (function).apply(rowWrapper).getValue() && ((Boolean) right));
+        } else if (leftType == Boolean.class && right instanceof RowWrapperFunction function) {
+            return (RowWrapperFunction) rowWrapper -> Value.of((Boolean) left && ((Boolean) (function).apply(rowWrapper).getValue()));
         } else {
             var diagnostic = Diagnostic.error(
                     symbolTable.getRacoonsConfigFilename(),
@@ -235,6 +279,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() < ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() < ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).lessThan(function2.apply(rowWrapper)));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).lessThan(Value.ofObject(right)));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(Value.ofObject(left).lessThan(function.apply(rowWrapper)));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -258,6 +308,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() > ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() > ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).greaterThan(function2.apply(rowWrapper)));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).greaterThan(Value.ofObject(right)));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(Value.ofObject(left).greaterThan(function.apply(rowWrapper)));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -281,6 +337,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() <= ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() <= ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).lessThanOrEqual(function2.apply(rowWrapper)));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).lessThanOrEqual(Value.ofObject(right)));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(Value.ofObject(left).lessThanOrEqual(function.apply(rowWrapper)));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -304,6 +366,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() >= ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() >= ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).greaterThanOrEqual(function2.apply(rowWrapper)));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(function.apply(rowWrapper).greaterThanOrEqual(Value.ofObject(right)));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(Value.ofObject(left).greaterThanOrEqual(function.apply(rowWrapper)));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -348,6 +416,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() + ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() + ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).add(function2.apply(rowWrapper));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).add(Value.ofObject(right));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.ofObject(left).add(function.apply(rowWrapper));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -371,6 +445,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() - ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() - ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).subtract(function2.apply(rowWrapper));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).subtract(Value.ofObject(right));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.ofObject(left).subtract(function.apply(rowWrapper));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -415,6 +495,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() * ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() * ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).multiply(function2.apply(rowWrapper));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).multiply(Value.ofObject(right));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.ofObject(left).multiply(function.apply(rowWrapper));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -438,6 +524,12 @@ public class InterpreterRuntime {
                     return ((Number) left).doubleValue() / ((Number) right).intValue();
                 } else if (leftType == Double.class && rightType == Double.class) {
                     return ((Number) left).doubleValue() / ((Number) right).doubleValue();
+                } else if (left instanceof RowWrapperFunction function && right instanceof RowWrapperFunction function2) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).divide(function2.apply(rowWrapper));
+                } else if (left instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).divide(Value.ofObject(right));
+                } else if (right instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.ofObject(left).divide(function.apply(rowWrapper));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -472,6 +564,8 @@ public class InterpreterRuntime {
             case "!" -> {
                 if (value.getClass() == Boolean.class) {
                     return !((Boolean) value);
+                } else if (value instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> Value.of(!((Boolean) function.apply(rowWrapper).getValue()));
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -488,6 +582,8 @@ public class InterpreterRuntime {
                     return -((Integer) value);
                 } else if (value.getClass() == Double.class) {
                     return -((Double) value);
+                } else if (value instanceof RowWrapperFunction function) {
+                    return (RowWrapperFunction) rowWrapper -> function.apply(rowWrapper).negate();
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -501,9 +597,11 @@ public class InterpreterRuntime {
             }
             case "++" -> {
                 if (value.getClass() == Integer.class) {
-                    return ((Integer) value) + 1;
+                    return value;
                 } else if (value.getClass() == Double.class) {
-                    return ((Double) value) + 1;
+                    return value;
+                } else if (value instanceof RowWrapperFunction function) {
+                    return function;
                 } else {
                     var diagnostic = Diagnostic.error(
                             symbolTable.getRacoonsConfigFilename(),
@@ -614,8 +712,47 @@ public class InterpreterRuntime {
         var name = operationCall.getName();
 
         if (Objects.equals(name, "where") || Objects.equals(name, "dropWhere")) {
-            // TODO: THE PARAMETER IS A LAMBDA
-            return null;
+            var parameters = operationCall.getParameters();
+
+            if (parameters.size() != 1) {
+                throw new AssertionFailedException("Expected 1 parameter, got " + parameters.size());
+            }
+
+            var parameter = parameters.get(0).getExpression();
+            var analysedParameter = analyseLogicalOr(parameter);
+
+            Predicate<RowWrapper> predicate;
+
+            if (analysedParameter instanceof Boolean) {
+                predicate = rowWrapper -> (Boolean) analysedParameter;
+            } else if (analysedParameter instanceof RowWrapperFunction function) {
+                predicate = rowWrapper -> {
+                    var value = function.apply(rowWrapper);
+
+                    try {
+                        return (Boolean) value.getValue();
+                    } catch (ClassCastException e) {
+                        var diagnostic = Diagnostic.error(
+                                symbolTable.getRacoonsConfigFilename(),
+                                NodeModelUtils.getNode(parameter).getStartLine(),
+                                -1,
+                                "Expected boolean, got " + value.getValue().getClass().getName()
+                        );
+
+                        throw new RacoonsRuntimeException(diagnostic);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                };
+            } else {
+                throw new AssertionError("Unsupported type " + analysedParameter.getClass().getName() + " in where operation");
+            }
+
+            if (Objects.equals(name, "where")) {
+                return new WhereOperation(predicate);
+            } else {
+                return new DropWhereOperation(predicate);
+            }
         }
 
         List<Object> parameters = new ArrayList<>();

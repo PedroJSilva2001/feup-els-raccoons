@@ -223,31 +223,27 @@ public class Value {
         }
 
         public static Type mostGeneralNumberRep(Type t1, Type t2) {
-            if (t1 == Value.Type.NULL || t2 == Value.Type.NULL ||
-                    t1 == Value.Type.BOOLEAN || t2 == Value.Type.BOOLEAN ||
-                    t1 == Value.Type.STRING || t2 == Value.Type.STRING) {
+            if (t1 == Type.NULL || t2 == Type.NULL || t1 == Type.STRING || t2 == Type.STRING || t1 == Type.BOOLEAN || t2 == Type.BOOLEAN) {
                 return null;
             }
 
-            if (t1 == t2) {
-                return t1;
+            if (t1 == Type.BIG_DECIMAL || t2 == Type.BIG_DECIMAL) {
+                return Type.BIG_DECIMAL;
             }
 
-            if ((t1 == Value.Type.BIG_INTEGER && t2 == Value.Type.LONG) ||
-                    (t1 == Value.Type.LONG && t2 == Value.Type.BIG_INTEGER)) {
-                return Value.Type.BIG_INTEGER;
-
+            if (t1 == Type.DOUBLE || t2 == Type.DOUBLE) {
+                return Type.DOUBLE;
             }
 
-            // the following conversions:
-            //      big decimal <-> double
-            //      big integer <-> big decimal
-            //      big integer <-> double
-            //      long <-> big decimal
-            //      long <-> double
-            // default to big decimal
-            return Value.Type.BIG_DECIMAL;
+            if (t1 == Type.BIG_INTEGER || t2 == Type.BIG_INTEGER) {
+                return Type.BIG_INTEGER;
+            }
 
+            if (t1 == Type.LONG || t2 == Type.LONG) {
+                return Type.LONG;
+            }
+
+            return null;
         }
     }
 
@@ -263,6 +259,42 @@ public class Value {
 
     public static Value ofNull() {
         return new Value(null, Type.NULL);
+    }
+
+    public static Value ofObject(Object value) {
+        if (value == null) {
+            return ofNull();
+        }
+
+        if (value instanceof Boolean) {
+            return of((Boolean) value);
+        }
+
+        if (value instanceof Integer) {
+            return of((Integer) value);
+        }
+
+        if (value instanceof Long) {
+            return of((Long) value);
+        }
+
+        if (value instanceof Double) {
+            return of((Double) value);
+        }
+
+        if (value instanceof String) {
+            return of((String) value);
+        }
+
+        if (value instanceof BigInteger) {
+            return of((BigInteger) value);
+        }
+
+        if (value instanceof BigDecimal) {
+            return of((BigDecimal) value);
+        }
+
+        throw new IllegalArgumentException("Unknown type: " + value.getClass());
     }
 
     public static Value of(Boolean value) {
@@ -342,21 +374,27 @@ public class Value {
         return this.value.toString();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
+    public boolean equals(Value obj) {
+        var commonNumberRep = Type.mostGeneralNumberRep(this.type, obj.type);
+
+        if (commonNumberRep == null) {
+            if (obj.type == Type.NULL || this.type == Type.NULL) {
+                return false;
+            }
+
+            return this.value.equals(obj.value);
         }
 
-        if (!(obj instanceof Value other)) {
-            return false;
-        }
+        var thisCasted = commonNumberRep.cast(this);
+        var objCasted = commonNumberRep.cast(obj);
 
-        if (this.value == null) {
-            return other.value == null;
-        }
-
-        return this.value.equals(other.value);
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> false;
+            case LONG -> ((Long)thisCasted.getValue()).equals((Long)objCasted.getValue());
+            case DOUBLE -> ((Double)thisCasted.getValue()).equals((Double)objCasted.getValue());
+            case BIG_INTEGER -> ((BigInteger)thisCasted.getValue()).equals((BigInteger)objCasted.getValue());
+            case BIG_DECIMAL -> ((BigDecimal)thisCasted.getValue()).equals((BigDecimal)objCasted.getValue());
+        };
     }
 
     public static Value add(Value v1, Value v2) throws IllegalArgumentException {
@@ -404,6 +442,35 @@ public class Value {
 
     public Value subtract(Value v2) throws IllegalArgumentException {
         return add(this, v2.negate());
+    }
+
+    public Value multiply(Value right) {
+        return multiply(this, right);
+    }
+
+    public static Value multiply(Value left, Value right) {
+        var commonNumberRep = Type.mostGeneralNumberRep(left.type, right.type);
+
+        if (commonNumberRep == null) {
+            return Value.ofNull();
+        }
+
+        var leftCasted = commonNumberRep.cast(left);
+        var rightCasted = commonNumberRep.cast(right);
+
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> null;
+            case LONG -> Value.of(
+                    ((Long)leftCasted.getValue()) * (Long)rightCasted.getValue());
+            case DOUBLE -> Value.of(
+                    ((Double)leftCasted.getValue()) * (Double)rightCasted.getValue());
+            case BIG_INTEGER -> Value.of(
+                    ((BigInteger)leftCasted.getValue())
+                            .multiply((BigInteger) rightCasted.getValue()));
+            case BIG_DECIMAL -> Value.of(
+                    ((BigDecimal)leftCasted.getValue())
+                            .multiply((BigDecimal) rightCasted.getValue()));
+        };
     }
 
     public static Value divide(Value nume, Value denom, MathContext ctx) {
@@ -499,51 +566,49 @@ public class Value {
         return sqrt(this, defaultMathContext);
     }
 
-    public boolean lessThan(Object obj) {
-        if (this == obj) {
+    public boolean lessThan(Value obj) {
+        var commonNumberRep = Type.mostGeneralNumberRep(this.type, obj.type);
+
+        if (commonNumberRep == null) {
             return false;
         }
 
-        if (!(obj instanceof Value other)) {
-            return false;
-        }
+        var thisCasted = commonNumberRep.cast(this);
+        var objCasted = commonNumberRep.cast(obj);
 
-        if (this.value == null || other.value == null) {
-            return false;
-        }
-
-        if (this.value instanceof Comparable<?> && other.value instanceof Comparable<?>) {
-            return ((Comparable<Object>) this.value).compareTo(other.value) < 0;
-        }
-
-        return false;
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> false;
+            case LONG -> ((Long)thisCasted.getValue()) < (Long)objCasted.getValue();
+            case DOUBLE -> ((Double)thisCasted.getValue()) < (Double)objCasted.getValue();
+            case BIG_INTEGER -> ((BigInteger)thisCasted.getValue()).compareTo((BigInteger)objCasted.getValue()) < 0;
+            case BIG_DECIMAL -> ((BigDecimal)thisCasted.getValue()).compareTo((BigDecimal)objCasted.getValue()) < 0;
+        };
     }
 
-    public boolean greaterThan(Object obj) {
-        if (this == obj) {
+    public boolean greaterThan(Value obj) {
+        var commonNumberRep = Type.mostGeneralNumberRep(this.type, obj.type);
+
+        if (commonNumberRep == null) {
             return false;
         }
 
-        if (!(obj instanceof Value other)) {
-            return false;
-        }
+        var thisCasted = commonNumberRep.cast(this);
+        var objCasted = commonNumberRep.cast(obj);
 
-        if (this.value == null || other.value == null) {
-            return false;
-        }
-
-        if (this.value instanceof Comparable<?> && other.value instanceof Comparable<?>) {
-            return ((Comparable<Object>) this.value).compareTo(other.value) > 0;
-        }
-
-        return false;
+        return switch (commonNumberRep) {
+            case NULL, BOOLEAN, STRING -> false;
+            case LONG -> ((Long)thisCasted.getValue()) > (Long)objCasted.getValue();
+            case DOUBLE -> ((Double)thisCasted.getValue()) > (Double)objCasted.getValue();
+            case BIG_INTEGER -> ((BigInteger)thisCasted.getValue()).compareTo((BigInteger)objCasted.getValue()) > 0;
+            case BIG_DECIMAL -> ((BigDecimal)thisCasted.getValue()).compareTo((BigDecimal)objCasted.getValue()) > 0;
+        };
     }
 
-    public boolean greaterThanOrEqual(Object obj) {
+    public boolean greaterThanOrEqual(Value obj) {
         return this.greaterThan(obj) || this.equals(obj);
     }
 
-    public boolean lessThanOrEqual(Object obj) {
+    public boolean lessThanOrEqual(Value obj) {
         return this.lessThan(obj) || this.equals(obj);
     }
 }

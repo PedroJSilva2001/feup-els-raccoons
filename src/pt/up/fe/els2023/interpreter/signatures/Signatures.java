@@ -310,14 +310,6 @@ public class Signatures {
             currentParameterIndex++;
         }
 
-        if (!currentStringVariadic.isEmpty()) {
-            parameterValues[currentParameterTypeIndex] = currentStringVariadic;
-        }
-
-        if (!currentTableVariadic.isEmpty()) {
-            parameterValues[currentParameterTypeIndex] = currentTableVariadic;
-        }
-
         try {
             return (TableOperation) constructor.newInstance(parameterValues);
         } catch (Exception e) {
