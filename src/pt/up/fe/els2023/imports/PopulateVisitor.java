@@ -1,7 +1,7 @@
 package pt.up.fe.els2023.imports;
 
-import pt.up.fe.els2023.table.Value;
-import pt.up.fe.els2023.table.schema.*;
+import pt.up.fe.els2023.model.schema.*;
+import pt.up.fe.els2023.model.table.Value;
 import pt.up.fe.els2023.utils.resources.ResourceNode;
 
 import java.nio.file.Path;

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import pt.up.fe.els2023.dsl.TableCascade;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 import pt.up.fe.els2023.exceptions.TableCascadeAlreadyConsumedException;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -2,6 +2,8 @@ package pt.up.fe.els2023.table;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.util.List;
 

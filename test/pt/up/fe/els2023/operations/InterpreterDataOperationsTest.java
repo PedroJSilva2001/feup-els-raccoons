@@ -1,24 +1,5 @@
 package pt.up.fe.els2023.operations;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.exceptions.ImproperTerminalOperationException;
-import pt.up.fe.els2023.exceptions.TableNotFoundException;
-import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
-import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.model.operations.*;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.table.Value;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.HashMap;
-import java.util.List;
-
 
 // todo
 

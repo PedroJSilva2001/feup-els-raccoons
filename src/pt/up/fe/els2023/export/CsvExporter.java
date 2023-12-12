@@ -1,16 +1,19 @@
 package pt.up.fe.els2023.export;
 
-import pt.up.fe.els2023.table.Column;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.table.Row;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.Column;
+import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Row;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class CsvExporter extends TableExporter {
+    public static String DEFAULT_SEPARATOR = ",";
     private final String separator;
 
     public CsvExporter(String filename, String path, String endOfLine, String separator) {
@@ -80,5 +83,16 @@ public class CsvExporter extends TableExporter {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), separator);
+    }
+
+    public static Map<String, AttributeValue> getSupportedAttributes() {
+        var attributes = new HashMap<String, AttributeValue>();
+
+        attributes.put("filename", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("path", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("endOfLine", new AttributeValue(AttributeValue.Type.STRING, System.lineSeparator(), false));
+        attributes.put("separator", new AttributeValue(AttributeValue.Type.STRING, DEFAULT_SEPARATOR, false));
+
+        return attributes;
     }
 }

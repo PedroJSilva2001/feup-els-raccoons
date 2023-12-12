@@ -1,15 +1,11 @@
 package pt.up.fe.els2023;
 
-import pt.up.fe.els2023.interpreter.InterpreterData;
-import pt.up.fe.els2023.interpreter.ConfigReader;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.interpreter.VariablesTable;
-import pt.up.fe.els2023.interpreter.TableCascadeInterpreter;
-import pt.up.fe.els2023.table.Value;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import pt.up.fe.els2023.interpreter.diagnostic.Reportable;
+import pt.up.fe.els2023.interpreter.semantic.SemanticAnalyser;
+import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalyser;
+
+import java.util.Collections;
 
 public class Main {
 
@@ -21,34 +17,42 @@ public class Main {
 
         String configFile = args[0];
 
-        ConfigReader configReader = new ConfigReader(configFile);
-        try {
-            InterpreterData interpreterData = configReader.readConfig();
+        System.out.println("Using Racoons config file: " + configFile);
 
-            Map<String, Table> tables = new HashMap<>();
 
-            for (var tableSchema : interpreterData.tableSchemas()) {
-                tables.put(tableSchema.name(), tableSchema.collect());
-            }
+        var syntaxResult = new SyntacticAnalyser().analyse(configFile, Collections.emptyMap());
 
-            var values = new HashMap<String, Value>();
-
-            var operations = interpreterData.operations();
-
-            var variablesTable = new VariablesTable(tables, values);
-
-            var btcInterpreter = new TableCascadeInterpreter(variablesTable);
-
-            for (var cascade : operations) {
-                try {
-                    btcInterpreter.execute(cascade);
-                } catch (Exception e) {
-                    System.out.println("Error: " + e.getMessage());
-                }
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error: " + e.getMessage());
+        if (report(syntaxResult)) {
+            System.out.println("Syntax errors found. Aborting.");
+            return;
         }
+
+        var semanticResult = new SemanticAnalyser().analyse(syntaxResult, Collections.emptyMap());
+
+
+        if (report(semanticResult)) {
+            System.out.println("Semantic errors found. Aborting.");
+            return;
+        }
+    }
+
+    private static boolean report(Reportable reportable) {
+        for (var info : reportable.infos()) {
+            System.out.println(info);
+        }
+
+        for (var warning : reportable.warnings()) {
+            System.out.println(warning);
+        }
+
+        if (reportable.errors().isEmpty()) {
+            return false;
+        }
+
+        for (var error : reportable.errors()) {
+            System.out.println(error);
+        }
+
+        return true;
     }
 }

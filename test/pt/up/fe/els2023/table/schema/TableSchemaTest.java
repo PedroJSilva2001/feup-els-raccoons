@@ -2,9 +2,10 @@ package pt.up.fe.els2023.table.schema;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.model.schema.TableSchema;
 import pt.up.fe.els2023.sources.YamlSource;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Value;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.util.List;
 

@@ -3,9 +3,9 @@ package pt.up.fe.els2023.model.operations;
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
 
 import pt.up.fe.els2023.imports.ColumnUtils;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Table;
-import pt.up.fe.els2023.table.Column;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Column;
 
 import java.util.ArrayList;
 import java.util.HashSet;

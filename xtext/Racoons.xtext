@@ -48,11 +48,11 @@ SchemaNode
     ;
     
 ColumnNode
-    : '->' (ID | STRING)
+    : '->' name=(ID | STRING)
     ;
     
 ColumnOrNode
-    : {ColumnOrNode} ColumnNode | SchemaNode
+    : {ColumnOrNode} node=(ColumnNode | SchemaNode)
     ;
     
 ListNode
@@ -64,7 +64,7 @@ StringListNode
     ;
     
 ResourceLocationNode
-    : {ResourceLocationNode} (DirectoryNode | PathNode | FileNode) element=ColumnNode?
+    : {ResourceLocationNode} resourceNode=(DirectoryNode | PathNode | FileNode) element=ColumnNode?
     ;
     
 DirectoryNode
@@ -116,62 +116,69 @@ ExporterDecl
     ;
     
 ExporterAttr
-    : attr=EXPORTER_ATTR ':' value=(STRING | BOOLEAN)
+    : attr=EXPORTER_ATTR ':' value=ExporterValue
     ;
+    
+ExporterValue
+	: {String} value=STRING
+	| {Boolean} value=BOOLEAN
+	;
 
 // Expressions
 Assignment
-    : name=ID '=' expression=Expression
+    : name=ID '=' rhs=Expression
     ;
     
 Expression
-	: LogicalOr
+	: expression=LogicalOr
 	;
 	
 LogicalOr
-	:  LogicalAnd ({BinaryOp.left=current} op='||' right=LogicalAnd)*
+	:  LogicalAnd ({LogicalOr.left=current} op='||' right=LogicalAnd)*
 	;
 	
 LogicalAnd
-	: EqualsAndNEquals ({BinaryOp.left=current} op='&&' right=EqualsAndNEquals)*
+	: EqualsAndNEquals ({LogicalAnd.left=current} op='&&' right=EqualsAndNEquals)*
 	;
 	
 EqualsAndNEquals
-	: Comparison ({BinaryOp.left=current} op=('==' | '!=') right=Comparison)*
+	: Comparison ({EqualsAndNEquals.left=current} op=('==' | '!=') right=Comparison)*
 	;
 	
 Comparison
-	: AddAndSub ({BinaryOp.left=current} op=('<=' | '<' | '>=' | '>') right=AddAndSub)*
+	: AddAndSub ({Comparison.left=current} op=('<=' | '<' | '>=' | '>') right=AddAndSub)*
 	;
 	
 AddAndSub
-	: MultAndDiv ({BinaryOp.left=current} op=('+' | '-') right=MultAndDiv)*
+	: MultAndDiv ({AddAndSub.left=current} op=('+' | '-') right=MultAndDiv)*
 	;
 	
 MultAndDiv
-	: UnaryPreOp ({BinaryOp.left=current} op=('*' | '/') right=UnaryPreOp)*
+	: UnaryPreOp ({MultAndDiv.left=current} op=('*' | '/') right=UnaryPreOp)*
 	;
 	
 UnaryPreOp
-	: op=('!' | '++' | '--') expression=UnaryPreOp
-	| expression=OperationCall
-	;
+    : op=('!' | '++' | '--') subExpression=UnaryPreOp
+    | ExpressionTerminal ({TableCascade.left=current} '->' right=OperationCall)*
+    ;
 	
 OperationCall
-	: element=ExpressionTerminal ('->' name+=TABLE_OP '(' (parameters+=Expression (',' parameters+=Expression)*)? ')')*
-	;
+    : name=TABLE_OP '(' (parameters+=Expression (','parameters+=Expression)*)? ')'
+    ;
 	
 ExpressionTerminal
-	: {Parenthesis} '(' op+=Expression ')'
-	| {ColumnCall} name+='col' '(' col=STRING ')'
-	| {PresenceOp} op+='containsCol' '(' expression+=Expression ')'
-	| {TableOperationCall} name+=TABLE_OP '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
-	| {Identifier} id=ID
+    : {Parenthesis} '(' element=Expression ')'
+    | {ColumnAccess} 'col' '(' col=STRING ')'
+	| {NullCheck} 'isNull' '(' col=STRING ')'
+    | {PresenceOp} 'containsCol' '(' col=STRING ')'
+    | {MapGet} 'get' '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
+    | OperationCall
+    | {Identifier} id=ID
     | {StringLiteral} value=STRING
     | {IntLiteral} value=INTEGER
     | {DoubleLiteral} value=DOUBLE
     | {BooleanLiteral} value=BOOLEAN
-	;
+    ;
 	
 // LEXER
 
@@ -186,12 +193,14 @@ terminal TABLE_OP
     | 'dropWhere'
 
     | 'sort'
-    | 'sortDesc'
 
     | 'concatVertical'
     | 'concatHorizontal'
 
-    | 'renameColumns'
+    | 'renameColumn'
+    
+    | 'argMax'
+    | 'argMin'
 
     | 'count'
     | 'min'
@@ -203,6 +212,8 @@ terminal TABLE_OP
 
     | 'join'
     | 'groupBy'
+    
+    | 'limit'
 
     | 'export'
    	;

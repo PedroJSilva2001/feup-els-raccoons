@@ -1,8 +1,8 @@
 package pt.up.fe.els2023.model.operations;
 
 import pt.up.fe.els2023.exceptions.ColumnNotFoundException;
-import pt.up.fe.els2023.table.RacoonTable;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.model.table.RacoonTable;
+import pt.up.fe.els2023.model.table.Table;
 
 import java.util.List;
 

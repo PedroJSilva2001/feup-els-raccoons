@@ -1,6 +1,7 @@
 package pt.up.fe.els2023.table.schema;
 
 import org.junit.jupiter.api.Test;
+import pt.up.fe.els2023.model.schema.*;
 
 import java.util.List;
 import java.util.Set;

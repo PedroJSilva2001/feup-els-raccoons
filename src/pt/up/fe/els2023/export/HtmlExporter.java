@@ -1,13 +1,31 @@
 package pt.up.fe.els2023.export;
 
 import org.apache.commons.text.StringEscapeUtils;
-import pt.up.fe.els2023.table.Table;
+import pt.up.fe.els2023.model.table.Table;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class HtmlExporter extends TableExporter {
+    public static String DEFAULT_TITLE = "Table";
+    public static String DEFAULT_STYLE = """
+            table {
+               border-collapse: collapse;
+               width: 100%;
+            }
+            th, td {
+               text-align: left;
+               padding: 8px;
+            }
+            tr:nth-child(even){background-color: #f2f2f2}
+            th {
+               background-color: #4CAF50;
+               color: white;
+            }""";
+    public static boolean DEFAULT_EXPORT_FULL_HTML = false;
     private final String title;
     private final String style;
     private final boolean exportFullHtml;
@@ -98,5 +116,17 @@ public class HtmlExporter extends TableExporter {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), title, style, exportFullHtml);
+    }
+
+    public static Map<String, AttributeValue> getSupportedAttributes() {
+        var attributes = new HashMap<String, AttributeValue>();
+
+        attributes.put("filename", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("path", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("endOfLine", new AttributeValue(AttributeValue.Type.STRING, System.lineSeparator(), false));
+        attributes.put("title", new AttributeValue(AttributeValue.Type.STRING, DEFAULT_TITLE, false));
+        attributes.put("style", new AttributeValue(AttributeValue.Type.STRING, DEFAULT_STYLE, false));
+        attributes.put("exportFullHtml", new AttributeValue(AttributeValue.Type.BOOLEAN, DEFAULT_EXPORT_FULL_HTML, false));
+        return attributes;
     }
 }
