@@ -37,4 +37,6 @@ public interface SymbolTable {
     void addRawSymbol(String name, int declarationLine);
 
     public void updateRawSymbolType(String name, Symbol.Type type);
+
+    boolean hasSymbol(String name);
 }

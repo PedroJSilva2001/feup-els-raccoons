@@ -168,7 +168,8 @@ OperationCall
 	
 ExpressionTerminal
     : {Parenthesis} '(' element=Expression ')'
-    | {ColumnAccess} 'col' '(' col=STRING ')'
+    | {ColumnAccess} 'col' '(' col=(STRING | ID) ')'
+	| {NullCheck} 'isNull' '(' col=(STRING | ID) ')'
     | {PresenceOp} 'containsCol' '(' expression=Expression ')'
     | {MapGet} 'get' '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
     | OperationCall
@@ -198,6 +199,9 @@ terminal TABLE_OP
     | 'concatHorizontal'
 
     | 'renameColumns'
+    
+    | 'argMax'
+    | 'argMin'
 
     | 'count'
     | 'min'
