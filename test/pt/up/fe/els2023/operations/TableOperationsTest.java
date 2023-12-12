@@ -181,6 +181,20 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testGetRow() throws ColumnNotFoundException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+        expectedTable.addColumn("Col2");
+
+        expectedTable.addRow(List.of(Value.of(1L), Value.of("hello")));
+
+        var getRowResult = new GetRowOperation(0).execute(table1);
+
+        Assertions.assertEquals(expectedTable, getRowResult.getTable());
+    }
+
+    @Test
     public void testJoin() throws ColumnNotFoundException {
         var table1 = new RacoonTable();
 

@@ -189,6 +189,12 @@ public class Signatures {
 
         operationSignatures.put("groupBy", groupBySignature);
         operationClass.put("groupBy", GroupByOperation.class);
+
+        var getRowSignature = new ArrayList<AttributeValue>();
+        getRowSignature.add(new AttributeValue(AttributeValue.Type.INTEGER, 0, true));
+
+        operationSignatures.put("getRow", getRowSignature);
+        operationClass.put("getRow", GetRowOperation.class);
     }
 
     static {

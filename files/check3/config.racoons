@@ -53,13 +53,13 @@ dynamicTable = table(dynamic)
 staticTable = table(static)
 functionsTable = table(functions)
 
-functionsGroup = functionsTable -> groupBy("Path") -> sort("time%", false) -> limit(3) -> get
+functionsGroup = functionsTable -> groupBy("Path") -> sort("time%", false) -> limit(3)
 
 functionsGroup -> export(testExporter)
 
-top1Function = functionsTable -> where(col("name") == "foo1()")
-top2Function = functionsTable -> where(col("name") == "foo2()")
-top3Function = functionsTable -> where(col("name") == "foo3()")
+top1Function = functionsGroup -> getRow(0)
+top2Function = functionsGroup -> getRow(1)
+top3Function = functionsGroup -> getRow(2)
 
 topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, "Path")
     -> renameColumn("name", "name #1") -> renameColumn("time%", "% #1")
@@ -67,6 +67,9 @@ topFunctions = top1Function -> join(top2Function, "Path") -> join(top3Function, 
     -> renameColumn("name_2", "name #3") -> renameColumn("time%_2", "% #3")
 
 final = dynamicTable -> join(staticTable, "Path") -> join(topFunctions, "Path") -> sort("Path")
+
+final -> export(testExporter)
+a= col("a")
 
 finalSum = final -> columnSum()
 finalMean = final -> columnMean()

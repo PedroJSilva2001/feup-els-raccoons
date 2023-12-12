@@ -36,7 +36,7 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
                 validateFilters(operationName, operationCall, symbolTable);
                 break;
             // variadic string column (add this to with aggregates case)
-            case "argMax", "argMin", "sort":
+            case "argMax", "argMin":
                 // only one string (column)
                 validateNstringsColumn(operationName, operationCall, symbolTable, 1);
                 break;
@@ -63,7 +63,7 @@ public class OperationCallCompatibilityAnalysis extends PreorderSemanticAnalysis
                 break;
             case "groupBy", "limit":
                 break;
-            case "columnSum", "columnMean":
+            case "columnSum", "columnMean", "sort", "getRow":
                 break;
             default:
                 addError(Diagnostic.error(symbolTable.getRacoonsConfigFilename(),
