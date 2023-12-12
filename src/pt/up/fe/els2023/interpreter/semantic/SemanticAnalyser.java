@@ -117,7 +117,8 @@ public class SemanticAnalyser implements SemanticAnalysis {
         var analysis = List.of(
                 new VariableExistenceAnalysis(),
                 new TableCascadeStartAnalysis(),
-                new AssignedVariableTypeInferAnalysis());
+                new AssignedVariableTypeInferAnalysis(),
+                new TypeCheckingAnalysis());
 
         for (var analysisStep : analysis) {
             analysisStep.visit(assignment, symbolTable);
