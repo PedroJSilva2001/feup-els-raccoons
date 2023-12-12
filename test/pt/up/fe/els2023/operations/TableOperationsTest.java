@@ -107,6 +107,20 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testColumnMean() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of((double) 393L/6)));
+
+        var meanResult = new ColumnMean(List.of("Col1")).execute(table2);
+
+        Assertions.assertEquals(expectedTable, meanResult.getTable());
+    }
+
+
+    @Test
     public void testLimit() throws ColumnNotFoundException, ImproperTerminalOperationException {
         var expectedTable = new RacoonTable();
 
