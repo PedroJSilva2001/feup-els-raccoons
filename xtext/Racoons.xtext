@@ -168,9 +168,9 @@ OperationCall
 	
 ExpressionTerminal
     : {Parenthesis} '(' element=Expression ')'
-    | {ColumnAccess} 'col' '(' col=(STRING | ID) ')'
-	| {NullCheck} 'isNull' '(' col=(STRING | ID) ')'
-    | {PresenceOp} 'containsCol' '(' expression=Expression ')'
+    | {ColumnAccess} 'col' '(' col=STRING ')'
+	| {NullCheck} 'isNull' '(' col=STRING ')'
+    | {PresenceOp} 'containsCol' '(' col=STRING ')'
     | {MapGet} 'get' '(' (expressions+=Expression (',' expressions+=Expression)*)? ')'
     | OperationCall
     | {Identifier} id=ID
