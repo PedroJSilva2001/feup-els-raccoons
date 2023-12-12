@@ -87,6 +87,12 @@ public class Signatures {
         operationSignatures.put("renameColumn", renameSignature);
         operationClass.put("renameColumn", RenameOperation.class);
 
+        var columnSum = new ArrayList<AttributeValue>();
+        columnSum.add(new AttributeValue(AttributeValue.Type.VARIADIC_STRING, List.of(), false));
+
+        operationSignatures.put("columnSum", columnSum);
+        operationClass.put("columnSum", ColumnSum.class);
+
         var sortSignature = new ArrayList<AttributeValue>();
         sortSignature.add(new AttributeValue(AttributeValue.Type.STRING, "", true));
         sortSignature.add(new AttributeValue(AttributeValue.Type.BOOLEAN, true, false));

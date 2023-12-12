@@ -94,6 +94,19 @@ public class TableOperationsTest {
     }
 
     @Test
+    public void testColumnSum() throws ColumnNotFoundException, ImproperTerminalOperationException {
+        var expectedTable = new RacoonTable();
+
+        expectedTable.addColumn("Col1");
+
+        expectedTable.addRow(List.of(Value.of(393L)));
+
+        var sumResult = new ColumnSum(List.of("Col1")).execute(table2);
+
+        Assertions.assertEquals(expectedTable, sumResult.getTable());
+    }
+
+    @Test
     public void testLimit() throws ColumnNotFoundException, ImproperTerminalOperationException {
         var expectedTable = new RacoonTable();
 
