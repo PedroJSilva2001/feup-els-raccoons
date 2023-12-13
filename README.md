@@ -163,14 +163,21 @@ t1 -> concatHorizontal(table(n1))
 ### Semantic Analysis
 - Static type checking.
   - With inferred types.
+  - Checks if the types of the arguments of an expression are compatible with the expression.
 - Variable/Symbol existence.
+  - Checks if an identifier for a variable/symbol is being used without being declared.
 - Cascade terminals in the middle of a table cascade.
+  - Checks if terminal operations like max() aren't being used in the middle of a table cascade.
 - Start of a table cascade must be a table.
 - Operation call compatibility.
+  - Checks if the arguments of an operation call are compatible with the operation. 
 - Unused expression result.
-  - Cascades ending in exports do not apply for this.
+  - Checks if a variable/symbol is being assigned.
+  - Cascades ending in an export operation do not apply to this as they don't need to be assigned.
 - Some special operations can only be used inside predicates of where() and dropWhere().
+  - This is the case for the col(), containsCol() and isNull() operations.
 - Attributes for exporters.
+  - Checks if the attributes specified for an exporter are valid.
 
 ## Internal DSL
 ### Source Definition
