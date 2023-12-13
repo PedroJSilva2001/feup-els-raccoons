@@ -1,0 +1,47 @@
+version "1.0"
+
+source vitis from (
+    "./files/assignment2/files/run*/vitis-report.xml"
+)
+
+source decisionTree from (
+    "./files/assignment2/files/run*/decision_tree.yaml"
+)
+
+source profiling from (
+    "./files/assignment2/files/run*/profiling.json"
+)
+
+nft vitisResources of vitis (
+    directory -> "Directory",
+    AreaEstimates Resources all
+)
+
+nft decisionTreeParams of decisionTree (
+    all-value,
+    params all-value
+)
+
+nft profilingFunctions of profiling (
+    "functions" each (
+        name -> "Function_Name",
+        "time%" -> "Function_Time_Percentage",
+    )
+)
+
+exporter htmlExporter of html (
+    title: "Vitis Report"
+    filename: "output.html"
+    path: "./files/assignment2/out"
+    exportFullHtml: true
+)
+
+vitisTable = table(vitisResources)
+decisionTreeTable = table(decisionTreeParams)
+profilingTable = table(profilingFunctions)
+
+maxFunction = profilingTable -> argMax("Function_Time_Percentage")
+
+final = vitisTable -> concatHorizontal(decisionTreeTable) -> concatHorizontal(maxFunction)
+
+final -> export(htmlExporter)

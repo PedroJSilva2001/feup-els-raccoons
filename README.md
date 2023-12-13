@@ -72,11 +72,13 @@ We took inspiration from the pandas package for Python and from SQL. Especially 
     - Count: Calculates the number of non-null values in a specified column;
     - Drop Where: Removes rows from a table that meet a given condition;
     - Export: Saves the table to an external file;
+    - GroupBy: Groups a table by a specified column;
+    - Join: Combines two tables by matching values in a specified column;
     - Max: Returns the maximum value in a specified column;
     - Min: Returns the minimum value in a specified column; 
     - Mean: Calculates the average (mean) of values in a specified column;
     - Reject: Removes specified columns from a table;
-    - Rename: Renames specified columns in a table with new names;
+    - Rename: Renames specified column in a table with a new name;
     - Select: Retains specified columns in a table and discards the rest;
     - Sum: Calculates the sum of values in a specified column;
     - Where: Filters and returns rows that meet a specified condition.
@@ -84,7 +86,7 @@ We took inspiration from the pandas package for Python and from SQL. Especially 
 - The export is now also an operation that can be executed at any time.
 
 ### Values
-- In the last milestone our values were all strings.
+- In the first milestone our values were all strings.
 - Now we support a wide range of data types:
     - strings;
     - numbers (longs, doubles, arbitrary precision integers and decimals);
@@ -94,17 +96,16 @@ We took inspiration from the pandas package for Python and from SQL. Especially 
 - Some operations ignore data types which don’t really make sense for them.
     - For example, max only applies to numbers and strings are ignored.
 - In the future we will warn the user of this.
-- Binary operations between two numbers of different types apply type coercion to the most general data type, one that doesn't result in loss of precision:
-    - long + double -> big decimal;
-    - long + big integer -> big integer;
-    - long + big decimal -> big decimal;
-    - double + big integer -> big decimal;
-    - double + big decimal -> big decimal;
-    - big integer + big decimal -> big decimal.
-- The design decision was to have a more permissive API that also removes the chance of loss of precision.
-- However, the user is not advised to have columns with different types.
-    - Suppose a column has one double and the rest are longs. We will need to implicitly cast all values to big decimals and operate on them, which is slower.
-- As it stands we are not satisfied with this feature. We will rethink it and maybe let the user configure the behaviour: choose between strong typing (always explicit cast) and weak typing (coercion).
+- Binary operations between two numbers of different types apply type coercion the same way as Java does.
+- Sorts also work with columns whose values have different types (string, null, numbers...).
+
+### Expressions
+- Users can write expressions containing:
+    - table cascades;
+    - arithmetic operations;
+    - boolean operations;
+    - parentheses;
+    - etc.
 
 ## Semantic Model
 ### Table Modelling
@@ -122,60 +123,54 @@ We took inspiration from the pandas package for Python and from SQL. Especially 
 ### Interpreter Modelling
 ![Interpreter Modelling](docs/interpreter_model.svg)
 
-## Configuration File
-### High-level Structure
-```yaml
-sources:
-      ...
-    
-tables:
-      ...
+## External DSL
+### Example
+```java
+t1 = table()
 
-operations:
-      ...
+source src1 from (
+  "./f*/*.json",
+  "./g/single.json"
+)
+
+exporter exp1 of csv (
+  filename: "empty table" // is mandatory
+  path: "/mnt/c" // is mandatory
+  endOfLine: "\r\n" // optional
+  separator: ";" // optional
+)
+
+nft n1 of (
+  "version" -> "Version",
+  except ( test ) -> "test %s",
+  data each (
+          student,
+          finalGrade,
+  ),
+)
+
+max1 = table(n1) -> max("finalGrade")
+
+t1 -> concatHorizontal(table(n1))
+   -> where(col("finalGrade") == max1) 
+   -> sort("Version")
+   -> export(exp1)
 ```
 
-### Sources
-```yaml
-sources:
-  - name: vitis
-    type: xml
-    path: "files/check2/run*/vitis-report.xml"
-  - name: decision_tree
-    type: yaml
-    path: "files/check2/run*/decision_tree.yaml"
-  - name: profiling
-    type: json
-    path: "files/check2/run*/profiling.json"
+### External DSL Interpreter
+![External DSL Interpreter](docs/external_dsl_interpreter.svg)
 
-```
-
-### Tables
-```yaml
-tables:
-  - name: profiling
-    source: "profiling"
-    nft:
-      - $directory
-      - functions:
-          - $each:
-              - name: "Function Name"
-              - time%: "Function Time Percentage"
-```
-
-### Operations
-```yaml
-operations:
-  - operation: argMax
-    table: profiling
-    columns: "Function Time Percentage"
-    result: maxRow
-  - operation: export
-    table: maxRow
-    result: "Higher Percentage"
-    path: "/dir1/dir2"
-    format: csv
-```
+### Semantic Analysis
+- Static type checking.
+  - With inferred types.
+- Variable/Symbol existence.
+- Cascade terminals in the middle of a table cascade.
+- Start of a table cascade must be a table.
+- Operation call compatibility.
+- Unused expression result.
+  - Cascades ending in exports do not apply for this.
+- Some special operations can only be used inside predicates of where() and dropWhere().
+- Attributes for exporters.
 
 ## Internal DSL
 ### Source Definition
@@ -222,19 +217,13 @@ decisionTreeTable.btc().concatHorizontal(profilingTable).get();
 ```
 
 ## What's Next
-- Finishing the operations
-    - groupby
-      - joins
-      - std, var,...
-- Wrap up the  NFT (mainly for XML)
-- Lazy evaluation for table cascades
-- Improved error and warning reporting
-- Create our language with our own syntax
-- Documenting the language
-- Syntax highlighting
-- Linting
-- Code auto-completion
-- A runtime for simple REPL
+- Improved algorithms (and table representation) for complex operations (i.e join, groupBy).
+- More customization for table exporters.
+- More operations (i.e addRow and addColumn).
+- Let the user pass variables containing strings (column names) for operations such as max().
+
+## Build Assignment Tables
+In the repository root, you'll find a ``files`` folder containing a folder for each of the checkpoints with the necessary source files and Racoons config file to build the tables requested.
 
 ## Project Instructions
 
