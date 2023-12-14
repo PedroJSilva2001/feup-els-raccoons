@@ -1,0 +1,32 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_*.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    nft:
+      - $all
+      - $all-value
+      - $all-container
+
+operations:
+
+export:
+  - name: table1
+    path: "/dir1/dir2"
+    filename: "Table 1"
+    format: csv
+  - name: table2
+    path: "/dir1/dir2"
+    filename: "Table 2"
+    format: csv
+    separator: ";"
+    endOfLine: "\r\n"
+  - name: table3
+    path: "/dir1/dir2"
+    filename: "Table 3"
+    format: tsv
+    endOfLine: "\n"

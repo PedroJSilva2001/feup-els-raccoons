@@ -1,0 +1,60 @@
+sources:
+  - name: vitis 
+    type: xml
+    path:
+      - "./files/check2/run*/vitis-report.xml"
+
+  - name: decision_tree
+    type: yaml
+    path:
+      - "./files/check2/run*/decision_tree.yaml"
+
+  - name: profiling
+    type: json
+    path:
+      - "./files/check2/run*/profiling.json"
+
+tables:
+  - name: vitis-resources
+    source: vitis
+    nft:
+      - $directory
+      - AreaEstimates:
+        - Resources:
+          - $all
+
+  - name: decision-tree-params
+    source: decision_tree
+    nft:
+      - $all-value
+      - params:
+        - $all-value
+
+  - name: profiling-functions
+    source: profiling
+    nft:
+      - functions:
+        - $each:
+          - name: "Function_Name"
+          - time%: "Function_Time_Percentage"
+
+operations:
+  - operation: argMax
+    table: profiling-functions
+    columns: "Function_Time_Percentage"
+    result: max-function
+  - operation: concat
+    table: vitis-resources
+    additionalTables:
+      - decision-tree-params
+      - max-function
+    axis: horizontal
+    result: final-table
+  - operation: export
+    table: final-table
+    result: "output.html"
+    path: "./files/check2/out/"
+    format: html
+    title: "Vitis Report"
+    exportFullHtml: true
+

@@ -1,0 +1,23 @@
+version "1.0"
+
+source yamlFiles from (
+    "./files/assignment1/files/decision_tree_*.yaml"
+)
+
+nft decisionTree of yamlFiles (
+    file -> "File",
+    params criterion -> "Criterion",
+    params splitter -> "Splitter",
+    params ccp_alpha -> "CPP Alpha",
+    params min_samples_split -> "Min Samples Split"
+)
+
+exporter csvExporter of csv (
+    filename: "output.csv"
+    path: "./files/assignment1/out"
+    endOfLine: "\r\n"
+)
+
+decisionTreeTable = table(decisionTree)
+
+decisionTreeTable -> export(csvExporter)

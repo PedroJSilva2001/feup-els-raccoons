@@ -1,15 +1,17 @@
 package pt.up.fe.els2023.export;
 
 import org.apache.commons.text.StringEscapeUtils;
-import pt.up.fe.els2023.table.ITable;
+import pt.up.fe.els2023.model.table.Table;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MarkdownExporter extends TableExporter {
-    public MarkdownExporter(String table, String filename, String path, String endOfLine) {
-        super(table, filename, path, endOfLine);
+    public MarkdownExporter(String filename, String path, String endOfLine) {
+        super(filename, path, endOfLine);
     }
 
     private String escapeMarkdown(String string) {
@@ -51,13 +53,13 @@ public class MarkdownExporter extends TableExporter {
         stringBuilder.append(endOfLine);
     }
 
-    private List<String> normalizeColumns(ITable table) {
+    private List<String> normalizeColumns(Table table) {
         return table.getColumns().stream().map(
                         column -> escapeMarkdown(column.getName()))
                 .toList();
     }
 
-    private List<List<String>> normalizeRows(ITable table) {
+    private List<List<String>> normalizeRows(Table table) {
         return table.getRows().stream().map(
                         row -> row.getValues().stream().map(
                                         value -> escapeMarkdown(value.toString()))
@@ -66,7 +68,7 @@ public class MarkdownExporter extends TableExporter {
     }
 
     @Override
-    void export(Writer writer, ITable table) throws IOException {
+    void export(Writer writer, Table table) throws IOException {
         if (table.getColumns().isEmpty()) {
             return;
         }
@@ -93,5 +95,15 @@ public class MarkdownExporter extends TableExporter {
         }
 
         writer.write(stringBuilder.toString());
+    }
+
+    public static Map<String, AttributeValue> getSupportedAttributes() {
+        var attributes = new HashMap<String, AttributeValue>();
+
+        attributes.put("filename", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("path", new AttributeValue(AttributeValue.Type.STRING, null, true));
+        attributes.put("endOfLine", new AttributeValue(AttributeValue.Type.STRING, System.lineSeparator(), false));
+
+        return attributes;
     }
 }

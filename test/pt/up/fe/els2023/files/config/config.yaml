@@ -1,0 +1,62 @@
+sources:
+  - name: decision_tree
+    type: yaml
+    path:
+      - "files/yaml/decision_tree_*.yaml"
+
+tables:
+  - name: decision_tree
+    source: "decision_tree"
+    nft:
+      - $file: "File"
+      - $directory
+      - params:
+          - ccp_alpha: "CCP Alpha"
+          - class_weight: "Class weight"
+          - criterion: "Criterion"
+          - min_samples_split
+      - feature_importances:
+          $each: "Feature importances"
+      - nodes:
+          $[0]:
+            - $node[d]: "Node 0"
+            - $node[1]: "Node 1"
+            - \\$no\$de[2]: "Node 2"
+  - name: "Table 2"
+    source: "file"
+    nft:
+      - params
+
+operations:
+  - operation: argMax
+    table: decision_tree
+    columns: "min_samples_split"
+    result: maxRow
+  - operation: select
+    table: decision_tree
+    columns: "File"
+    result: selectResult
+  - cascade:
+      table: decision_tree
+      result: test
+      operations:
+        - operation: argMin
+          columns: "min_samples_split"
+        - operation: concat
+          additionalTables: maxRow
+          axis: vertical
+  - operation: where
+    table: decision_tree
+    condition: "Criterion == gini"
+    result: table1
+  - operation: export
+    table: table1
+    result: "Table 1"
+    path: "/dir1/dir2"
+    format: csv
+
+export:
+  - name: table1
+    path: "/dir1/dir2"
+    filename: "Table 1"
+    format: csv

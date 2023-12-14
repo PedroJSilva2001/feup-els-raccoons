@@ -1,0 +1,11 @@
+---
+studID: 1
+grades:
+  - 1
+  - 2
+friends:
+  - 3
+  - 2
+info:
+  name: John
+  age: 20

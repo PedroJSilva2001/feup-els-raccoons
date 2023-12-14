@@ -4,9 +4,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import pt.up.fe.els2023.table.Column;
-import pt.up.fe.els2023.table.ITable;
-import pt.up.fe.els2023.table.Row;
+import pt.up.fe.els2023.model.table.Column;
+import pt.up.fe.els2023.model.table.Table;
+import pt.up.fe.els2023.model.table.Row;
+import pt.up.fe.els2023.model.table.Value;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -17,58 +18,60 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ExporterTest {
-    ITable table;
+    Table table;
+
 
     @BeforeEach
     public void init() {
-        table = Mockito.mock(ITable.class);
+        table = Mockito.mock(Table.class);
         Mockito.when(table.getName()).thenReturn("table1");
 
         Column column = new Column("data");
-        column.addEntry(1);
-        column.addEntry(2);
-        column.addEntry(3);
-        column.addEntry(4);
-        column.addEntry(null);
-        column.addEntry(1);
+        column.addEntry(Value.of(1));
+        column.addEntry(Value.of(2));
+        column.addEntry(Value.of(3));
+        column.addEntry(Value.of(4));
+        column.addEntry(Value.ofNull());
+        column.addEntry(Value.of(1));
 
         Column column2 = new Column("strings");
-        column.addEntry("stuff");
-        column.addEntry("things");
-        column.addEntry("zau");
-        column.addEntry("ano\\ther & one");
-        column.addEntry("multip\"le;spaces  ah");
-        column.addEntry("  inner\r\n  ");
-        column.addEntry(" extra<!-- row");
+        column.addEntry(Value.of("stuff"));
+        column.addEntry(Value.of("things"));
+        column.addEntry(Value.of("zau"));
+        column.addEntry(Value.of("ano\\ther & one"));
+        column.addEntry(Value.of("multip\"le;spaces  ah"));
+        column.addEntry(Value.of("  inner\r\n  "));
+        column.addEntry(Value.of(" extra<!-- row"));
 
         Column column3 = new Column("doubles");
-        column.addEntry(1.03);
-        column.addEntry(2.3);
-        column.addEntry(3.10345);
-        column.addEntry(4.0);
-        column.addEntry(5.123);
-        column.addEntry(1);
-        column.addEntry("&nbsp;");
+        column.addEntry(Value.of(1.03));
+        column.addEntry(Value.of(2.3));
+        column.addEntry(Value.of(3.10345));
+        column.addEntry(Value.of(4.0));
+        column.addEntry(Value.of(5.123));
+        column.addEntry(Value.of(1));
+        column.addEntry(Value.of("&nbsp;"));
 
         List<Column> columns = List.of(column, column2, column3);
         Mockito.when(table.getColumns()).thenReturn(columns);
 
-        Row row = new Row(List.of(1, "stuff", 1.03));
-        Row row2 = new Row(List.of(2, "things", 2.3));
-        Row row3 = new Row(List.of(3, "zau", 3.10345));
-        Row row4 = new Row(List.of(4, "ano\\ther & one", 4.0));
-        Row row5 = new Row(Stream.of(null, "multip\"le;spaces  ah", 5.123).collect(Collectors.toList()));
-        Row row6 = new Row(List.of(1, "  inner\r\n  ", 1));
-        Row row7 = new Row(Stream.of(null, " extra<!-- row", "&nbsp;").collect(Collectors.toList()));
+        Row row1 = new Row(List.of(Value.of(1), Value.of("stuff"), Value.of(1.03)));
+        Row row2 = new Row(List.of(Value.of(2), Value.of("things"), Value.of(2.3)));
+        Row row3 = new Row(List.of(Value.of(3), Value.of("zau"), Value.of(3.10345)));
+        Row row4 = new Row(List.of(Value.of(4), Value.of("ano\\ther & one"), Value.of(4.0)));
+        Row row5 = new Row(Stream.of(Value.ofNull(), Value.of("multip\"le;spaces  ah"), Value.of(5.123))
+                .collect(Collectors.toList()));
+        Row row6 = new Row(List.of(Value.of(1), Value.of("  inner\r\n  "), Value.of(1)));
+        Row row7 = new Row(Stream.of(Value.ofNull(), Value.of(" extra<!-- row"), Value.of("&nbsp;")).collect(Collectors.toList()));
 
         Mockito.when(table.getRows()).thenReturn(List.of(
-                row, row2, row3, row4, row5, row6, row7
+                row1, row2, row3, row4, row5, row6, row7
         ));
     }
 
     @Test
     public void exportCsv() throws IOException {
-        CsvExporter exporter = new CsvExporter("table1", "", "", "\r\n", ";");
+        CsvExporter exporter = new CsvExporter("", "", "\r\n", ";");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
@@ -90,7 +93,7 @@ public class ExporterTest {
 
     @Test
     public void exportTsv() throws IOException {
-        TsvExporter exporter = new TsvExporter("table1", "", "", "\r\n");
+        TsvExporter exporter = new TsvExporter("", "", "\r\n");
         StringWriter writer = new StringWriter();
 
         exporter.export(writer, table);
@@ -112,7 +115,7 @@ public class ExporterTest {
 
     @Test
     public void exportHtml() {
-        HtmlExporter exporter = new HtmlExporter("table1", "", "", "\n\r", "Table", """
+        HtmlExporter exporter = new HtmlExporter("", "", "\n\r", "Table", """
                 table {
                    border-collapse: collapse;
                    width: 100%;
@@ -191,7 +194,7 @@ public class ExporterTest {
 
     @Test
     public void exportTableHtml() {
-        HtmlExporter exporter = new HtmlExporter("table1", "", "", "\n", "Table",
+        HtmlExporter exporter = new HtmlExporter("", "", "\n", "Table",
                 "", false);
 
         StringWriter writer = new StringWriter();
@@ -253,7 +256,7 @@ public class ExporterTest {
 
     @Test
     public void exportLatex() {
-        LatexExporter exporter = new LatexExporter("table1", "", "", "\n");
+        LatexExporter exporter = new LatexExporter("", "", "\n");
 
         StringWriter writer = new StringWriter();
         Assertions.assertDoesNotThrow(() -> exporter.export(writer, table));
@@ -290,7 +293,7 @@ public class ExporterTest {
 
     @Test
     public void exportMarkdown() {
-        MarkdownExporter markdownExporter = new MarkdownExporter("table1", "", "", "\n");
+        MarkdownExporter markdownExporter = new MarkdownExporter("", "", "\n");
 
         StringWriter writer = new StringWriter();
         Assertions.assertDoesNotThrow(() -> markdownExporter.export(writer, table));

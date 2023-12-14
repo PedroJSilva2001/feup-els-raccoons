@@ -7,14 +7,16 @@ import pt.up.fe.els2023.utils.resources.json.JsonParser;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 
 public class JsonNodeTest {
 
-    private JsonParser parser = new JsonParser();
+    private final JsonParser parser = new JsonParser();
 
     private JsonNode jsonNode(String s) throws IOException {
         return parser.parse(new StringReader(s));
     }
+
     @Test
     public void testIsNull() throws IOException {
         JsonNode nullNode = jsonNode("null");
@@ -85,6 +87,42 @@ public class JsonNodeTest {
 
         JsonNode listNode = jsonNode("[\"item1\", \"item2\"]");
         Assertions.assertFalse(listNode.isInteger());
+
+        JsonNode longNode = jsonNode("9223372036854775807");
+        Assertions.assertFalse(longNode.isInteger());
+
+        JsonNode bigIntegerNode = jsonNode("9223372036854775808");
+        Assertions.assertFalse(bigIntegerNode.isInteger());
+    }
+
+    @Test
+    public void testIsLong() throws IOException {
+        JsonNode nullNode = jsonNode("null");
+        Assertions.assertFalse(nullNode.isLong());
+
+        JsonNode booleanNode = jsonNode("false");
+        Assertions.assertFalse(booleanNode.isLong());
+
+        JsonNode integerNode = jsonNode("3");
+        Assertions.assertTrue(integerNode.isLong());
+
+        JsonNode doubleNode = jsonNode("22.1");
+        Assertions.assertFalse(doubleNode.isLong());
+
+        JsonNode stringNode = jsonNode("\"Hello, World!\"");
+        Assertions.assertFalse(stringNode.isLong());
+
+        JsonNode mapNode = jsonNode("{\"key\": \"value\"}");
+        Assertions.assertFalse(mapNode.isLong());
+
+        JsonNode listNode = jsonNode("[\"item1\", \"item2\"]");
+        Assertions.assertFalse(listNode.isLong());
+
+        JsonNode longNode = jsonNode("9223372036854775807");
+        Assertions.assertTrue(longNode.isLong());
+
+        JsonNode bigIntegerNode = jsonNode("9223372036854775808");
+        Assertions.assertFalse(bigIntegerNode.isLong());
     }
 
     @Test
@@ -109,6 +147,33 @@ public class JsonNodeTest {
 
         JsonNode listNode = jsonNode("[\"item1\", \"item2\"]");
         Assertions.assertFalse(listNode.isDouble());
+
+        JsonNode bigDecimalNode = jsonNode(BigDecimal.valueOf(Double.MAX_VALUE).toPlainString());
+        Assertions.assertFalse(bigDecimalNode.isDouble());
+    }
+
+    @Test
+    public void testIsBigDecimal() throws IOException {
+        JsonNode nullNode = jsonNode("null");
+        Assertions.assertFalse(nullNode.isBigDecimal());
+
+        JsonNode booleanNode = jsonNode("false");
+        Assertions.assertFalse(booleanNode.isBigDecimal());
+
+        JsonNode integerNode = jsonNode("3");
+        Assertions.assertFalse(integerNode.isBigDecimal());
+
+        JsonNode doubleNode = jsonNode("22.1");
+        Assertions.assertFalse(doubleNode.isBigDecimal());
+
+        JsonNode stringNode = jsonNode("\"Hello, World!\"");
+        Assertions.assertFalse(stringNode.isBigDecimal());
+
+        JsonNode mapNode = jsonNode("{\"key\": \"value\"}");
+        Assertions.assertFalse(mapNode.isBigDecimal());
+
+        JsonNode listNode = jsonNode("[\"item1\", \"item2\"]");
+        Assertions.assertFalse(listNode.isBigDecimal());
     }
 
     @Test
@@ -433,6 +498,51 @@ public class JsonNodeTest {
 
         JsonNode listNode = jsonNode("[\"item1\", \"item2\", \"item3\"]");
         Assertions.assertNull(listNode.asInteger());
+
+        JsonNode longNode = jsonNode("9223372036854775807");
+        Assertions.assertNull(longNode.asInteger());
+    }
+
+    @Test
+    public void testAsLong() throws IOException {
+        JsonNode integerNode1 = jsonNode("42");
+        Assertions.assertEquals(42, integerNode1.asLong());
+
+        JsonNode integerNode2 = jsonNode("-123");
+        Assertions.assertEquals(-123, integerNode2.asLong());
+
+        JsonNode integerNode3 = jsonNode("0");
+        Assertions.assertEquals(0, integerNode3.asLong());
+
+        JsonNode nullNode = jsonNode("null");
+        Assertions.assertNull(nullNode.asLong());
+
+        JsonNode booleanNode1 = jsonNode("false");
+        Assertions.assertEquals(0, booleanNode1.asLong());
+
+        JsonNode booleanNode2 = jsonNode("true");
+        Assertions.assertEquals(1, booleanNode2.asLong());
+
+        JsonNode doubleNode = jsonNode("22.1");
+        Assertions.assertEquals(22, doubleNode.asLong());
+
+        JsonNode string1Node = jsonNode("\"3\"");
+        Assertions.assertEquals(3, string1Node.asLong());
+
+        JsonNode string2Node = jsonNode("\"10\"");
+        Assertions.assertEquals(10, string2Node.asLong());
+
+        JsonNode string3Node = jsonNode("\"Hello, World!\"");
+        Assertions.assertNull(string3Node.asLong());
+
+        JsonNode mapNode = jsonNode("{\"name\": \"John\", \"age\": 30}");
+        Assertions.assertNull(mapNode.asLong());
+
+        JsonNode listNode = jsonNode("[\"item1\", \"item2\", \"item3\"]");
+        Assertions.assertNull(listNode.asLong());
+
+        JsonNode longNode = jsonNode("9223372036854775807");
+        Assertions.assertEquals(9223372036854775807L, longNode.asLong());
     }
 
     @Test

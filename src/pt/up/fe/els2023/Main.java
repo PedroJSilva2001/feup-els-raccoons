@@ -1,8 +1,12 @@
 package pt.up.fe.els2023;
 
-import pt.up.fe.els2023.exceptions.TableNotFoundException;
 
-import java.io.IOException;
+import pt.up.fe.els2023.interpreter.diagnostic.Reportable;
+import pt.up.fe.els2023.interpreter.runtime.InterpreterRuntime;
+import pt.up.fe.els2023.interpreter.semantic.SemanticAnalyser;
+import pt.up.fe.els2023.interpreter.syntactic.SyntacticAnalyser;
+
+import java.util.Collections;
 
 public class Main {
 
@@ -14,24 +18,45 @@ public class Main {
 
         String configFile = args[0];
 
-        ConfigReader configReader = new ConfigReader(configFile);
-        try {
-            Config config = configReader.readConfig();
+        System.out.println("Using Racoons config file: " + configFile);
 
-            Interpreter interpreter = new Interpreter();
-            var tables = interpreter.buildTables(config);
+        var syntaxResult = new SyntacticAnalyser().analyse(configFile, Collections.emptyMap());
 
-            config.exporters().forEach((exporter) -> {
-                try {
-                    exporter.export(tables);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (TableNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (report(syntaxResult)) {
+            System.out.println("Syntax errors found. Aborting.");
+            return;
         }
+
+        var semanticResult = new SemanticAnalyser().analyse(syntaxResult, Collections.emptyMap());
+
+
+        if (report(semanticResult)) {
+            System.out.println("Semantic errors found. Aborting.");
+            return;
+        }
+
+        var interpreter = new InterpreterRuntime();
+
+        interpreter.run(syntaxResult, semanticResult, Collections.emptyMap());
+    }
+
+    private static boolean report(Reportable reportable) {
+        for (var info : reportable.infos()) {
+            System.out.println(info);
+        }
+
+        for (var warning : reportable.warnings()) {
+            System.out.println(warning);
+        }
+
+        if (reportable.errors().isEmpty()) {
+            return false;
+        }
+
+        for (var error : reportable.errors()) {
+            System.out.println(error);
+        }
+
+        return true;
     }
 }

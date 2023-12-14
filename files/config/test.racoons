@@ -1,0 +1,175 @@
+version "80085.0"
+
+
+// dont forget in table cascade start to check if table exists (not just a symbol) when started with identifier
+// dont forget that table() between cascades (not allowed and see below)
+// look at left and right for tableCascadeStart to check new cascades
+          // (table->concatHorizontal()) -> join() -> (max()) // permitted
+          // (table->concatHorizontal()) -> max() -> (join()) // not permitted
+
+
+//a = (b + c * 4 ) * table1 -> concatHorizontal() -> max("a", "b") + 1
+
+//(table() -> concatHorizontal()) -> max()
+//t1 = table()
+
+t2 = table() -> max()
+
+//(t1 -> max() -> concatHorizontal()) -> max() -> join()
+
+//max()
+//b = c + d
+
+/*
+table1 = table()
+
+table2 -> concatHorizontal(table1)
+
+table4 = table1 -> concatHorizontal(table2)
+table3 = tableNotExisting*/
+
+
+/*
+a = b + c + 1 / 2
+d + c
+
+ddd = table1 -> concatHorizontal() -> max()
+*/
+
+
+/*
+a = 2.0
+b = false
+st = "string"
+stuff = a
+newTable = table()
+newTable2 = newTable
+test = (--(table1 -> concatHorizontal() -> max()))
+tableCool = ((table1->concatHorizontal()) -> max())
+bruh = table(nft1)
+c = a * (1 + 3)
+unary1 = ++1
+unary2 = !s
+unary3 = --!1
+newww = a ||  a && false + 1
+eyeye = a && a
+
+t0 = table1 -> concatHorizontal() -> max()
+t1 = table1 -> concatHorizontal() -> min("a", "b")
+t2 = table1 -> concatHorizontal() -> min("a")
+t3 = table1 -> concatHorizontal()
+*/
+//c
+
+source src1 from (
+  "./f*/*.json",
+  "./g/single.json"
+)
+
+//a = --2.0
+
+//b = a + c
+
+//new = b || 1
+
+nft nft_test of src1 (
+    data
+)
+
+nft n1 of src1 (
+    data data1 [1] -> "dddd",
+    [1],
+
+	/*all-container,
+	filePath -> "File",
+	"nft" [2],
+	[2] -> "test",
+	config[3],
+	config[2] -> "Peter",
+    config "secretVar",
+    config2 secretVar2 -> "Secret2",
+    "version" -> "Version",
+    except ( test ) -> "test %s",
+    data each (
+        student,
+        finalGrade,
+    ),*/
+)
+
+// test Ola pedro
+
+exporter coolHtmlExporter of html (
+    filename: "cool table"
+    path: "/mnt/c/"
+    title: "Cool Table"
+    style: "table, th, td { border: 1px solid black; }"
+    exportFullHtml: true
+    //separator: ";" // error (does not support)
+)
+
+exporter coolTsvExporter of tsv (
+    filename: "cool table"
+    path: "/mnt/c/"
+    endOfLine: "\r\n"
+    //separator: ";" // error
+)
+
+exporter coolMarkdownExporter of markdown (
+    filename: "cool table"
+    path: "/mnt/c/"
+)
+
+exporter coolLatexExporter of latex (
+    filename: "cool table"
+    path: "/mnt/c/"
+)
+
+1 == 1
+1 == 1.0
+1.0 == 1
+1.0 == 1.0
+1 != 1
+true && false
+false || false
+1 < 1
+
+//coolTable =
+//        table(n1)
+//          -> where(col("coolCol") <= a && col("coolCol") >= 1.0)
+//          -> concatHorizontal(table(n1), table())
+
+//coolTable -> export(coolExporter)
+//table(n1)
+//  -> concatHorizontal(table(n1), table())
+//  -> export(coolExporter)
+
+exporter coolExporter of csv (
+    filename: "cool.csv"
+    path: "./build/"
+)
+
+exporter coolExporter2 of csv (
+    filename: "cool2.csv"
+    path: "./build/"
+)
+
+source src2 from (
+    "./files/yaml/students*.yaml",
+)
+
+nft n2 of src2 (
+    file -> "File",
+    course -> "Course",
+    students each (
+        studID -> "Student ID",
+        grades each -> "Grades",
+    ),
+)
+
+coolTable =
+        table2
+          -> where(col("Grades") >= (table2 -> max("Grades")))
+
+exportStatus = coolTable -> export(coolExporter)
+
+coolTable -> concatHorizontal(coolTable->select("t1"))

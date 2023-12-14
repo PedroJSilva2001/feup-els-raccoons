@@ -1,0 +1,5 @@
+---
+outside: true
+params:
+  test: 1
+  prop: "stuff"

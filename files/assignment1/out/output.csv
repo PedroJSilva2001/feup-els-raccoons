@@ -1,0 +1,4 @@
+File,Criterion,Splitter,CPP Alpha,Min Samples Split
+decision_tree_1.yaml,gini,best,0,2
+decision_tree_2.yaml,entropy,random,0.015,3
+decision_tree_3.yaml,best,best,0.03,4
